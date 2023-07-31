@@ -6,7 +6,9 @@ import { DatabaseConnectionService } from 'database-connection.service';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { Role } from './users/entities/role.entity';
-
+import { AuthModule } from './auth/auth.module';
+import { MessagesModule } from './messages/messages.module';
+import { JwtModule } from '@nestjs/jwt';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -14,7 +16,14 @@ import { Role } from './users/entities/role.entity';
     }),
     TypeOrmModule.forFeature([Role]),
     ConfigModule.forRoot({ isGlobal: true }),
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '365 days' },
+    }),
+    AuthModule,
     UsersModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

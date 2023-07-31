@@ -17,8 +17,18 @@ export class User extends AbstractEntity {
   password: string;
   @Column({ default: false })
   isVerified: boolean;
+
+  @Column({ nullable: true })
+  code: string;
+
+  @Column({ nullable: true })
+  codeUseCase: string;
+
+  @Column({ nullable: true })
+  codeExpiryDate: Date;
+
   @ManyToOne(() => Role, (role) => role.user)
-  role: string;
+  role: Role;
 
   @BeforeInsert()
   async hashPassword() {
