@@ -26,14 +26,6 @@ import {
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  @ApiBadRequestResponse({ description: 'Bad request' })
-  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
-  @ApiCreatedResponse({ description: 'user created successfully' })
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
   @Get('me')
   @ApiBearerAuth()
   @ApiUnauthorizedResponse()
