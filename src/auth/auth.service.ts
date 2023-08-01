@@ -9,12 +9,35 @@ import { ERRORS } from 'src/utils/errors';
 import { generateOtpCode, isCodeExpired } from 'src/utils/helpers';
 import { VerifyCodeDto } from './dto/verifyCode.dto';
 import { CodeUseCases } from 'src/utils/enums';
-
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class AuthService {
-  constructor(private usersService: UsersService) {}
-  login(body: LoginDto) {
-    return `Login ${JSON.stringify(body)}`;
+  constructor(
+    private usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  async login(body: LoginDto) {
+    try {
+      const user = await this.usersService.findUserByPhone(body.phone);
+      const passwordValid = await bcrypt.compare(body.password, user.password);
+      if (user && !passwordValid) {
+        throw new BadRequestException(ERRORS.INVALID_PASSWORD.EN);
+      }
+      const tokenPayload = {
+        phone: user.phone,
+        fullName: user.fullName,
+        id: user.id,
+      };
+      return {
+        user: { ...user.toJSON() },
+        accessToken: this.jwtService.sign(tokenPayload),
+      };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
   remove(id: number) {
     return `This action removes a #${id} auth`;
