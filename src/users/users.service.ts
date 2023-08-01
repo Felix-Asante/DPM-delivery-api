@@ -71,7 +71,10 @@ export class UsersService {
 
   async findUserByEmail(email: string) {
     try {
-      const user = await this.userRepository.findOne({ where: { email } });
+      const user = await this.userRepository.findOne({
+        where: { email },
+        relations: ['role'],
+      });
       if (!user) {
         throw new NotFoundException(ERRORS.USER_NOT_FOUND_EMAIL.EN);
       }
@@ -83,7 +86,10 @@ export class UsersService {
   }
   async findUserByPhone(phone: string) {
     try {
-      const user = await this.userRepository.findOne({ where: { phone } });
+      const user = await this.userRepository.findOne({
+        where: { phone },
+        relations: ['role'],
+      });
       if (!user) {
         throw new NotFoundException(ERRORS.USER_NOT_FOUND_PHONE.EN);
       }
@@ -96,7 +102,10 @@ export class UsersService {
 
   async findUserByCode(code: string): Promise<User | null> {
     try {
-      const user = await this.userRepository.findOne({ where: { code } });
+      const user = await this.userRepository.findOne({
+        where: { code },
+        relations: ['role'],
+      });
       return user;
     } catch (error) {
       console.log(error);

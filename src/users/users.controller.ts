@@ -51,7 +51,6 @@ export class UsersController {
   }
 
   @Get(':id')
-  @ApiBearerAuth()
   @ApiNotFoundResponse({ description: 'user not found' })
   @ApiUnauthorizedResponse()
   findOne(@Param('id') id: string) {
