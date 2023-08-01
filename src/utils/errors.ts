@@ -11,4 +11,13 @@ export const ERRORS = {
   PHONE_ALREADY_TAKEN: {
     EN: 'Another user is already using this phone number',
   },
+  INVALID_CODE: {
+    EN: 'The code your provided code is invalid',
+  },
+  CODE_USECASE_MISMATCH: {
+    EN: 'Code does not match the use case',
+  },
+  CODE_EXPIRED: {
+    EN: 'Code has expired, please request for a new one',
+  },
 };

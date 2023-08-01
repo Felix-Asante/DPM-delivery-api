@@ -4,7 +4,7 @@ export const enum UserRoles {
   PLACE_ADMIN = 'Place Admin',
 }
 
-export const enum CodeUseCases {
+export enum CodeUseCases {
   CONFIRM_BOOKING = 'CBK',
   ACTIVATE_ACCOUNT = 'ACA',
   RESET_PASSWORD = 'REP',

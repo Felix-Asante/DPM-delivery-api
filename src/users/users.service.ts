@@ -100,6 +100,16 @@ export class UsersService {
     }
   }
 
+  async findUserByCode(code: string): Promise<User | null> {
+    try {
+      const user = await this.userRepository.findOne({ where: { code } });
+      return user;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
