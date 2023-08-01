@@ -55,15 +55,9 @@ export class UsersService {
       recipient: createUserDto.phone,
     });
 
-    const tokenPayload = {
-      phone: savedUser.phone,
-      fullName: savedUser.fullName,
-      id: savedUser.id,
-    };
-
     return {
       user: { ...savedUser.toJSON() },
-      accessToken: this.jwtService.sign(tokenPayload),
+      accessToken: this.jwtService.sign({ ...savedUser.toJSON() }),
     };
   }
 
