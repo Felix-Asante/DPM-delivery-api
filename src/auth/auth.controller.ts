@@ -12,7 +12,6 @@ import {
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-import { CodeUseCases } from 'src/utils/enums';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -40,6 +39,9 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiCreatedResponse()
   findOne(@Body() body: LoginDto) {
     return this.authService.login(body);
   }

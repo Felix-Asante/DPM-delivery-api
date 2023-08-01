@@ -5,6 +5,9 @@ export const ERRORS = {
   USER_NOT_FOUND_PHONE: {
     EN: 'User not found with this phone number',
   },
+  INVALID_PASSWORD: {
+    EN: 'The password your provided is invalid',
+  },
   ALREADY_REQUESTED_CODE: {
     EN: 'You already requested a code less than 5 minutes ago !',
   },
