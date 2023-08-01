@@ -21,6 +21,9 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwtAuth.guard';
 import { currentUser } from 'src/auth/decorators/currentUser.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { hasRoles } from 'src/auth/decorators/roles.decorator';
+import { UserRoles } from 'src/utils/enums';
 
 @ApiTags('users')
 @Controller('users')
@@ -36,7 +39,8 @@ export class UsersController {
     return user;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
   @Get()
   @ApiBearerAuth()
   @ApiUnauthorizedResponse()
