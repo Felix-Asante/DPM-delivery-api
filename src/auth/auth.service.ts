@@ -6,16 +6,22 @@ import {
 import { LoginDto } from './dto/login.dto';
 import { UsersService } from 'src/users/users.service';
 import { ERRORS } from 'src/utils/errors';
-import { generateOtpCode, isCodeExpired } from 'src/utils/helpers';
+import {
+  generateExpiryDate,
+  generateOtpCode,
+  isCodeExpired,
+} from 'src/utils/helpers';
 import { VerifyCodeDto } from './dto/verifyCode.dto';
 import { CodeUseCases } from 'src/utils/enums';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { MessagesService } from 'src/messages/messages.service';
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly messageService: MessagesService,
   ) {}
 
   async login(body: LoginDto) {
@@ -39,8 +45,31 @@ export class AuthService {
       throw error;
     }
   }
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+
+  async requestPasswordResetCode(phone: string) {
+    try {
+      const user = await this.usersService.findUserByPhone(phone);
+      if (user) {
+        const smsCode = generateOtpCode();
+        user.codeExpiryDate = generateExpiryDate();
+        user.code = smsCode;
+        user.codeUseCase = CodeUseCases.RESET_PASSWORD;
+
+        // send sms
+        const SMS_MESSAGE = `Your reset password confirmation code is ${smsCode}`;
+        await this.messageService.sendSmsMessage({
+          message: SMS_MESSAGE,
+          recipient: phone,
+        });
+        return {
+          success: true,
+          code: smsCode,
+        };
+      }
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
   async verifyAccount(code: string) {
