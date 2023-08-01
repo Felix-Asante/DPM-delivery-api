@@ -37,14 +37,10 @@ export class AuthService {
       if (user && !passwordValid) {
         throw new BadRequestException(ERRORS.INVALID_PASSWORD.EN);
       }
-      const tokenPayload = {
-        phone: user.phone,
-        fullName: user.fullName,
-        id: user.id,
-      };
+
       return {
         user: { ...user.toJSON() },
-        accessToken: this.jwtService.sign(tokenPayload),
+        accessToken: this.jwtService.sign({ ...user.toJSON() }),
       };
     } catch (error) {
       console.log(error);
