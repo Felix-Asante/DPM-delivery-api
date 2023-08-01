@@ -16,12 +16,18 @@ import { CodeUseCases } from 'src/utils/enums';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { MessagesService } from 'src/messages/messages.service';
+import { ResetPasswordDto } from './dto/resetPassword.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { Repository } from 'typeorm';
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly messageService: MessagesService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async login(body: LoginDto) {
@@ -61,11 +67,43 @@ export class AuthService {
           message: SMS_MESSAGE,
           recipient: phone,
         });
+        user.save();
         return {
           success: true,
           code: smsCode,
         };
       }
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async resetPassword(data: ResetPasswordDto, resetCode: string) {
+    try {
+      const user = await this.usersService.findUserByCode(resetCode);
+      if (!user) throw new NotFoundException(ERRORS.INVALID_CODE.EN);
+
+      if (isCodeExpired(user.codeExpiryDate)) {
+        throw new BadRequestException(ERRORS.CODE_EXPIRED.EN);
+      }
+      if (data.confirmPassword !== data.newPassword) {
+        throw new BadRequestException(ERRORS.PASSWORD_MISMATCH.EN);
+      }
+
+      if (await bcrypt.compare(data.newPassword, user.password)) {
+        throw new BadRequestException(ERRORS.PASSWORD_ALREADY_IN_USE.EN);
+      }
+      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+      user.password = hashedPassword;
+      user.code = null;
+      user.codeExpiryDate = null;
+      user.codeUseCase = null;
+      user.save();
+
+      return {
+        success: true,
+      };
     } catch (error) {
       console.log(error);
       throw error;
@@ -79,6 +117,9 @@ export class AuthService {
     });
     if (user) {
       user.isVerified = true;
+      user.codeExpiryDate = null;
+      user.code = null;
+      user.codeUseCase = null;
       return await user.save();
     }
   }

@@ -23,4 +23,10 @@ export const ERRORS = {
   CODE_EXPIRED: {
     EN: 'Code has expired, please request for a new one',
   },
+  PASSWORD_MISMATCH: {
+    EN: 'Passwords do not match',
+  },
+  PASSWORD_ALREADY_IN_USE: {
+    EN: 'You are already using this password',
+  },
 };

@@ -12,7 +12,7 @@ import {
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-import { ForgotPasswordDto } from './dto/resetPassword.dto';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/resetPassword.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -52,5 +52,11 @@ export class AuthController {
   @ApiNotFoundResponse()
   forgotPassword(@Body() body: ForgotPasswordDto) {
     return this.authService.requestPasswordResetCode(body.phone);
+  }
+  @Post('resetPassword/:code')
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiNotFoundResponse()
+  resetPassword(@Body() body: ResetPasswordDto, @Param('code') code: string) {
+    return this.authService.resetPassword(body, code);
   }
 }
