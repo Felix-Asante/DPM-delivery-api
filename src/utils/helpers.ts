@@ -3,7 +3,7 @@ import * as dayjs from 'dayjs';
 import { CODE_EXPIRATION_MINUTE } from './constants';
 
 export const generateOtpCode = () => {
-  return crypto.randomInt(100000, 999999).toString();
+  return crypto.randomInt(100000, 999999).toString().slice(0, 4);
 };
 
 export const generateExpiryDate = () => {
