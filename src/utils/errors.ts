@@ -3,7 +3,7 @@ export const ERRORS = {
     EN: 'User not found with this email address',
   },
   USER_NOT_FOUND_PHONE: {
-    EN: 'User not found',
+    EN: 'This phone number does not belong to any account',
   },
   INVALID_PASSWORD: {
     EN: 'The password your provided is invalid',

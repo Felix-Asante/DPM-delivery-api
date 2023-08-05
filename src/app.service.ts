@@ -6,9 +6,6 @@ import { UserRoles } from './utils/enums';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'DPM Delivery API';
-  }
   constructor(
     @InjectRepository(Role)
     private readonly rolesRepository: Repository<Role>,
@@ -24,6 +21,8 @@ export class AppService {
         await userRole.save();
         const placeAdminRole = new Role(UserRoles.PLACE_ADMIN);
         await placeAdminRole.save();
+        const riderRole = new Role(UserRoles.COURIER);
+        await riderRole.save();
       }
     } catch (error) {
       console.log(error);
