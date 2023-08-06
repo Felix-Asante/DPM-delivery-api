@@ -34,5 +34,6 @@ export const ERRORS = {
   },
   CATEGORIES: {
     NOT_FOUND: 'Category not found',
+    ALREADY_EXIST: 'Category name already exist',
   },
 };

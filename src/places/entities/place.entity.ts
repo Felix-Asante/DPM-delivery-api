@@ -1,7 +1,15 @@
 import { Category } from 'src/categories/entities/category.entity';
 import { AbstractEntity } from 'src/entities/abstract.entity';
+import { ProductsCategory } from 'src/products-category/entities/products-category.entity';
 import { slugify } from 'src/utils/helpers';
-import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 
 @Entity('places')
 export class Place extends AbstractEntity {
@@ -20,6 +28,8 @@ export class Place extends AbstractEntity {
   @Column()
   logo: string;
   @Column()
+  mainImage: string;
+  @Column()
   isVerified: boolean;
   @Column()
   slug: string;
@@ -27,6 +37,9 @@ export class Place extends AbstractEntity {
   visits: number;
   @ManyToOne(() => Category, (category) => category.place)
   category: Category;
+  @OneToMany(() => ProductsCategory, (category) => category.place)
+  productCategory: ProductsCategory;
+
   @BeforeInsert()
   @BeforeUpdate()
   createSlug() {
