@@ -20,8 +20,9 @@ export class CategoriesService {
       const category = this.categoryRepository.create({
         name: data.name,
         image: uploadedFile.url,
+        imgId: uploadedFile.public_id,
       });
-      return await category.save();
+      return (await category.save()).toJSON();
     } catch (error) {
       console.log(error);
       throw error;
@@ -40,7 +41,8 @@ export class CategoriesService {
 
   async deleteCategory(id: string) {
     try {
-      await this.findCategoryById(id);
+      const category = await this.findCategoryById(id);
+      await this.fileService.deleteImage(category.imgId);
       const deleted = await this.categoryRepository.delete(id);
       if (deleted.affected) {
         return {

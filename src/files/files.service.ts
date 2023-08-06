@@ -21,4 +21,14 @@ export class FilesService {
       new BufferStream(file.buffer).pipe(upload);
     });
   }
+
+  async deleteImage(publicId: string) {
+    try {
+      const deletedImage = await Cloudinary.uploader.destroy(publicId);
+      return deletedImage;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
 }
