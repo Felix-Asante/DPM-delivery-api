@@ -16,6 +16,7 @@ import {
   ApiBearerAuth,
   ApiConsumes,
   ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
   ApiTags,
@@ -27,6 +28,7 @@ import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { UserRoles } from 'src/utils/enums';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { imageFileFilter } from 'src/utils/helpers';
 
 @Controller('categories')
 @ApiTags('Categories')
@@ -36,12 +38,17 @@ export class CategoriesController {
   @Post()
   @ApiCreatedResponse({ description: 'Category has been successfully created' })
   @ApiUnauthorizedResponse()
+  @ApiInternalServerErrorResponse()
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: '(super admin)' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @hasRoles(UserRoles.ADMIN)
-  @UseInterceptors(FileInterceptor('picture'))
+  @UseInterceptors(
+    FileInterceptor('picture', {
+      fileFilter: imageFileFilter,
+    }),
+  )
   async createCategory(
     @Body() body: CreateCategoryDto,
     @UploadedFile() picture: Express.Multer.File,
@@ -57,7 +64,7 @@ export class CategoriesController {
   @ApiNotFoundResponse()
   @ApiBadRequestResponse()
   async getCategoryById(@Param('id', ParseUUIDPipe) id: string) {
-    return await this.categoriesService.findCategoryBySlug(id);
+    return await this.categoriesService.findCategoryById(id);
   }
   @Get(':slug/slug')
   @ApiNotFoundResponse()

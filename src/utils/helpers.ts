@@ -1,6 +1,8 @@
 import * as crypto from 'crypto';
 import * as dayjs from 'dayjs';
 import { CODE_EXPIRATION_MINUTE } from './constants';
+import { BadRequestException } from '@nestjs/common';
+import { ERRORS } from './errors';
 
 export const generateOtpCode = () => {
   return crypto.randomInt(100000, 999999).toString().slice(0, 4);
@@ -25,4 +27,11 @@ export const slugify = (str: string): string => {
     .replace(/[^\w\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '');
+};
+
+export const imageFileFilter = (req, file, callback) => {
+  if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+    return callback(new BadRequestException(ERRORS.ONLY_IMAGE.EN), false);
+  }
+  callback(null, true);
 };
