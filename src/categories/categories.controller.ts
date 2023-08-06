@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -29,6 +30,7 @@ import { UserRoles } from 'src/utils/enums';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { imageFileFilter } from 'src/utils/helpers';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('categories')
 @ApiTags('Categories')
@@ -42,8 +44,8 @@ export class CategoriesController {
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: '(super admin)' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @hasRoles(UserRoles.ADMIN)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @hasRoles(UserRoles.ADMIN)
   @UseInterceptors(
     FileInterceptor('picture', {
       fileFilter: imageFileFilter,
@@ -54,6 +56,27 @@ export class CategoriesController {
     @UploadedFile() picture: Express.Multer.File,
   ) {
     return await this.categoriesService.createCategory(body, picture);
+  }
+  @Put(':id')
+  @ApiCreatedResponse({ description: 'Category has been successfully updated' })
+  @ApiUnauthorizedResponse()
+  @ApiInternalServerErrorResponse()
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: '(super admin)' })
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @hasRoles(UserRoles.ADMIN)
+  @UseInterceptors(
+    FileInterceptor('picture', {
+      fileFilter: imageFileFilter,
+    }),
+  )
+  async updateCategory(
+    @Body() body: UpdateCategoryDto,
+    @UploadedFile() picture: Express.Multer.File,
+    @Param('id') id: string,
+  ) {
+    return await this.categoriesService.updateCategory(body, id, picture);
   }
 
   @Get()
