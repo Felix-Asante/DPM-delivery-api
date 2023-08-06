@@ -11,6 +11,7 @@ import { MessagesModule } from './messages/messages.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PlacesModule } from './places/places.module';
 import { CategoriesModule } from './categories/categories.module';
+import { FilesModule } from './files/files.module';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -28,6 +29,7 @@ import { CategoriesModule } from './categories/categories.module';
     MessagesModule,
     PlacesModule,
     CategoriesModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

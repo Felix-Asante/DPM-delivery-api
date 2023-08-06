@@ -29,7 +29,9 @@ export const ERRORS = {
   PASSWORD_ALREADY_IN_USE: {
     EN: 'You are already using this password',
   },
-
+  ONLY_IMAGE: {
+    EN: 'Only images are allowed',
+  },
   CATEGORIES: {
     NOT_FOUND: 'Category not found',
   },

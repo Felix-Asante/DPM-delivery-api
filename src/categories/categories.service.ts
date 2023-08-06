@@ -4,17 +4,24 @@ import { Category } from './entities/category.entity';
 import { Repository } from 'typeorm';
 import { ERRORS } from 'src/utils/errors';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { FilesService } from 'src/files/files.service';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    private readonly fileService: FilesService,
   ) {}
 
   async createCategory(data: CreateCategoryDto, picture: Express.Multer.File) {
     try {
-      return 'category created ';
+      const uploadedFile = await this.fileService.uploadImage(picture);
+      const category = this.categoryRepository.create({
+        name: data.name,
+        image: uploadedFile.url,
+      });
+      return await category.save();
     } catch (error) {
       console.log(error);
       throw error;

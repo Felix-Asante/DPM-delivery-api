@@ -7,9 +7,10 @@ import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { Role } from 'src/users/entities/role.entity';
 import { MessagesService } from 'src/messages/messages.service';
+import { FilesModule } from 'src/files/files.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Category, User, Role])],
+  imports: [TypeOrmModule.forFeature([Category, User, Role]), FilesModule],
   controllers: [CategoriesController],
   providers: [CategoriesService, UsersService, MessagesService],
 })
