@@ -8,10 +8,15 @@ import { User } from 'src/users/entities/user.entity';
 import { Role } from 'src/users/entities/role.entity';
 import { MessagesService } from 'src/messages/messages.service';
 import { FilesModule } from 'src/files/files.module';
+import { Place } from 'src/places/entities/place.entity';
+import { PlacesService } from 'src/places/places.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Category, User, Role]), FilesModule],
+  imports: [
+    TypeOrmModule.forFeature([Category, User, Role, Place]),
+    FilesModule,
+  ],
   controllers: [CategoriesController],
-  providers: [CategoriesService, UsersService, MessagesService],
+  providers: [CategoriesService, UsersService, MessagesService, PlacesService],
 })
 export class CategoriesModule {}

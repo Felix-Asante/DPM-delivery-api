@@ -44,8 +44,8 @@ export class CategoriesController {
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: '(super admin)' })
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @hasRoles(UserRoles.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
   @UseInterceptors(
     FileInterceptor('picture', {
       fileFilter: imageFileFilter,
@@ -64,8 +64,8 @@ export class CategoriesController {
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: '(super admin)' })
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @hasRoles(UserRoles.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
   @UseInterceptors(
     FileInterceptor('picture', {
       fileFilter: imageFileFilter,
@@ -93,6 +93,11 @@ export class CategoriesController {
   @ApiNotFoundResponse()
   async getCategoryBySlug(@Param('slug') slug: string) {
     return await this.categoriesService.findCategoryBySlug(slug);
+  }
+  @Get(':slug/places')
+  @ApiNotFoundResponse()
+  async getCategoryPlacesBySlug(@Param('slug') slug: string) {
+    return await this.categoriesService.getCategoryPlaces(slug);
   }
   @Delete(':id')
   @ApiNotFoundResponse()
