@@ -36,4 +36,8 @@ export const ERRORS = {
     NOT_FOUND: 'Category not found',
     ALREADY_EXIST: 'Category name already exist',
   },
+  PLACES: {
+    NOT_FOUND: 'Place not found',
+    ALREADY_EXIST: 'Place name already exist',
+  },
 };

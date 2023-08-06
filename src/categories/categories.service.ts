@@ -6,6 +6,7 @@ import { ERRORS } from 'src/utils/errors';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { FilesService } from 'src/files/files.service';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { PlacesService } from 'src/places/places.service';
 
 @Injectable()
 export class CategoriesService {
@@ -13,6 +14,7 @@ export class CategoriesService {
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     private readonly fileService: FilesService,
+    private readonly placeService: PlacesService,
   ) {}
 
   async createCategory(data: CreateCategoryDto, picture: Express.Multer.File) {
@@ -58,6 +60,16 @@ export class CategoriesService {
     try {
       const categories = await this.categoryRepository.find();
       return categories;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async getCategoryPlaces(slug: string) {
+    try {
+      await this.findCategoryBySlug(slug);
+      return await this.placeService.getPlacesByCategory(slug);
     } catch (error) {
       console.log(error);
       throw error;
