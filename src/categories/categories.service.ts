@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { ERRORS } from 'src/utils/errors';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { FilesService } from 'src/files/files.service';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoriesService {
@@ -23,6 +24,30 @@ export class CategoriesService {
         imgId: uploadedFile.public_id,
       });
       return (await category.save()).toJSON();
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async updateCategory(
+    data: UpdateCategoryDto,
+    categoryId: string,
+    picture?: Express.Multer.File,
+  ) {
+    try {
+      const category = await this.findCategoryById(categoryId);
+      if (category && picture) {
+        await this.fileService.deleteImage(category.imgId);
+        const uploadedImg = await this.fileService.uploadImage(picture);
+        category.imgId = uploadedImg.public_id;
+        category.image = uploadedImg.url;
+      }
+      if (data?.name) {
+        category.name = data.name;
+      }
+
+      return await category.save();
     } catch (error) {
       console.log(error);
       throw error;
