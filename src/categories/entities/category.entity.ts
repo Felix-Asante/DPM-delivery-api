@@ -11,6 +11,9 @@ export class Category extends AbstractEntity {
   image: string;
   @Column()
   slug: string;
+  @Column()
+  imgId: string;
+
   @OneToMany(() => Place, (place) => place.category)
   place: Place;
 
@@ -18,5 +21,9 @@ export class Category extends AbstractEntity {
   @BeforeUpdate()
   createSlug() {
     this.slug = slugify(this.name);
+  }
+  toJSON() {
+    delete this.imgId;
+    return this;
   }
 }
