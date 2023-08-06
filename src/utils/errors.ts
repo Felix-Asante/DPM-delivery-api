@@ -29,4 +29,8 @@ export const ERRORS = {
   PASSWORD_ALREADY_IN_USE: {
     EN: 'You are already using this password',
   },
+
+  CATEGORIES: {
+    NOT_FOUND: 'Category not found',
+  },
 };

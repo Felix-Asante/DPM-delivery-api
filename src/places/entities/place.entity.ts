@@ -23,6 +23,8 @@ export class Place extends AbstractEntity {
   isVerified: boolean;
   @Column()
   slug: string;
+  @Column()
+  visits: number;
   @ManyToOne(() => Category, (category) => category.place)
   category: Category;
   @BeforeInsert()
