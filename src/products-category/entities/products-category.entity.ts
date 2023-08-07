@@ -3,7 +3,7 @@ import { Place } from 'src/places/entities/place.entity';
 import { slugify } from 'src/utils/helpers';
 import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne } from 'typeorm';
 
-@Entity('productsCategory')
+@Entity('productscategory')
 export class ProductsCategory extends AbstractEntity {
   @Column()
   name: string;

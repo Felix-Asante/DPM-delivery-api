@@ -50,15 +50,14 @@ export class UsersService {
     const savedUser = await newUser.save();
     // send sms
     const SMS_MESSAGE = `Your account verification code is ${smsCode}`;
-    await this.messageService.sendSmsMessage({
-      message: SMS_MESSAGE,
-      recipient: createUserDto.phone,
-    });
+    if (!isPlaceAdmin) {
+      await this.messageService.sendSmsMessage({
+        message: SMS_MESSAGE,
+        recipient: createUserDto.phone,
+      });
+    }
 
-    return {
-      user: { ...savedUser.toJSON() },
-      accessToken: this.jwtService.sign({ ...savedUser.toJSON() }),
-    };
+    return savedUser;
   }
 
   findAll() {

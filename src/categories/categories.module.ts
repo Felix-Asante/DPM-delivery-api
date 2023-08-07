@@ -9,7 +9,6 @@ import { Role } from 'src/users/entities/role.entity';
 import { MessagesService } from 'src/messages/messages.service';
 import { FilesModule } from 'src/files/files.module';
 import { Place } from 'src/places/entities/place.entity';
-import { PlacesService } from 'src/places/places.service';
 
 @Module({
   imports: [
@@ -17,6 +16,6 @@ import { PlacesService } from 'src/places/places.service';
     FilesModule,
   ],
   controllers: [CategoriesController],
-  providers: [CategoriesService, UsersService, MessagesService, PlacesService],
+  providers: [CategoriesService, UsersService, MessagesService],
 })
 export class CategoriesModule {}

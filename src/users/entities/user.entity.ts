@@ -1,7 +1,15 @@
 import { AbstractEntity } from 'src/entities/abstract.entity';
-import { BeforeInsert, Column, Entity, ManyToOne } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+} from 'typeorm';
 import { Role } from './role.entity';
 import * as bcrypt from 'bcrypt';
+import { Place } from 'src/places/entities/place.entity';
 
 @Entity('users')
 export class User extends AbstractEntity {
@@ -29,6 +37,10 @@ export class User extends AbstractEntity {
 
   @ManyToOne(() => Role, (role) => role.user)
   role: Role;
+
+  @OneToOne(() => Place, { onDelete: 'CASCADE', eager: true })
+  @JoinColumn()
+  adminFor: Place;
 
   @BeforeInsert()
   async hashPassword() {

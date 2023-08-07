@@ -10,3 +10,7 @@ export enum CodeUseCases {
   ACTIVATE_ACCOUNT = 'ACA',
   RESET_PASSWORD = 'REP',
 }
+
+export enum Categories {
+  UNCATEGORIZED = 'UNCATEGORIZED',
+}
