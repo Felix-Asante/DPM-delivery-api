@@ -7,10 +7,26 @@ import { UsersService } from 'src/users/users.service';
 import { MessagesService } from 'src/messages/messages.service';
 import { Role } from 'src/users/entities/role.entity';
 import { User } from 'src/users/entities/user.entity';
+import { CategoriesService } from 'src/categories/categories.service';
+import { FilesService } from 'src/files/files.service';
+import { Category } from 'src/categories/entities/category.entity';
+import { FilesModule } from 'src/files/files.module';
+import { ProductsCategoryService } from 'src/products-category/products-category.service';
+import { ProductsCategory } from 'src/products-category/entities/products-category.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Place, Role, User])],
+  imports: [
+    TypeOrmModule.forFeature([Place, Role, User, Category, ProductsCategory]),
+    FilesModule,
+  ],
   controllers: [PlacesController],
-  providers: [PlacesService, UsersService, MessagesService],
+  providers: [
+    PlacesService,
+    UsersService,
+    MessagesService,
+    CategoriesService,
+    FilesService,
+    ProductsCategoryService,
+  ],
 })
 export class PlacesModule {}

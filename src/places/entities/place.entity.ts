@@ -29,15 +29,20 @@ export class Place extends AbstractEntity {
   logo: string;
   @Column()
   mainImage: string;
-  @Column()
+  @Column({ default: false })
   isVerified: boolean;
   @Column()
   slug: string;
   @Column()
+  address: string;
+  @Column({ default: 0 })
   visits: number;
   @ManyToOne(() => Category, (category) => category.place)
   category: Category;
-  @OneToMany(() => ProductsCategory, (category) => category.place)
+  @OneToMany(() => ProductsCategory, (category) => category.place, {
+    onDelete: 'CASCADE',
+    eager: true,
+  })
   productCategory: ProductsCategory;
 
   @BeforeInsert()

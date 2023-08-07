@@ -7,6 +7,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { FilesService } from 'src/files/files.service';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PlacesService } from 'src/places/places.service';
+import { Place } from 'src/places/entities/place.entity';
 
 @Injectable()
 export class CategoriesService {
@@ -14,7 +15,8 @@ export class CategoriesService {
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     private readonly fileService: FilesService,
-    private readonly placeService: PlacesService,
+    @InjectRepository(Place)
+    private readonly placeRepository: Repository<Place>,
   ) {}
 
   async createCategory(data: CreateCategoryDto, picture: Express.Multer.File) {
@@ -68,8 +70,10 @@ export class CategoriesService {
 
   async getCategoryPlaces(slug: string) {
     try {
-      await this.findCategoryBySlug(slug);
-      return await this.placeService.getPlacesByCategory(slug);
+      const places = await this.placeRepository.find({
+        where: { category: { slug: slug } },
+      });
+      return places;
     } catch (error) {
       console.log(error);
       throw error;
