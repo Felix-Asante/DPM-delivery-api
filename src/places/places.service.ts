@@ -46,14 +46,7 @@ export class PlacesService {
       newPlace.website = place?.website;
       newPlace.category = category;
 
-      const savedUser = await this.usersService.create(
-        {
-          fullName: 'admin@goldentulip.com',
-          phone: '0274233889',
-          password: 'password',
-        },
-        true,
-      );
+      const savedUser = await this.usersService.create(place.placeAdmin, true);
       const result = await newPlace.save();
       await this.productCategoryService.create({
         name: Categories.UNCATEGORIZED,
