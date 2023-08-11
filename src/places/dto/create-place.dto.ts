@@ -25,7 +25,7 @@ export class CreatePlaceDto {
   @IsOptional()
   @IsString()
   website: string;
-  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  @ApiProperty({ type: 'string', format: 'binary', required: true })
   logo: Express.Multer.File;
   @ApiProperty({ type: 'string', format: 'binary', required: true })
   mainImage: Express.Multer.File;

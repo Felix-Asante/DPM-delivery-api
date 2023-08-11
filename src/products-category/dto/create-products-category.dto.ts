@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
-import { Place } from 'src/places/entities/place.entity';
 
 export class CreateProductsCategoryDto {
   @ApiProperty()
@@ -8,5 +7,5 @@ export class CreateProductsCategoryDto {
   name: string;
   @ApiProperty()
   @IsString()
-  place: Place;
+  place: string;
 }

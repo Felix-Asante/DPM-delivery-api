@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   UploadedFile,
   UploadedFiles,
   UseGuards,
@@ -29,6 +30,9 @@ import {
   FileInterceptor,
 } from '@nestjs/platform-express';
 import { imageFileFilter } from 'src/utils/helpers';
+import { UpdatePlaceDto } from './dto/update-place.dto';
+import { currentUser } from 'src/auth/decorators/currentUser.decorator';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('places')
 @ApiTags('Places')
@@ -56,6 +60,35 @@ export class PlacesController {
     return await this.placesService.createPlace(
       body,
       files.mainImage[0],
+      files?.logo?.[0],
+    );
+  }
+
+  @Put(':id')
+  @ApiBearerAuth()
+  @ApiBadRequestResponse()
+  @ApiOperation({ summary: '(super admin,place admin)' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'mainImage', maxCount: 1 },
+      { name: 'logo', maxCount: 1 },
+    ]),
+  )
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
+  async updatePlace(
+    @Body() body: UpdatePlaceDto,
+    @Param('id') id: string,
+    @currentUser() user: User,
+    @UploadedFiles()
+    files: { logo: Express.Multer.File[]; mainImage: Express.Multer.File[] },
+  ) {
+    return await this.placesService.updatePlace(
+      body,
+      user,
+      id,
+      files?.mainImage?.[0],
       files?.logo?.[0],
     );
   }

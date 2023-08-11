@@ -9,26 +9,39 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ProductsCategory } from './entities/products-category.entity';
 import { Repository } from 'typeorm';
 import { ERRORS } from 'src/utils/errors';
+import { User } from 'src/users/entities/user.entity';
+import { Place } from 'src/places/entities/place.entity';
 
 @Injectable()
 export class ProductsCategoryService {
   constructor(
     @InjectRepository(ProductsCategory)
     private readonly productsCategoryRepository: Repository<ProductsCategory>,
+    @InjectRepository(Place)
+    private readonly placeRepository: Repository<Place>,
   ) {}
 
   async create(createProductsCategoryDto: CreateProductsCategoryDto) {
     try {
-      const category = await this.productsCategoryRepository.findOneBy({
-        name: createProductsCategoryDto.name,
+      const result = await this.productsCategoryRepository.findOne({
+        where: {
+          place: { id: createProductsCategoryDto.place },
+          name: createProductsCategoryDto.name,
+        },
       });
-      if (category) {
+      if (result) {
         throw new BadRequestException(ERRORS.CATEGORIES.ALREADY_EXIST);
       }
 
+      const place = await this.placeRepository.findOne({
+        where: { id: createProductsCategoryDto.place },
+      });
+      if (!place) {
+        throw new NotFoundException(ERRORS.PLACES.NOT_FOUND);
+      }
       const newCategory = this.productsCategoryRepository.create({
         name: createProductsCategoryDto.name,
-        place: createProductsCategoryDto.place,
+        place: place,
       });
       return await newCategory.save();
     } catch (error) {
