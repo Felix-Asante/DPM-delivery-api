@@ -39,12 +39,14 @@ export class UsersService {
     });
     const newUser = new User();
     const smsCode = generateOtpCode();
+    if (!isPlaceAdmin) {
+      newUser.codeExpiryDate = generateExpiryDate();
+      newUser.code = smsCode;
+      newUser.codeUseCase = CodeUseCases.ACTIVATE_ACCOUNT;
+    }
     newUser.role = role;
     newUser.fullName = createUserDto.fullName;
     newUser.phone = createUserDto.phone;
-    newUser.codeExpiryDate = generateExpiryDate();
-    newUser.code = smsCode;
-    newUser.codeUseCase = CodeUseCases.ACTIVATE_ACCOUNT;
     newUser.password = createUserDto.password;
 
     const savedUser = await newUser.save();
