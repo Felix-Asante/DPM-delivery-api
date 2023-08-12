@@ -19,6 +19,7 @@ import { ConfigService } from '@nestjs/config';
 import getPreciseDistance from 'geolib/es/getPreciseDistance';
 import { convertDistance, isDecimal, toDecimal } from 'geolib';
 import { MAX_DELIVERY_DISTANCE } from 'src/utils/constants';
+import { IDistance } from 'src/utils/interface';
 @Injectable()
 export class PlacesService {
   constructor(
@@ -126,23 +127,10 @@ export class PlacesService {
     }
   }
 
-  async findPlacesNearBy(distance: { longitude: string; latitude: string }) {
+  async findPlacesNearBy(distance: IDistance) {
     try {
       const places = await this.placeRepository.find();
-      const nearestPlaces = places.filter((place) => {
-        const d = getPreciseDistance(
-          distance,
-          {
-            latitude: place.latitude,
-            longitude: place.longitude,
-          },
-          0.01,
-        );
-
-        const distanceKm = convertDistance(d, 'km');
-
-        if (distanceKm <= MAX_DELIVERY_DISTANCE) return true;
-      });
+      const nearestPlaces = this.getNearbyPlaces(places, distance);
       return nearestPlaces;
     } catch (error) {
       console.log(error);
@@ -153,6 +141,23 @@ export class PlacesService {
   extractIdFromImage(image: string): string {
     const imagePublicId = image?.split('/')?.at(-1).split('.')?.[0];
     return imagePublicId;
+  }
+
+  getNearbyPlaces(places: Place[], distance: IDistance) {
+    return places.filter((place) => {
+      const d = getPreciseDistance(
+        distance,
+        {
+          latitude: place.latitude,
+          longitude: place.longitude,
+        },
+        0.01,
+      );
+
+      const distanceKm = convertDistance(d, 'km');
+
+      if (distanceKm <= MAX_DELIVERY_DISTANCE) return true;
+    });
   }
   async getAllPlaces() {
     try {
@@ -202,6 +207,9 @@ export class PlacesService {
       if (!place) {
         return new NotFoundException(ERRORS.PLACES.NOT_FOUND);
       }
+      const visits = place.visits;
+      place.visits = visits + 1;
+      await place.save();
       return place;
     } catch (error) {
       console.log(error);
@@ -214,7 +222,28 @@ export class PlacesService {
       if (!place) {
         return new NotFoundException(ERRORS.PLACES.NOT_FOUND);
       }
+      const visits = place.visits;
+      place.visits = visits + 1;
+      await place.save();
       return place;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async getPopularPlaces(coords: IDistance) {
+    try {
+      const popularPlaces = await this.placeRepository.find({
+        order: {
+          visits: 'DESC',
+        },
+      });
+
+      if (coords.latitude && coords.longitude) {
+        return this.getNearbyPlaces(popularPlaces, coords).slice(0, 11);
+      }
+      return popularPlaces.slice(0, 11);
     } catch (error) {
       console.log(error);
       throw error;
