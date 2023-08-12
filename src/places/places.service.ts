@@ -232,7 +232,7 @@ export class PlacesService {
     }
   }
 
-  async getPopularPlaces(coords: IDistance) {
+  async getPopularPlaces(coords?: IDistance) {
     try {
       const popularPlaces = await this.placeRepository.find({
         order: {
@@ -240,7 +240,7 @@ export class PlacesService {
         },
       });
 
-      if (coords.latitude && coords.longitude) {
+      if (coords?.latitude && coords?.longitude) {
         return this.getNearbyPlaces(popularPlaces, coords).slice(0, 11);
       }
       return popularPlaces.slice(0, 11);
