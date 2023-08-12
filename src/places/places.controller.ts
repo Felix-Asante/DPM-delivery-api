@@ -17,6 +17,7 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiConsumes,
+  ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
   ApiQuery,
@@ -125,6 +126,20 @@ export class PlacesController {
   @ApiNotFoundResponse()
   async getPlaceBySlug(@Param('slug') slug: string) {
     return await this.placesService.findPlaceBySlug(slug);
+  }
+
+  // @ApiBearerAuth()
+  @ApiBadRequestResponse()
+  @ApiInternalServerErrorResponse()
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @hasRoles(UserRoles.ADMIN)
+  @ApiQuery({ name: 'longitude', required: false, type: String })
+  @ApiQuery({ name: 'latitude', required: false, type: String })
+  @Get('popular/locations')
+  async popularPlaces(
+    @Query() coords: { longitude: string; latitude: string },
+  ) {
+    return this.placesService.getPopularPlaces(coords);
   }
 
   @Delete(':id')
