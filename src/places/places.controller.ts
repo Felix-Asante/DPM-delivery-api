@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UploadedFile,
   UploadedFiles,
   UseGuards,
@@ -18,6 +19,7 @@ import {
   ApiConsumes,
   ApiNotFoundResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwtAuth.guard';
@@ -50,8 +52,8 @@ export class PlacesController {
       { name: 'logo', maxCount: 1 },
     ]),
   )
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @hasRoles(UserRoles.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
   async createPlace(
     @Body() body: CreatePlaceDto,
     @UploadedFiles()
@@ -107,6 +109,15 @@ export class PlacesController {
   @ApiNotFoundResponse()
   async getPlaceById(@Param('id') id: string) {
     return await this.placesService.findPlaceById(id);
+  }
+
+  @ApiQuery({ name: 'longitude', required: true, type: String })
+  @ApiQuery({ name: 'latitude', required: true, type: String })
+  @Get('near/me')
+  async getPlacesNearby(
+    @Query() distance: { longitude: string; latitude: string },
+  ) {
+    return await this.placesService.findPlacesNearBy(distance);
   }
 
   @Get(':slug/slug')

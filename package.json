@@ -33,6 +33,7 @@
     "class-validator": "^0.14.0",
     "cloudinary": "^1.40.0",
     "dayjs": "^1.11.9",
+    "geolib": "^3.3.4",
     "messagebird": "^4.0.1",
     "nestjs-twilio": "^4.1.1",
     "pg": "^8.11.1",
