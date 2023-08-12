@@ -16,7 +16,9 @@ import { UsersService } from 'src/users/users.service';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import { User } from 'src/users/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
-
+import getPreciseDistance from 'geolib/es/getPreciseDistance';
+import { convertDistance, isDecimal, toDecimal } from 'geolib';
+import { MAX_DELIVERY_DISTANCE } from 'src/utils/constants';
 @Injectable()
 export class PlacesService {
   constructor(
@@ -49,19 +51,16 @@ export class PlacesService {
       newPlace.email = place.email;
       newPlace.phone = place.phone;
       newPlace.address = place.address;
-      newPlace.latitude = place.latitude;
-      newPlace.longitude = place.longitude;
+      newPlace.latitude = isDecimal(place.latitude)
+        ? place.latitude
+        : toDecimal(place.latitude);
+      newPlace.longitude = isDecimal(place.longitude)
+        ? place.longitude
+        : toDecimal(place.longitude);
       newPlace.website = place?.website;
       newPlace.category = category;
 
-      const savedUser = await this.usersService.create(
-        {
-          fullName: 'tictac admin',
-          phone: '0272301206',
-          password: 'password',
-        },
-        true,
-      );
+      const savedUser = await this.usersService.create(place.placeAdmin, true);
       const result = await newPlace.save();
 
       await this.productCategoryService.create({
@@ -121,6 +120,30 @@ export class PlacesService {
         place.mainImage = savedImage.url;
       }
       return place;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async findPlacesNearBy(distance: { longitude: string; latitude: string }) {
+    try {
+      const places = await this.placeRepository.find();
+      const nearestPlaces = places.filter((place) => {
+        const d = getPreciseDistance(
+          distance,
+          {
+            latitude: place.latitude,
+            longitude: place.longitude,
+          },
+          0.01,
+        );
+
+        const distanceKm = convertDistance(d, 'km');
+
+        if (distanceKm <= MAX_DELIVERY_DISTANCE) return true;
+      });
+      return nearestPlaces;
     } catch (error) {
       console.log(error);
       throw error;
