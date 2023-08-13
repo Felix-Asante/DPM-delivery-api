@@ -20,6 +20,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
@@ -36,6 +37,7 @@ import { imageFileFilter } from 'src/utils/helpers';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import { currentUser } from 'src/auth/decorators/currentUser.decorator';
 import { User } from 'src/users/entities/user.entity';
+import { IDistance } from 'src/utils/interface';
 
 @Controller('places')
 @ApiTags('Places')
@@ -105,11 +107,18 @@ export class PlacesController {
     return await this.placesService.getAllPlaces();
   }
 
-  @Get(':id')
+  @Get('search')
   @ApiBadRequestResponse()
-  @ApiNotFoundResponse()
-  async getPlaceById(@Param('id') id: string) {
-    return await this.placesService.findPlaceById(id);
+  @ApiInternalServerErrorResponse()
+  @ApiQuery({ name: 'longitude', required: false, type: String })
+  @ApiQuery({ name: 'latitude', required: false, type: String })
+  @ApiQuery({ name: 'category', required: false, type: String })
+  @ApiQuery({ name: 'query', required: true, type: String })
+  async search(
+    @Query() searchQuery: IDistance & { query: string; category: string },
+  ) {
+    const { query, category, ...coords } = searchQuery;
+    return this.placesService.searchPlace(query, category, coords);
   }
 
   @ApiQuery({ name: 'longitude', required: true, type: String })
@@ -140,6 +149,13 @@ export class PlacesController {
     @Query() coords: { longitude: string; latitude: string },
   ) {
     return this.placesService.getPopularPlaces(coords);
+  }
+
+  @Get(':id')
+  @ApiBadRequestResponse()
+  @ApiNotFoundResponse()
+  async getPlaceById(@Param('id') id: string) {
+    return await this.placesService.findPlaceById(id);
   }
 
   @Delete(':id')
