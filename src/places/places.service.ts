@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Place } from './entities/place.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { ERRORS } from 'src/utils/errors';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { CategoriesService } from 'src/categories/categories.service';
@@ -244,6 +244,56 @@ export class PlacesService {
         return this.getNearbyPlaces(popularPlaces, coords).slice(0, 11);
       }
       return popularPlaces.slice(0, 11);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async searchPlace(query: string, category?: string, coords?: IDistance) {
+    try {
+      let searchWhereClause;
+      if (category) {
+        searchWhereClause = [
+          {
+            name: ILike(`%${query}%`),
+            category: { name: ILike(`%${category}%`) },
+          },
+          {
+            website: ILike(`%${query}%`),
+            category: { name: ILike(`%${category}%`) },
+          },
+          {
+            address: ILike(`%${query}%`),
+            category: { name: ILike(`%${category}%`) },
+          },
+          {
+            name: ILike(`%${query}%`),
+            category: { name: ILike(`%${category}%`) },
+          },
+          {
+            name: ILike(`%${query}%`),
+            category: { name: ILike(`%${category}%`) },
+          },
+        ];
+      } else {
+        searchWhereClause = [
+          { name: ILike(`%${query}%`) },
+          { website: ILike(`%${query}%`) },
+          { address: ILike(`%${query}%`) },
+          { name: ILike(`%${query}%`) },
+          { name: ILike(`%${query}%`) },
+        ];
+      }
+
+      const results = await this.placeRepository.find({
+        where: searchWhereClause,
+      });
+
+      if (coords?.latitude && coords?.longitude) {
+        return this.getNearbyPlaces(results, coords);
+      }
+      return results;
     } catch (error) {
       console.log(error);
       throw error;
