@@ -35,3 +35,8 @@ export const imageFileFilter = (req, file, callback) => {
   }
   callback(null, true);
 };
+
+export const extractIdFromImage = (image: string) => {
+  const imagePublicId = image?.split('/')?.at(-1).split('.')?.[0];
+  return imagePublicId;
+};

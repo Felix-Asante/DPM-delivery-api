@@ -8,6 +8,8 @@ export class Products extends AbstractEntity {
   description: string;
   @Column({ nullable: true })
   photo: string;
+  @Column()
+  name: string;
 
   @ManyToOne(
     () => ProductsCategory,

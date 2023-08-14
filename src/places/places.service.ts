@@ -20,6 +20,7 @@ import getPreciseDistance from 'geolib/es/getPreciseDistance';
 import { convertDistance, isDecimal, toDecimal } from 'geolib';
 import { MAX_DELIVERY_DISTANCE } from 'src/utils/constants';
 import { IDistance } from 'src/utils/interface';
+import { extractIdFromImage } from 'src/utils/helpers';
 @Injectable()
 export class PlacesService {
   constructor(
@@ -109,13 +110,13 @@ export class PlacesService {
         place.category = category;
       }
       if (logo) {
-        const imagePublicId = this.extractIdFromImage(place?.logo);
+        const imagePublicId = extractIdFromImage(place?.logo);
         await this.filesService.deleteImage(imagePublicId);
         const savedImage = await this.filesService.uploadImage(logo);
         place.logo = savedImage.url;
       }
       if (mainImage) {
-        const imagePublicId = this.extractIdFromImage(place?.mainImage);
+        const imagePublicId = extractIdFromImage(place?.mainImage);
         await this.filesService.deleteImage(imagePublicId);
         const savedImage = await this.filesService.uploadImage(logo);
         place.mainImage = savedImage.url;
@@ -136,11 +137,6 @@ export class PlacesService {
       console.log(error);
       throw error;
     }
-  }
-
-  extractIdFromImage(image: string): string {
-    const imagePublicId = image?.split('/')?.at(-1).split('.')?.[0];
-    return imagePublicId;
   }
 
   getNearbyPlaces(places: Place[], distance: IDistance) {

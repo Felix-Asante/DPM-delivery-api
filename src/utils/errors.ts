@@ -40,4 +40,9 @@ export const ERRORS = {
     NOT_FOUND: 'Place not found',
     ALREADY_EXIST: 'Place name already exist',
   },
+  PRODUCTS: {
+    NOT_FOUND: {
+      EN: 'product not found',
+    },
+  },
 };
