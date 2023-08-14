@@ -13,6 +13,7 @@ import { PlacesModule } from './places/places.module';
 import { CategoriesModule } from './categories/categories.module';
 import { FilesModule } from './files/files.module';
 import { ProductsCategoryModule } from './products-category/products-category.module';
+import { ProductsModule } from './products/products.module';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -32,6 +33,7 @@ import { ProductsCategoryModule } from './products-category/products-category.mo
     CategoriesModule,
     FilesModule,
     ProductsCategoryModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

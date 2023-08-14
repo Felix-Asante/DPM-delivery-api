@@ -8,12 +8,14 @@ import {
   Delete,
   UseGuards,
   Put,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ProductsCategoryService } from './products-category.service';
 import { CreateProductsCategoryDto } from './dto/create-products-category.dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
   ApiTags,
@@ -72,6 +74,14 @@ export class ProductsCategoryController {
       updateProductsCategoryDto.name,
       id,
     );
+  }
+
+  @Get('place/:placeId')
+  @ApiNotFoundResponse()
+  @ApiInternalServerErrorResponse()
+  @ApiBadRequestResponse()
+  async getPlaceCategory(@Param('placeId', ParseUUIDPipe) placeId: string) {
+    return this.productsCategoryService.getPlaceCategory(placeId);
   }
 
   @Delete(':id')
