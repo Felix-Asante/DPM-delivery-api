@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -78,5 +79,16 @@ export class ProductsController {
   @Get(':id')
   async findById(@Param('id') id: string) {
     return await this.productsService.findProductById(id);
+  }
+
+  @Delete(':id')
+  @ApiNotFoundResponse()
+  @ApiBadRequestResponse()
+  @ApiInternalServerErrorResponse()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
+  @ApiBearerAuth()
+  async deleteProduct(@Param('id') productId: string) {
+    return await this.productsService.deleteProduct(productId);
   }
 }

@@ -100,4 +100,25 @@ export class ProductsService {
       throw error;
     }
   }
+
+  async deleteProduct(id: string) {
+    try {
+      await this.findProductById(id);
+      const result = await this.productRepository.delete({ id });
+      if (result.affected) {
+        return {
+          success: true,
+          message: 'product successfully deleted',
+        };
+      } else {
+        return {
+          success: false,
+          message: 'Failed to delete product',
+        };
+      }
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
 }
