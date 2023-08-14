@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ProductsCategory } from './entities/products-category.entity';
 import { Repository } from 'typeorm';
 import { ERRORS } from 'src/utils/errors';
-import { User } from 'src/users/entities/user.entity';
 import { Place } from 'src/places/entities/place.entity';
 
 @Injectable()
@@ -33,12 +32,7 @@ export class ProductsCategoryService {
         throw new BadRequestException(ERRORS.CATEGORIES.ALREADY_EXIST);
       }
 
-      const place = await this.placeRepository.findOne({
-        where: { id: createProductsCategoryDto.place },
-      });
-      if (!place) {
-        throw new NotFoundException(ERRORS.PLACES.NOT_FOUND);
-      }
+      const place = await this.findPlaceById(createProductsCategoryDto.place);
       const newCategory = this.productsCategoryRepository.create({
         name: createProductsCategoryDto.name,
         place: place,
@@ -65,6 +59,34 @@ export class ProductsCategoryService {
   async findAllProductsCategory() {
     try {
       return await this.productsCategoryRepository.find();
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async getPlaceCategory(placeId: string) {
+    try {
+      await this.findPlaceById(placeId);
+      const results = await this.productsCategoryRepository.find({
+        where: { place: { id: placeId } },
+      });
+      return results;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async findPlaceById(id: string) {
+    try {
+      const place = await this.placeRepository.findOne({
+        where: { id },
+      });
+      if (!place) {
+        throw new NotFoundException(ERRORS.PLACES.NOT_FOUND);
+      }
+      return place;
     } catch (error) {
       console.log(error);
       throw error;

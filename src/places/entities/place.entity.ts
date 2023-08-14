@@ -1,6 +1,7 @@
 import { Category } from 'src/categories/entities/category.entity';
 import { AbstractEntity } from 'src/entities/abstract.entity';
 import { ProductsCategory } from 'src/products-category/entities/products-category.entity';
+import { Products } from 'src/products/entities/product.entity';
 import { slugify } from 'src/utils/helpers';
 import {
   BeforeInsert,
