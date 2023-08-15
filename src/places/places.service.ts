@@ -21,11 +21,13 @@ import { convertDistance, isDecimal, toDecimal } from 'geolib';
 import { MAX_DELIVERY_DISTANCE } from 'src/utils/constants';
 import { IDistance } from 'src/utils/interface';
 import { extractIdFromImage } from 'src/utils/helpers';
+
 @Injectable()
 export class PlacesService {
   constructor(
     @InjectRepository(Place)
     private readonly placeRepository: Repository<Place>,
+
     private readonly categoriesService: CategoriesService,
     private readonly filesService: FilesService,
     private readonly productCategoryService: ProductsCategoryService,
@@ -60,6 +62,7 @@ export class PlacesService {
         ? place.longitude
         : toDecimal(place.longitude);
       newPlace.website = place?.website;
+      newPlace.averagePrice = place?.averagePrice;
       newPlace.category = category;
 
       const savedUser = await this.usersService.create(place.placeAdmin, true);
@@ -84,6 +87,7 @@ export class PlacesService {
       category: categoryId,
       logo: placeLogo,
       mainImage: placeImg,
+      averagePrice,
       ...body
     }: UpdatePlaceDto,
     user: User,
@@ -108,6 +112,9 @@ export class PlacesService {
           categoryId,
         );
         place.category = category;
+      }
+      if (averagePrice) {
+        place.averagePrice = averagePrice;
       }
       if (logo) {
         const imagePublicId = extractIdFromImage(place?.logo);
@@ -197,6 +204,18 @@ export class PlacesService {
     }
   }
 
+  async getPlaceProducts(placeId: string) {
+    try {
+      const result = await this.productCategoryService.getPlaceProducts(
+        placeId,
+      );
+      return result;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
   async findPlaceById(id: string) {
     try {
       const place = await this.placeRepository.findOneBy({ id });
@@ -234,6 +253,7 @@ export class PlacesService {
         order: {
           visits: 'DESC',
         },
+        relations: ['category'],
       });
 
       if (coords?.latitude && coords?.longitude) {

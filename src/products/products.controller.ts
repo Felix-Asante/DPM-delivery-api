@@ -29,7 +29,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateProductDto } from './dto/CreateProductDto.dto';
 
 @Controller('products')
-@ApiTags('Products/ service / Menu')
+@ApiTags('Products / service / Menu')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 

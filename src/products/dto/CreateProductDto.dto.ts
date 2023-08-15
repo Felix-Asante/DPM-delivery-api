@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsDecimal, IsString } from 'class-validator';
 
 export class CreateProductDto {
   @ApiProperty({ description: 'Can be ingredients,services', required: false })
@@ -14,4 +14,7 @@ export class CreateProductDto {
   @ApiProperty()
   @IsString()
   name: string;
+  @ApiProperty()
+  @IsDecimal()
+  price: number;
 }

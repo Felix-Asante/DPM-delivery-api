@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import {
+  IsDecimal,
+  IsEmail,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+} from 'class-validator';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 export class CreatePlaceDto {
@@ -32,6 +38,9 @@ export class CreatePlaceDto {
   @ApiProperty()
   @IsString()
   category: string;
+  @ApiProperty()
+  @IsDecimal()
+  averagePrice: number;
   @ApiProperty()
   placeAdmin: CreateUserDto;
 }
