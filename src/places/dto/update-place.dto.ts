@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import {
+  IsDecimal,
+  IsEmail,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+} from 'class-validator';
 
 export class UpdatePlaceDto {
   @IsOptional()
@@ -36,6 +42,10 @@ export class UpdatePlaceDto {
   @ApiProperty({ type: 'string', format: 'binary', required: false })
   mainImage: Express.Multer.File;
 
+  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsDecimal()
+  averagePrice: number;
   @ApiProperty({ required: false })
   @IsString()
   category: string;

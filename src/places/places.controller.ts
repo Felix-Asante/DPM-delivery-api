@@ -29,11 +29,8 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { UserRoles } from 'src/utils/enums';
 import { CreatePlaceDto } from './dto/create-place.dto';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-} from '@nestjs/platform-express';
-import { imageFileFilter } from 'src/utils/helpers';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import { currentUser } from 'src/auth/decorators/currentUser.decorator';
 import { User } from 'src/users/entities/user.entity';
@@ -135,6 +132,13 @@ export class PlacesController {
   @ApiNotFoundResponse()
   async getPlaceBySlug(@Param('slug') slug: string) {
     return await this.placesService.findPlaceBySlug(slug);
+  }
+
+  @Get(':id/products')
+  @ApiNotFoundResponse()
+  @ApiInternalServerErrorResponse()
+  async getPlaceProduct(@Param('id') id: string) {
+    return this.placesService.getPlaceProducts(id);
   }
 
   // @ApiBearerAuth()

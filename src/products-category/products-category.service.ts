@@ -78,6 +78,20 @@ export class ProductsCategoryService {
     }
   }
 
+  async getPlaceProducts(placeId: string) {
+    try {
+      await this.findPlaceById(placeId);
+      const results = await this.productsCategoryRepository.find({
+        where: { place: { id: placeId } },
+        relations: ['products'],
+      });
+      return results;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
   async findPlaceById(id: string) {
     try {
       const place = await this.placeRepository.findOne({

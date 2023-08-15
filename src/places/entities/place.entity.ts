@@ -38,6 +38,8 @@ export class Place extends AbstractEntity {
   address: string;
   @Column({ default: 0 })
   visits: number;
+  @Column({ default: 0 })
+  averagePrice: number;
   @ManyToOne(() => Category, (category) => category.place)
   category: Category;
   @OneToMany(() => ProductsCategory, (category) => category.place, {

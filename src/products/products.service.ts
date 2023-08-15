@@ -20,7 +20,7 @@ export class ProductsService {
   ) {}
 
   async create(body: CreateProductDto, photo: Express.Multer.File) {
-    const { name, description, productCategory } = body;
+    const { name, description, productCategory, price } = body;
     try {
       const newProduct = new Products();
       const category = await this.productsCategoryRepository.findOneBy({
@@ -32,6 +32,7 @@ export class ProductsService {
       }
 
       newProduct.name = name;
+      newProduct.price = price;
       if (description) {
         newProduct.description = description;
       }
@@ -48,7 +49,7 @@ export class ProductsService {
   }
 
   async updateProduct(
-    { description, name, productCategory }: UpdateProductDto,
+    { description, name, productCategory, price }: UpdateProductDto,
     photo: Express.Multer.File,
     id: string,
   ) {
@@ -56,6 +57,9 @@ export class ProductsService {
       const product = await this.findProductById(id);
       if (name) {
         product.name = name;
+      }
+      if (price) {
+        product.price = price;
       }
       if (description) {
         product.description = description;

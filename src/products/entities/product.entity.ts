@@ -10,6 +10,8 @@ export class Products extends AbstractEntity {
   photo: string;
   @Column()
   name: string;
+  @Column({ default: 0.0 })
+  price: number;
 
   @ManyToOne(
     () => ProductsCategory,
