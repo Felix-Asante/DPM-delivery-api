@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDecimal,
   IsEmail,
@@ -41,6 +41,14 @@ export class CreatePlaceDto {
   @ApiProperty()
   @IsDecimal()
   averagePrice: number;
+  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsDecimal()
+  minPrepTime: number;
+  @ApiPropertyOptional()
+  @ApiProperty()
+  @IsDecimal()
+  maxPrepTime: number;
   @ApiProperty()
   placeAdmin: CreateUserDto;
 }

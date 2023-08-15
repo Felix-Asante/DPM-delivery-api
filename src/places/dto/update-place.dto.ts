@@ -46,6 +46,14 @@ export class UpdatePlaceDto {
   @ApiPropertyOptional()
   @IsDecimal()
   averagePrice: number;
+  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsDecimal()
+  minPrepTime: number;
+  @ApiPropertyOptional()
+  @ApiProperty()
+  @IsDecimal()
+  maxPrepTime: number;
   @ApiProperty({ required: false })
   @IsString()
   category: string;
