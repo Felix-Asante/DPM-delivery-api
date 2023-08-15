@@ -55,6 +55,8 @@ export class PlacesService {
       newPlace.email = place.email;
       newPlace.phone = place.phone;
       newPlace.address = place.address;
+      newPlace.minPrepTime = place.minPrepTime;
+      newPlace.maxPrepTime = place.maxPrepTime;
       newPlace.latitude = isDecimal(place.latitude)
         ? place.latitude
         : toDecimal(place.latitude);
