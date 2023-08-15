@@ -140,6 +140,14 @@ export class PlacesController {
   async getPlaceProduct(@Param('id') id: string) {
     return this.placesService.getPlaceProducts(id);
   }
+  @Get('new')
+  @ApiNotFoundResponse()
+  @ApiInternalServerErrorResponse()
+  @ApiQuery({ name: 'longitude', required: false, type: String })
+  @ApiQuery({ name: 'latitude', required: false, type: String })
+  async getNewPlaces(@Query() coords: { longitude: string; latitude: string }) {
+    return this.placesService.getNewPlaces(coords);
+  }
 
   // @ApiBearerAuth()
   @ApiBadRequestResponse()

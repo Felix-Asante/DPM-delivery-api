@@ -185,6 +185,23 @@ export class PlacesService {
     }
   }
 
+  async getNewPlaces(coords?: IDistance) {
+    try {
+      const places = await this.placeRepository.find({
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+      if (coords?.latitude && coords?.longitude) {
+        return this.getNearbyPlaces(places, coords).slice(0, 11);
+      }
+      return places.slice(0, 11);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
   async deletePlace(id: string) {
     try {
       await this.findPlaceById(id);
