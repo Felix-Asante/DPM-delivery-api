@@ -170,6 +170,27 @@ export class PlacesController {
     return await this.placesService.findPlaceById(id);
   }
 
+  @Put(':placeId/like')
+  @ApiBearerAuth()
+  @ApiBadRequestResponse()
+  @ApiInternalServerErrorResponse()
+  @ApiOperation({ summary: '(user)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.USER)
+  async LikePlace(@Param('placeId') id: string, @currentUser() user: User) {
+    return await this.placesService.LikePlace({ place: id, user });
+  }
+  @Put(':placeId/dislike')
+  @ApiBearerAuth()
+  @ApiBadRequestResponse()
+  @ApiInternalServerErrorResponse()
+  @ApiOperation({ summary: '(user)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.USER)
+  async disLikePlace(@Param('placeId') id: string, @currentUser() user: User) {
+    return await this.placesService.UnLikePlace({ place: id, user });
+  }
+
   @Delete(':id')
   @ApiBearerAuth()
   @ApiBadRequestResponse()

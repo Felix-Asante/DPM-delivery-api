@@ -19,8 +19,9 @@ import { ConfigService } from '@nestjs/config';
 import getPreciseDistance from 'geolib/es/getPreciseDistance';
 import { convertDistance, isDecimal, toDecimal } from 'geolib';
 import { MAX_DELIVERY_DISTANCE } from 'src/utils/constants';
-import { IDistance } from 'src/utils/interface';
+import { IDistance, Like } from 'src/utils/interface';
 import { extractIdFromImage } from 'src/utils/helpers';
+import { LikesService } from 'src/likes/likes.service';
 
 @Injectable()
 export class PlacesService {
@@ -32,7 +33,7 @@ export class PlacesService {
     private readonly filesService: FilesService,
     private readonly productCategoryService: ProductsCategoryService,
     private readonly usersService: UsersService,
-    private readonly configService: ConfigService,
+    private readonly likesService: LikesService,
   ) {}
 
   async createPlace(
@@ -333,5 +334,12 @@ export class PlacesService {
       console.log(error);
       throw error;
     }
+  }
+
+  async LikePlace(data: Like) {
+    return await this.likesService.createLike(data);
+  }
+  async UnLikePlace(data: Like) {
+    return await this.likesService.unLike(data);
   }
 }
