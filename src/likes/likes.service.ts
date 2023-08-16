@@ -78,4 +78,16 @@ export class LikesService {
       throw error;
     }
   }
+
+  async getLikesByUser(userId: string) {
+    try {
+      const likes = await this.likeRepository.find({
+        where: { user: { id: userId } },
+        relations: ['place'],
+      });
+      return likes;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
