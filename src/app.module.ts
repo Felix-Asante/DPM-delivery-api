@@ -14,6 +14,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { FilesModule } from './files/files.module';
 import { ProductsCategoryModule } from './products-category/products-category.module';
 import { ProductsModule } from './products/products.module';
+import { LikesModule } from './likes/likes.module';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -34,6 +35,7 @@ import { ProductsModule } from './products/products.module';
     FilesModule,
     ProductsCategoryModule,
     ProductsModule,
+    LikesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

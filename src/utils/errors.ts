@@ -45,4 +45,11 @@ export const ERRORS = {
       EN: 'product not found',
     },
   },
+
+  LIKES: {
+    LIKED: 'Already liked',
+    NOT_LIKED: 'Place not liked',
+    DELETED: 'places successfully unliked',
+    FAILED: 'Failed to like place',
+  },
 };

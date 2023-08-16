@@ -34,6 +34,8 @@ export class User extends AbstractEntity {
 
   @Column({ nullable: true })
   codeExpiryDate: Date;
+  @Column('text', { array: true, default: [] })
+  likes: string[];
 
   @ManyToOne(() => Role, (role) => role.user)
   role: Role;

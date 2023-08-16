@@ -13,11 +13,13 @@ import { Category } from 'src/categories/entities/category.entity';
 import { FilesModule } from 'src/files/files.module';
 import { ProductsCategoryService } from 'src/products-category/products-category.service';
 import { ProductsCategory } from 'src/products-category/entities/products-category.entity';
+import { LikesModule } from 'src/likes/likes.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Place, Role, User, Category, ProductsCategory]),
     FilesModule,
+    LikesModule,
   ],
   controllers: [PlacesController],
   providers: [
