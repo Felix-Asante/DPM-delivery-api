@@ -8,9 +8,13 @@ import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { MessagesService } from 'src/messages/messages.service';
 import { Place } from 'src/places/entities/place.entity';
+import { LikesModule } from 'src/likes/likes.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProductsCategory, Role, User, Place])],
+  imports: [
+    TypeOrmModule.forFeature([ProductsCategory, Role, User, Place]),
+    LikesModule,
+  ],
   controllers: [ProductsCategoryController],
   providers: [ProductsCategoryService, UsersService, MessagesService],
 })

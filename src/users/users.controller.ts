@@ -50,11 +50,15 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Get(':id')
-  @ApiNotFoundResponse({ description: 'user not found' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.USER)
+  @Get('likes')
+  @ApiBearerAuth()
   @ApiUnauthorizedResponse()
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  @ApiForbiddenResponse()
+  @ApiOperation({ summary: '(user)' })
+  getLikes(@currentUser() user) {
+    return this.usersService.findLikes(user?.id);
   }
 
   @UseGuards(JwtAuthGuard)

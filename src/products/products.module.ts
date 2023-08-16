@@ -9,11 +9,13 @@ import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { MessagesService } from 'src/messages/messages.service';
 import { Role } from 'src/users/entities/role.entity';
+import { LikesModule } from 'src/likes/likes.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Products, ProductsCategory, User, Role]),
     FilesModule,
+    LikesModule,
   ],
   controllers: [ProductsController],
   providers: [ProductsService, UsersService, MessagesService],

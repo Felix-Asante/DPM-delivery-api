@@ -6,9 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Role } from 'src/users/entities/role.entity';
 import { MessagesService } from 'src/messages/messages.service';
+import { LikesModule } from 'src/likes/likes.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Role])],
+  imports: [TypeOrmModule.forFeature([User, Role]), LikesModule],
   controllers: [AuthController],
   providers: [AuthService, UsersService, MessagesService],
 })

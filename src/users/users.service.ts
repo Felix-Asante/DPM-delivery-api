@@ -14,6 +14,7 @@ import { CodeUseCases, UserRoles } from 'src/utils/enums';
 import { generateExpiryDate, generateOtpCode } from 'src/utils/helpers';
 import { MessagesService } from 'src/messages/messages.service';
 import { JwtService } from '@nestjs/jwt';
+import { LikesService } from 'src/likes/likes.service';
 
 @Injectable()
 export class UsersService {
@@ -23,6 +24,7 @@ export class UsersService {
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
     private readonly messageService: MessagesService,
+    private readonly likeService: LikesService,
     private readonly jwtService: JwtService,
   ) {}
   async create(createUserDto: CreateUserDto, isPlaceAdmin = false) {
@@ -66,8 +68,8 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findLikes(id: string) {
+    return await this.likeService.getLikesByUser(id);
   }
 
   async findUserByEmail(email: string) {
