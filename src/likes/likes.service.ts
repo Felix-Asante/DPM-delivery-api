@@ -25,6 +25,7 @@ export class LikesService {
       const place = await this.placeRepository.findOneBy({ id: data.place });
       const liked = await this.likeRepository.findOneBy({
         user: { id: data.user.id },
+        place: { id: data.place },
       });
 
       if (liked) throw new BadRequestException(ERRORS.LIKES.LIKED);
@@ -62,11 +63,12 @@ export class LikesService {
       if (result.affected) {
         user.likes = user.likes?.filter((likes) => likes !== data.place);
 
-        await user.save();
+        const savedUser = await user.save();
 
         return {
           success: true,
           message: ERRORS.LIKES.DELETED,
+          user: savedUser,
         };
       } else {
         return {
