@@ -67,6 +67,9 @@ export class PlacesService {
       newPlace.website = place?.website;
       newPlace.averagePrice = place?.averagePrice;
       newPlace.category = category;
+      if (place.deliveryFee) {
+        newPlace.deliveryFee = place.deliveryFee;
+      }
 
       const savedUser = await this.usersService.create(place.placeAdmin, true);
       const result = await newPlace.save();

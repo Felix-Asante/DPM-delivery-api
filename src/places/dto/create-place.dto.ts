@@ -44,6 +44,10 @@ export class CreatePlaceDto {
   @ApiProperty()
   @ApiPropertyOptional()
   @IsDecimal()
+  deliveryFee: number;
+  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsDecimal()
   minPrepTime: number;
   @ApiPropertyOptional()
   @ApiProperty()
