@@ -289,6 +289,7 @@ export class PlacesService {
   async searchPlace(query: string, category?: string, coords?: IDistance) {
     try {
       let searchWhereClause;
+      if (!query.length && !category?.length) return [];
       if (category) {
         searchWhereClause = [
           {
@@ -324,6 +325,7 @@ export class PlacesService {
 
       const results = await this.placeRepository.find({
         where: searchWhereClause,
+        relations: ['category'],
       });
 
       if (coords?.latitude && coords?.longitude) {
