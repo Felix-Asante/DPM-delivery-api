@@ -40,6 +40,8 @@ export class Place extends AbstractEntity {
   visits: number;
   @Column({ default: 0 })
   averagePrice: number;
+  @Column({ default: 0 })
+  deliveryFee: number;
   @Column({ default: 5 })
   minPrepTime: number;
   @Column({ default: 15 })
