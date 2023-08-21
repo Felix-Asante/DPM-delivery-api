@@ -1,5 +1,6 @@
 import { Category } from 'src/categories/entities/category.entity';
 import { AbstractEntity } from 'src/entities/abstract.entity';
+import { Offer } from 'src/offers/entities/offer.entity';
 import { ProductsCategory } from 'src/products-category/entities/products-category.entity';
 import { Products } from 'src/products/entities/product.entity';
 import { slugify } from 'src/utils/helpers';
@@ -53,6 +54,10 @@ export class Place extends AbstractEntity {
     eager: true,
   })
   productCategory: ProductsCategory;
+  @OneToMany(() => Offer, (offer) => offer.product, {
+    onDelete: 'CASCADE',
+  })
+  offers: Offer;
 
   @BeforeInsert()
   @BeforeUpdate()

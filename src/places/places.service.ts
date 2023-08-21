@@ -15,12 +15,9 @@ import { Categories, UserRoles } from 'src/utils/enums';
 import { UsersService } from 'src/users/users.service';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import { User } from 'src/users/entities/user.entity';
-import { ConfigService } from '@nestjs/config';
-import getPreciseDistance from 'geolib/es/getPreciseDistance';
-import { convertDistance, isDecimal, toDecimal } from 'geolib';
-import { MAX_DELIVERY_DISTANCE } from 'src/utils/constants';
+import { isDecimal, toDecimal } from 'geolib';
 import { IDistance, Like } from 'src/utils/interface';
-import { extractIdFromImage } from 'src/utils/helpers';
+import { extractIdFromImage, getNearbyPlaces } from 'src/utils/helpers';
 import { LikesService } from 'src/likes/likes.service';
 
 @Injectable()
@@ -144,7 +141,7 @@ export class PlacesService {
   async findPlacesNearBy(distance: IDistance) {
     try {
       const places = await this.placeRepository.find();
-      const nearestPlaces = this.getNearbyPlaces(places, distance);
+      const nearestPlaces = getNearbyPlaces(places, distance);
       return nearestPlaces;
     } catch (error) {
       console.log(error);
@@ -152,22 +149,6 @@ export class PlacesService {
     }
   }
 
-  getNearbyPlaces(places: Place[], distance: IDistance) {
-    return places.filter((place) => {
-      const d = getPreciseDistance(
-        distance,
-        {
-          latitude: place.latitude,
-          longitude: place.longitude,
-        },
-        0.01,
-      );
-
-      const distanceKm = convertDistance(d, 'km');
-
-      if (distanceKm <= MAX_DELIVERY_DISTANCE) return true;
-    });
-  }
   async getAllPlaces() {
     try {
       const places = await this.placeRepository.find();
@@ -197,7 +178,7 @@ export class PlacesService {
         },
       });
       if (coords?.latitude && coords?.longitude) {
-        return this.getNearbyPlaces(places, coords).slice(0, 11);
+        return getNearbyPlaces(places, coords).slice(0, 11);
       }
       return places.slice(0, 11);
     } catch (error) {
@@ -280,7 +261,7 @@ export class PlacesService {
       });
 
       if (coords?.latitude && coords?.longitude) {
-        return this.getNearbyPlaces(popularPlaces, coords).slice(0, 11);
+        return getNearbyPlaces(popularPlaces, coords).slice(0, 11);
       }
       return popularPlaces.slice(0, 11);
     } catch (error) {
@@ -332,7 +313,7 @@ export class PlacesService {
       });
 
       if (coords?.latitude && coords?.longitude) {
-        return this.getNearbyPlaces(results, coords);
+        return getNearbyPlaces(results, coords);
       }
       return results;
     } catch (error) {

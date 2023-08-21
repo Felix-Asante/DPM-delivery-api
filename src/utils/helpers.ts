@@ -1,8 +1,11 @@
 import * as crypto from 'crypto';
 import * as dayjs from 'dayjs';
-import { CODE_EXPIRATION_MINUTE } from './constants';
+import { CODE_EXPIRATION_MINUTE, MAX_DELIVERY_DISTANCE } from './constants';
 import { BadRequestException } from '@nestjs/common';
 import { ERRORS } from './errors';
+import { convertDistance, getPreciseDistance } from 'geolib';
+import { Place } from 'src/places/entities/place.entity';
+import { IDistance } from './interface';
 
 export const generateOtpCode = () => {
   return crypto.randomInt(100000, 999999).toString().slice(0, 4);
@@ -40,3 +43,31 @@ export const extractIdFromImage = (image: string) => {
   const imagePublicId = image?.split('/')?.at(-1).split('.')?.[0];
   return imagePublicId;
 };
+
+export function getNearbyPlaces(places: Place[], distance: IDistance) {
+  const nearbyPlaces: Place[] = [];
+  const maxDeliveryDistance = MAX_DELIVERY_DISTANCE;
+
+  for (const place of places) {
+    const calculatedDistance = calculateDistance(place, distance);
+
+    if (calculatedDistance <= maxDeliveryDistance) {
+      nearbyPlaces.push(place);
+    }
+  }
+
+  return nearbyPlaces;
+}
+
+function calculateDistance(place: Place, reference: IDistance): number {
+  const d = getPreciseDistance(
+    reference,
+    {
+      latitude: place.latitude,
+      longitude: place.longitude,
+    },
+    0.01,
+  );
+
+  return convertDistance(d, 'km');
+}

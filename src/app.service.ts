@@ -2,13 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from './users/entities/role.entity';
 import { Repository } from 'typeorm';
-import { UserRoles } from './utils/enums';
+import { OffersTypes, UserRoles } from './utils/enums';
+import { OfferTypes } from './offers/entities/offer-type.entity';
 
 @Injectable()
 export class AppService {
   constructor(
     @InjectRepository(Role)
     private readonly rolesRepository: Repository<Role>,
+    @InjectRepository(OfferTypes)
+    private readonly offerTypesRepository: Repository<OfferTypes>,
   ) {}
   async onModuleInit() {
     try {
@@ -23,6 +26,17 @@ export class AppService {
         await placeAdminRole.save();
         const riderRole = new Role(UserRoles.COURIER);
         await riderRole.save();
+      }
+      const offerTypes = await this.offerTypesRepository.find();
+      if (!offerTypes.length) {
+        const placeOffer = this.offerTypesRepository.create({
+          name: OffersTypes.PLACE_OFFER,
+        });
+        const productOffer = this.offerTypesRepository.create({
+          name: OffersTypes.PRODUCT_OFFER,
+        });
+        await placeOffer.save();
+        await productOffer.save();
       }
     } catch (error) {
       console.log(error);
