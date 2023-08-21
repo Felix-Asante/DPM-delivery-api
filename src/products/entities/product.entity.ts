@@ -1,6 +1,7 @@
 import { AbstractEntity } from 'src/entities/abstract.entity';
+import { Offer } from 'src/offers/entities/offer.entity';
 import { ProductsCategory } from 'src/products-category/entities/products-category.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('products')
 export class Products extends AbstractEntity {
@@ -13,9 +14,18 @@ export class Products extends AbstractEntity {
   @Column({ default: 0.0 })
   price: number;
 
+  @OneToMany(() => Offer, (offer) => offer.product, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  offers: Offer;
+
   @ManyToOne(
     () => ProductsCategory,
     (productCategory) => productCategory.products,
+    {
+      onDelete: 'CASCADE',
+    },
   )
   productCategory: ProductsCategory;
 }

@@ -52,4 +52,12 @@ export const ERRORS = {
     DELETED: 'places successfully unliked',
     FAILED: 'Failed to like place',
   },
+  OFFERS: {
+    TYPE_NOT_FOUND: {
+      EN: 'No record was found for this type',
+    },
+    NOT_FOUND: {
+      EN: 'Offer not found',
+    },
+  },
 };

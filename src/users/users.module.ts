@@ -11,5 +11,6 @@ import { LikesModule } from 'src/likes/likes.module';
   imports: [TypeOrmModule.forFeature([User, Role]), LikesModule],
   controllers: [UsersController],
   providers: [UsersService, MessagesService],
+  exports: [UsersService],
 })
 export class UsersModule {}

@@ -14,3 +14,7 @@ export enum CodeUseCases {
 export enum Categories {
   UNCATEGORIZED = 'UNCATEGORIZED',
 }
+export enum OffersTypes {
+  PLACE_OFFER = 'place_offer',
+  PRODUCT_OFFER = 'product_offer',
+}

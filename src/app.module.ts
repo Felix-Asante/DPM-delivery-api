@@ -15,12 +15,14 @@ import { FilesModule } from './files/files.module';
 import { ProductsCategoryModule } from './products-category/products-category.module';
 import { ProductsModule } from './products/products.module';
 import { LikesModule } from './likes/likes.module';
+import { OffersModule } from './offers/offers.module';
+import { OfferTypes } from './offers/entities/offer-type.entity';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       useClass: DatabaseConnectionService,
     }),
-    TypeOrmModule.forFeature([Role]),
+    TypeOrmModule.forFeature([Role, OfferTypes]),
     ConfigModule.forRoot({ isGlobal: true }),
     JwtModule.register({
       global: true,
@@ -36,6 +38,7 @@ import { LikesModule } from './likes/likes.module';
     ProductsCategoryModule,
     ProductsModule,
     LikesModule,
+    OffersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
