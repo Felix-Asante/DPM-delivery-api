@@ -228,8 +228,7 @@ export class PlacesService {
       }
       const visits = place.visits;
       place.visits = visits + 1;
-      await place.save();
-      return place;
+      return await place.save();
     } catch (error) {
       console.log(error);
       throw error;
