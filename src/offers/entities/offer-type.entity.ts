@@ -7,6 +7,6 @@ export class OfferTypes extends AbstractEntity {
   @Column()
   name: string;
 
-  @OneToMany(() => Offer, (offer) => offer.type)
+  @OneToMany(() => Offer, (offer) => offer.type, { onDelete: 'CASCADE' })
   offers: Offer;
 }

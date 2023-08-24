@@ -39,10 +39,14 @@ export const ERRORS = {
   PLACES: {
     NOT_FOUND: 'Place not found',
     ALREADY_EXIST: 'Place name already exist',
+    NOT_EMPTY: 'Place cannot be empty',
   },
   PRODUCTS: {
     NOT_FOUND: {
       EN: 'product not found',
+    },
+    NOT_EMPTY: {
+      EN: 'product cannot be empty',
     },
   },
 

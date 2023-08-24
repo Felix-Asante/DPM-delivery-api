@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -21,9 +22,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { OfferTypeDto } from './dtos/create-offer-types.dto';
+import { CreateOfferDto } from './dtos/create-offer.dto';
 
 @Controller('offers')
-@ApiTags('Offers')
+@ApiTags('Offers Type')
 export class OffersController {
   constructor(private readonly offersService: OffersService) {}
   @Post('types')
@@ -46,6 +48,17 @@ export class OffersController {
   async updateOfferType(@Body() body: OfferTypeDto, @Param('id') id: string) {
     return this.offersService.updateOfferType(id, body);
   }
+  @Delete(':id/types')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
+  @ApiOkResponse()
+  @ApiBearerAuth()
+  @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  async deleteOfferType(@Param('id') id: string) {
+    return this.offersService.deleteOfferType(id);
+  }
+
   @Get('types')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @hasRoles(UserRoles.ADMIN)
@@ -72,5 +85,56 @@ export class OffersController {
   @ApiOkResponse()
   async getOffersByType(@Param('id') id: string) {
     return this.offersService.getOffersByType(id);
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
+  @ApiBearerAuth()
+  @ApiCreatedResponse()
+  @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  async createOffer(@Body() body: CreateOfferDto) {
+    return this.offersService.createOffer(body);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
+  @ApiBearerAuth()
+  @ApiCreatedResponse()
+  @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  async getAllOffers() {
+    return this.offersService.getAllOffers();
+  }
+  @Get('place-offers')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN, UserRoles.USER)
+  @ApiBearerAuth()
+  @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  async getPlaceOffers() {
+    return this.offersService.getPlaceOffers();
+  }
+  @Get('product-offers')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN, UserRoles.USER)
+  @ApiBearerAuth()
+  @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  async getProductOffers() {
+    return this.offersService.getProductOffers();
+  }
+
+  @Delete()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
+  @ApiBearerAuth()
+  @ApiOkResponse()
+  @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  async deleteOffer(@Param('id') id: string) {
+    return this.offersService.deleteOffer(id);
   }
 }

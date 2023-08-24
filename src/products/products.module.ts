@@ -19,5 +19,6 @@ import { LikesModule } from 'src/likes/likes.module';
   ],
   controllers: [ProductsController],
   providers: [ProductsService, UsersService, MessagesService],
+  exports: [ProductsService],
 })
 export class ProductsModule {}

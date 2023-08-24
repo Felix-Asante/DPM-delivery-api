@@ -30,5 +30,6 @@ import { LikesModule } from 'src/likes/likes.module';
     FilesService,
     ProductsCategoryService,
   ],
+  exports: [PlacesService],
 })
 export class PlacesModule {}
