@@ -18,3 +18,7 @@ export enum OffersTypes {
   PLACE_OFFER = 'place_offer',
   PRODUCT_OFFER = 'product_offer',
 }
+export enum PaymentMethodTypes {
+  MOBILE_MONEY = 'Mobile_Money',
+  BANK = 'Bank',
+}
