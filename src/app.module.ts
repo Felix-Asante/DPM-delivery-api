@@ -17,6 +17,7 @@ import { ProductsModule } from './products/products.module';
 import { LikesModule } from './likes/likes.module';
 import { OffersModule } from './offers/offers.module';
 import { OfferTypes } from './offers/entities/offer-type.entity';
+import { PaymentTypeModule } from './payment-type/payment-type.module';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -39,6 +40,7 @@ import { OfferTypes } from './offers/entities/offer-type.entity';
     ProductsModule,
     LikesModule,
     OffersModule,
+    PaymentTypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

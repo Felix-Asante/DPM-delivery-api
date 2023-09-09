@@ -25,7 +25,7 @@ import { OfferTypeDto } from './dtos/create-offer-types.dto';
 import { CreateOfferDto } from './dtos/create-offer.dto';
 
 @Controller('offers')
-@ApiTags('Offers Type')
+@ApiTags('Offers Type / Offers')
 export class OffersController {
   constructor(private readonly offersService: OffersService) {}
   @Post('types')
@@ -127,7 +127,7 @@ export class OffersController {
     return this.offersService.getProductOffers();
   }
 
-  @Delete()
+  @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
   @ApiBearerAuth()
