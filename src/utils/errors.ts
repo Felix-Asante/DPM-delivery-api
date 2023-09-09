@@ -69,5 +69,8 @@ export const ERRORS = {
     EXIST: {
       EN: 'Payment type with this name already exists',
     },
+    DOES_NOT_EXIST: {
+      EN: "payment type doesn't exist",
+    },
   },
 };

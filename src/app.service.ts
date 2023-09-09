@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from './users/entities/role.entity';
 import { Repository } from 'typeorm';
-import { OffersTypes, UserRoles } from './utils/enums';
+import { OffersTypes, PaymentMethodTypes, UserRoles } from './utils/enums';
 import { OfferTypes } from './offers/entities/offer-type.entity';
+import { PaymentTypeService } from './payment-type/payment-type.service';
 
 @Injectable()
 export class AppService {
@@ -12,6 +13,7 @@ export class AppService {
     private readonly rolesRepository: Repository<Role>,
     @InjectRepository(OfferTypes)
     private readonly offerTypesRepository: Repository<OfferTypes>,
+    private readonly paymentTypeService: PaymentTypeService,
   ) {}
   async onModuleInit() {
     try {
@@ -37,6 +39,14 @@ export class AppService {
         });
         await placeOffer.save();
         await productOffer.save();
+      }
+
+      const paymentMethodTypes = await this.paymentTypeService.findAll();
+      if (!paymentMethodTypes.length) {
+        await this.paymentTypeService.create({
+          name: PaymentMethodTypes.MOBILE_MONEY,
+        });
+        await this.paymentTypeService.create({ name: PaymentMethodTypes.BANK });
       }
     } catch (error) {
       console.log(error);

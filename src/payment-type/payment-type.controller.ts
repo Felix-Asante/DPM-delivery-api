@@ -12,10 +12,12 @@ import { PaymentTypeService } from './payment-type.service';
 import { CreatePaymentTypeDto } from './dto/create-payment-type.dto';
 import { UpdatePaymentTypeDto } from './dto/update-payment-type.dto';
 import {
+  ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiOkResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { UserRoles } from 'src/utils/enums';
@@ -23,6 +25,8 @@ import { JwtAuthGuard } from 'src/auth/guards/jwtAuth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('payment-type')
+@ApiTags('Payment method types')
+@ApiBearerAuth()
 export class PaymentTypeController {
   constructor(private readonly paymentTypeService: PaymentTypeService) {}
 

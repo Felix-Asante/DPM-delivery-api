@@ -1,7 +1,8 @@
 import { AbstractEntity } from 'src/entities/abstract.entity';
-import { Column } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
+@Entity('paymentmethodtypes')
 export class PaymentType extends AbstractEntity {
-  @Column()
+  @Column({ unique: true })
   name: string;
 }

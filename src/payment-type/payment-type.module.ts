@@ -9,5 +9,6 @@ import { UsersModule } from 'src/users/users.module';
   imports: [TypeOrmModule.forFeature([PaymentType]), UsersModule],
   controllers: [PaymentTypeController],
   providers: [PaymentTypeService],
+  exports: [PaymentTypeService],
 })
 export class PaymentTypeModule {}

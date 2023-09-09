@@ -18,7 +18,7 @@ export class PaymentTypeService {
   ) {}
   async create({ name }: CreatePaymentTypeDto) {
     try {
-      const type = this.findTypeByName(name);
+      const type = await this.findTypeByName(name);
       if (type) throw new ConflictException(ERRORS.PAYMENT_TYPE.EXIST.EN);
       const newType = this.paymentTypeRepository.create({ name });
       return await newType.save();
@@ -63,7 +63,7 @@ export class PaymentTypeService {
     try {
       const paymentType = await this.findTypeById(id);
       if (!paymentType) {
-        throw new BadRequestException();
+        throw new BadRequestException(ERRORS.PAYMENT_TYPE.DOES_NOT_EXIST.EN);
       }
       paymentType.name = name;
       return await paymentType.save();
@@ -75,6 +75,10 @@ export class PaymentTypeService {
 
   async remove(id: string) {
     try {
+      const paymentType = await this.findTypeById(id);
+      if (!paymentType) {
+        throw new BadRequestException(ERRORS.PAYMENT_TYPE.DOES_NOT_EXIST.EN);
+      }
       const results = await this.paymentTypeRepository.delete({ id });
       if (!results.affected) {
         return { success: false };
