@@ -64,4 +64,10 @@ export const ERRORS = {
       EN: 'Offer not found',
     },
   },
+
+  PAYMENT_TYPE: {
+    EXIST: {
+      EN: 'Payment type with this name already exists',
+    },
+  },
 };
