@@ -9,6 +9,7 @@ import {
   UploadedFile,
   UseGuards,
   Put,
+  Query,
 } from '@nestjs/common';
 import { PaymentmethodService } from './paymentmethod.service';
 import { CreatePaymentmethodDto } from './dto/create-paymentmethod.dto';
@@ -23,6 +24,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -30,7 +32,7 @@ import { imageFileFilter } from 'src/utils/helpers';
 import { JwtAuthGuard } from 'src/auth/guards/jwtAuth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { hasRoles } from 'src/auth/decorators/roles.decorator';
-import { UserRoles } from 'src/utils/enums';
+import { PaymentMethodTypes, UserRoles } from 'src/utils/enums';
 
 @Controller('paymentmethod')
 @ApiTags('payment methods')
@@ -60,8 +62,13 @@ export class PaymentmethodController {
   }
 
   @Get()
-  findAll() {
-    return this.paymentmethodService.findAll();
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    enum: [PaymentMethodTypes.MOBILE_MONEY, PaymentMethodTypes.BANK],
+  })
+  findAll(@Query('type') type: string) {
+    return this.paymentmethodService.findAll(type ?? '');
   }
 
   @Get(':id')
