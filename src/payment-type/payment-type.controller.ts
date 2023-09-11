@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Put,
 } from '@nestjs/common';
 import { PaymentTypeService } from './payment-type.service';
 import { CreatePaymentTypeDto } from './dto/create-payment-type.dto';
@@ -58,7 +59,16 @@ export class PaymentTypeController {
     return this.paymentTypeService.findTypeById(id);
   }
 
-  @Patch(':id')
+  @Get(':id/payment-methods')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
+  @ApiForbiddenResponse()
+  @ApiOkResponse()
+  findPaymentMethodsByType(@Param('id') id: string) {
+    return this.paymentTypeService.findPaymentMethodByType(id);
+  }
+
+  @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @hasRoles(UserRoles.ADMIN)
   @ApiForbiddenResponse()
