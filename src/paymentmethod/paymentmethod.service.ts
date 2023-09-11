@@ -63,8 +63,15 @@ export class PaymentmethodService {
     });
   }
 
-  findAll() {
+  findAll(type?: string) {
     return tryCatch(async () => {
+      console.log('first', type);
+      if (type) {
+        const methods = await this.paymentMethodRepository.find({
+          where: { type: { name: type } },
+        });
+        return methods;
+      }
       const paymentMethods = await this.paymentMethodRepository.find();
       return paymentMethods;
     });
