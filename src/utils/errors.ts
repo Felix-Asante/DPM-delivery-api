@@ -73,4 +73,12 @@ export const ERRORS = {
       EN: "payment type doesn't exist",
     },
   },
+  PAYMENT_METHOD: {
+    DOES_NOT_EXIST: {
+      EN: "payment method doesn't exist",
+    },
+    ADD: {
+      EN: ' Specify Mobile_money provider code',
+    },
+  },
 };

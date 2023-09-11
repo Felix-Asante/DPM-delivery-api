@@ -71,3 +71,12 @@ function calculateDistance(place: Place, reference: IDistance): number {
 
   return convertDistance(d, 'km');
 }
+
+export async function tryCatch<T>(cb: any): Promise<T> {
+  try {
+    return await cb();
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
