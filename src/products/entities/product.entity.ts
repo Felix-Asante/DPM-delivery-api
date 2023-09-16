@@ -1,3 +1,4 @@
+import { Booking } from 'src/bookings/entities/booking.entity';
 import { AbstractEntity } from 'src/entities/abstract.entity';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { ProductsCategory } from 'src/products-category/entities/products-category.entity';
@@ -28,4 +29,6 @@ export class Products extends AbstractEntity {
     },
   )
   productCategory: ProductsCategory;
+  @OneToMany(() => Booking, (booking) => booking.place, { onDelete: 'CASCADE' })
+  bookings: Booking;
 }

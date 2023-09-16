@@ -22,3 +22,8 @@ export enum PaymentMethodTypes {
   MOBILE_MONEY = 'Mobile_Money',
   BANK = 'Bank',
 }
+export enum BookingState {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELLED = 'cancelled',
+}

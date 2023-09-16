@@ -81,4 +81,15 @@ export const ERRORS = {
       EN: ' Specify Mobile_money provider code',
     },
   },
+  BOOKINGS: {
+    NOT_FOUND: {
+      EN: 'booking not found',
+    },
+    FAILED: {
+      EN: 'Failed to delete booking',
+    },
+    UNAUTHORIZED: {
+      EN: 'Unauthorized!!, you cannot access this booking',
+    },
+  },
 };

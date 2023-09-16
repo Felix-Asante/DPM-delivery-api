@@ -2,9 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from './users/entities/role.entity';
 import { Repository } from 'typeorm';
-import { OffersTypes, PaymentMethodTypes, UserRoles } from './utils/enums';
+import {
+  BookingState,
+  OffersTypes,
+  PaymentMethodTypes,
+  UserRoles,
+} from './utils/enums';
 import { OfferTypes } from './offers/entities/offer-type.entity';
 import { PaymentTypeService } from './payment-type/payment-type.service';
+import { BookingStatus } from './bookings/entities/booking-status.entity';
 
 @Injectable()
 export class AppService {
@@ -13,6 +19,8 @@ export class AppService {
     private readonly rolesRepository: Repository<Role>,
     @InjectRepository(OfferTypes)
     private readonly offerTypesRepository: Repository<OfferTypes>,
+    @InjectRepository(BookingStatus)
+    private readonly bookingStatusRepository: Repository<BookingStatus>,
     private readonly paymentTypeService: PaymentTypeService,
   ) {}
   async onModuleInit() {
@@ -47,6 +55,15 @@ export class AppService {
           name: PaymentMethodTypes.MOBILE_MONEY,
         });
         await this.paymentTypeService.create({ name: PaymentMethodTypes.BANK });
+      }
+
+      const bookingStatus = await this.bookingStatusRepository.find();
+      if (!bookingStatus.length) {
+        const status = Object.values(BookingState);
+        status.forEach(async (status) => {
+          const state = this.bookingStatusRepository.create({ label: status });
+          await state.save();
+        });
       }
     } catch (error) {
       console.log(error);

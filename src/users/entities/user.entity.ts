@@ -5,11 +5,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
 } from 'typeorm';
 import { Role } from './role.entity';
 import * as bcrypt from 'bcrypt';
 import { Place } from 'src/places/entities/place.entity';
+import { Booking } from 'src/bookings/entities/booking.entity';
 
 @Entity('users')
 export class User extends AbstractEntity {
@@ -39,6 +41,8 @@ export class User extends AbstractEntity {
 
   @ManyToOne(() => Role, (role) => role.user)
   role: Role;
+  @OneToMany(() => Booking, (booking) => booking.user, { onDelete: 'CASCADE' })
+  bookings: Booking;
 
   @OneToOne(() => Place, { onDelete: 'CASCADE', eager: true })
   @JoinColumn()

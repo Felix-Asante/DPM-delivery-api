@@ -7,8 +7,8 @@ import { convertDistance, getPreciseDistance } from 'geolib';
 import { Place } from 'src/places/entities/place.entity';
 import { IDistance } from './interface';
 
-export const generateOtpCode = () => {
-  return crypto.randomInt(100000, 999999).toString().slice(0, 4);
+export const generateOtpCode = (length = 4) => {
+  return crypto.randomInt(100000, 999999).toString().slice(0, length);
 };
 
 export const generateExpiryDate = () => {
