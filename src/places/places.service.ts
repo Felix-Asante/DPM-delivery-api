@@ -220,14 +220,16 @@ export class PlacesService {
     }
   }
 
-  async findPlaceById(id: string) {
+  async findPlaceById(id: string, visit = true) {
     try {
       const place = await this.placeRepository.findOneBy({ id });
       if (!place) {
-        return new NotFoundException(ERRORS.PLACES.NOT_FOUND);
+        throw new NotFoundException(ERRORS.PLACES.NOT_FOUND);
       }
-      const visits = place.visits;
-      place.visits = visits + 1;
+      if (visit) {
+        const visits = place.visits;
+        place.visits = visits + 1;
+      }
       return await place.save();
     } catch (error) {
       console.log(error);

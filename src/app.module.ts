@@ -19,12 +19,14 @@ import { OffersModule } from './offers/offers.module';
 import { OfferTypes } from './offers/entities/offer-type.entity';
 import { PaymentTypeModule } from './payment-type/payment-type.module';
 import { PaymentmethodModule } from './paymentmethod/paymentmethod.module';
+import { BookingsModule } from './bookings/bookings.module';
+import { BookingStatus } from './bookings/entities/booking-status.entity';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       useClass: DatabaseConnectionService,
     }),
-    TypeOrmModule.forFeature([Role, OfferTypes]),
+    TypeOrmModule.forFeature([Role, OfferTypes, BookingStatus]),
     ConfigModule.forRoot({ isGlobal: true }),
     JwtModule.register({
       global: true,
@@ -43,6 +45,7 @@ import { PaymentmethodModule } from './paymentmethod/paymentmethod.module';
     OffersModule,
     PaymentTypeModule,
     PaymentmethodModule,
+    BookingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
