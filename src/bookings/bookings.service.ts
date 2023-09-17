@@ -49,9 +49,7 @@ export class BookingsService {
       newBooking.amount = amount * quantity;
       newBooking.quantity = quantity;
 
-      const pendingBooking = await this.bookingStatusRepository.findOne({
-        where: { label: BookingState.PENDING },
-      });
+      const pendingBooking = await this.getBookingStatus(BookingState.PENDING);
       newBooking.status = pendingBooking;
 
       const user = await this.userService.findUserByPhone(userPhone);
@@ -73,8 +71,14 @@ export class BookingsService {
     });
   }
 
-  findAll() {
+  findAll(status?: string) {
     return tryCatch<Booking>(async () => {
+      if (status) {
+        const bookings = await this.bookingRepository.find({
+          where: { status: { label: status } },
+        });
+        return bookings;
+      }
       const bookings = await this.bookingRepository.find();
       return bookings;
     });
@@ -89,12 +93,44 @@ export class BookingsService {
     });
   }
 
+  getBookingStatus(label: string) {
+    return tryCatch<BookingStatus>(async () => {
+      const status = await this.bookingStatusRepository.findOne({
+        where: { label },
+      });
+      if (!status) {
+        throw new NotFoundException(`Invalid booking status: ${label}`);
+      }
+      return status;
+    });
+  }
+
   findPlaceBookings(id: string) {
     return tryCatch(async () => {
       const placeBookings = await this.bookingRepository.find({
         where: { place: { id } },
       });
       return placeBookings;
+    });
+  }
+
+  changeBookingStatus(id: string, status: string, user: User) {
+    return tryCatch(async () => {
+      const [booking, bookingStatus] = await Promise.all([
+        this.findBookingById(id),
+        this.getBookingStatus(status),
+      ]);
+      if (user.role.name === UserRoles.USER && booking.user.id !== user.id) {
+        throw new ForbiddenException();
+      }
+      if (
+        user.role.name === UserRoles.PLACE_ADMIN &&
+        booking.place.id !== user.adminFor.id
+      ) {
+        throw new ForbiddenException();
+      }
+      booking.status = bookingStatus;
+      return await booking.save();
     });
   }
   remove(id: string, user: User) {

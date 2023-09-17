@@ -26,4 +26,5 @@ export enum BookingState {
   PENDING = 'pending',
   CONFIRMED = 'confirmed',
   CANCELLED = 'cancelled',
+  REJECTED = 'rejected',
 }
