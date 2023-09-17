@@ -10,10 +10,11 @@ import { UsersService } from 'src/users/users.service';
 import { MessagesService } from 'src/messages/messages.service';
 import { Role } from 'src/users/entities/role.entity';
 import { LikesModule } from 'src/likes/likes.module';
+import { Booking } from 'src/bookings/entities/booking.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Products, ProductsCategory, User, Role]),
+    TypeOrmModule.forFeature([Products, ProductsCategory, User, Role, Booking]),
     FilesModule,
     LikesModule,
   ],

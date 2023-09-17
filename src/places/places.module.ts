@@ -14,10 +14,18 @@ import { FilesModule } from 'src/files/files.module';
 import { ProductsCategoryService } from 'src/products-category/products-category.service';
 import { ProductsCategory } from 'src/products-category/entities/products-category.entity';
 import { LikesModule } from 'src/likes/likes.module';
+import { Booking } from 'src/bookings/entities/booking.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Place, Role, User, Category, ProductsCategory]),
+    TypeOrmModule.forFeature([
+      Place,
+      Role,
+      User,
+      Category,
+      ProductsCategory,
+      Booking,
+    ]),
     FilesModule,
     LikesModule,
   ],

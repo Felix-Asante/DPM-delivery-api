@@ -3,18 +3,22 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { LikesService } from 'src/likes/likes.service';
+import { MessagesService } from 'src/messages/messages.service';
+import { BookingState, CodeUseCases, UserRoles } from 'src/utils/enums';
+import { ERRORS } from 'src/utils/errors';
+import {
+  generateExpiryDate,
+  generateOtpCode,
+  tryCatch,
+} from 'src/utils/helpers';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
-import { ERRORS } from 'src/utils/errors';
 import { Role } from './entities/role.entity';
-import { CodeUseCases, UserRoles } from 'src/utils/enums';
-import { generateExpiryDate, generateOtpCode } from 'src/utils/helpers';
-import { MessagesService } from 'src/messages/messages.service';
-import { JwtService } from '@nestjs/jwt';
-import { LikesService } from 'src/likes/likes.service';
+import { User } from './entities/user.entity';
+import { Booking } from 'src/bookings/entities/booking.entity';
 
 @Injectable()
 export class UsersService {
@@ -25,7 +29,8 @@ export class UsersService {
     private readonly roleRepository: Repository<Role>,
     private readonly messageService: MessagesService,
     private readonly likeService: LikesService,
-    private readonly jwtService: JwtService,
+    @InjectRepository(Booking)
+    private readonly bookingRepository: Repository<Booking>,
   ) {}
   async create(createUserDto: CreateUserDto, isPlaceAdmin = false) {
     const user = await this.userRepository.findOne({
@@ -64,8 +69,21 @@ export class UsersService {
     return savedUser;
   }
 
+  findUserBookings(status: string = BookingState.CONFIRMED, { id }: User) {
+    return tryCatch(async () => {
+      const bookings = await this.bookingRepository.find({
+        where: { user: { id }, status: { label: status } },
+      });
+      return bookings;
+    });
+  }
   findAll() {
-    return `This action returns all users`;
+    return tryCatch(async () => {
+      const users = await this.userRepository.find({
+        where: { role: { name: UserRoles.USER } },
+      });
+      return users;
+    });
   }
 
   async findLikes(id: string) {

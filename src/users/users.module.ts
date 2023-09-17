@@ -6,9 +6,10 @@ import { User } from './entities/user.entity';
 import { Role } from './entities/role.entity';
 import { MessagesService } from 'src/messages/messages.service';
 import { LikesModule } from 'src/likes/likes.module';
+import { Booking } from 'src/bookings/entities/booking.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Role]), LikesModule],
+  imports: [TypeOrmModule.forFeature([User, Role, Booking]), LikesModule],
   controllers: [UsersController],
   providers: [UsersService, MessagesService],
   exports: [UsersService],
