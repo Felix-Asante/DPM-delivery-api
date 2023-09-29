@@ -4,11 +4,24 @@ import { IsInt, IsNumber, IsString } from 'class-validator';
 export class CreateBookingDto {
   @IsString()
   @ApiProperty()
-  place: string;
+  place: string[];
 
   @IsString()
   @ApiPropertyOptional()
-  product: string;
+  services: {
+    product: string;
+    quantity: number;
+    price: number;
+    place: string;
+  }[];
+
+  @IsNumber()
+  @ApiPropertyOptional()
+  quantity: number;
+
+  @IsInt()
+  @ApiPropertyOptional()
+  price: number;
 
   @IsInt()
   @ApiPropertyOptional()
@@ -27,10 +40,6 @@ export class CreateBookingDto {
   transaction_id: string;
 
   @IsInt()
-  @ApiProperty()
-  quantity: number;
-
-  @IsInt()
-  @ApiProperty()
-  amount: number;
+  @ApiPropertyOptional()
+  total_amount: number;
 }

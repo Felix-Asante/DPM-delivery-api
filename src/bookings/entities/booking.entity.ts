@@ -9,13 +9,14 @@ import { Products } from 'src/products/entities/product.entity';
 @Entity('bookings')
 export class Booking extends AbstractEntity {
   @Column()
-  amount: number;
+  total_amount: number;
+  @Column({ default: 0 })
+  quantity: number;
+  @Column({ default: 0 })
+  price: number;
 
   @Column({ default: 0 })
   rider_tip: number;
-
-  @Column()
-  quantity: number;
 
   @Column()
   recipient_address: string;
@@ -36,17 +37,16 @@ export class Booking extends AbstractEntity {
   user: User;
 
   @ManyToOne(() => Place, (place) => place.bookings, { eager: true })
-  place: Place;
+  place: Place[];
 
-  @ManyToOne(() => Products, (products) => products.bookings, {
-    eager: true,
-    nullable: true,
-  })
-  product: Products;
-
-  @BeforeInsert()
-  generateReferenceCode() {
-    const code = generateOtpCode(8);
-    this.reference_code = `BK-${code}`;
-  }
+  services: {
+    //   @ManyToOne(() => Products, (products) => products.bookings, {
+    //   eager: true,
+    //   nullable: true,
+    // })
+    product: Products;
+    quantity: number;
+    price: number;
+    place: string;
+  }[];
 }

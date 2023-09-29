@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { BookingState, UserRoles } from 'src/utils/enums';
 import { ERRORS } from 'src/utils/errors';
-import { tryCatch } from 'src/utils/helpers';
+import { generateOtpCode, tryCatch } from 'src/utils/helpers';
 import { Repository } from 'typeorm';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { Booking } from './entities/booking.entity';
@@ -28,46 +28,65 @@ export class BookingsService {
     private readonly productsService: ProductsService,
     private readonly userService: UsersService,
   ) {}
-  create(
-    {
-      place: placeId,
-      product: productId,
-      rider_tip,
-      delivery_address,
-      recipient_phone,
-      transaction_id,
-      quantity,
-      amount,
-    }: CreateBookingDto,
-    { phone: userPhone }: User,
-  ) {
+  create(bookings: CreateBookingDto, { phone: userPhone }: User) {
     return tryCatch<Booking>(async () => {
+      const reference = `DPM-BK-${generateOtpCode(8)}`;
+
+      const {
+        place: places,
+        services,
+        rider_tip,
+        delivery_address,
+        recipient_phone,
+        transaction_id,
+        quantity,
+        total_amount,
+      } = bookings;
+
       const newBooking = new Booking();
+
       newBooking.recipient_address = delivery_address;
       newBooking.recipient_phone = recipient_phone;
       newBooking.transaction_id = transaction_id;
-      newBooking.amount = amount * quantity;
+      newBooking.total_amount = total_amount;
       newBooking.quantity = quantity;
+      newBooking.reference_code = reference;
 
-      const pendingBooking = await this.getBookingStatus(BookingState.PENDING);
+      const pendingBooking = await this.getBookingByStatus(
+        BookingState.PENDING,
+      );
+
       newBooking.status = pendingBooking;
 
       const user = await this.userService.findUserByPhone(userPhone);
       newBooking.user = user;
 
-      const place = await this.placeService.findPlaceById(placeId, false);
-      if (place) {
-        newBooking.place = place;
-      }
-      if (productId) {
-        const product = await this.productsService.findProductById(productId);
-        newBooking.product = product;
+      const reservedPlaces = await Promise.all(
+        places.map((place) => this.placeService.findPlaceById(place, false)),
+      );
+
+      newBooking.place = reservedPlaces;
+
+      if (services.length) {
+        const reservedProducts: any[] = await Promise.all(
+          services.map(async (service) => {
+            const product = await this.productsService.findProductById(
+              service.product,
+            );
+
+            return new Promise((resolve) => {
+              resolve({ product, ...service });
+            });
+          }),
+        );
+        console.log('first', reservedProducts);
+        newBooking.services = reservedProducts;
       }
       if (rider_tip) {
         newBooking.rider_tip = rider_tip;
       }
 
-      return await newBooking.save();
+      await newBooking.save();
     });
   }
 
@@ -93,7 +112,7 @@ export class BookingsService {
     });
   }
 
-  getBookingStatus(label: string) {
+  getBookingByStatus(label: string) {
     return tryCatch<BookingStatus>(async () => {
       const status = await this.bookingStatusRepository.findOne({
         where: { label },
@@ -102,6 +121,17 @@ export class BookingsService {
         throw new NotFoundException(`Invalid booking status: ${label}`);
       }
       return status;
+    });
+  }
+  getBookingByTransactionId(transactionId: string) {
+    return tryCatch<Booking>(async () => {
+      const booking = await this.bookingRepository.findOne({
+        where: { transaction_id: transactionId },
+      });
+      if (!booking) {
+        throw new NotFoundException(ERRORS.BOOKINGS.NOT_FOUND.EN);
+      }
+      return booking;
     });
   }
 
@@ -118,14 +148,14 @@ export class BookingsService {
     return tryCatch(async () => {
       const [booking, bookingStatus] = await Promise.all([
         this.findBookingById(id),
-        this.getBookingStatus(status),
+        this.getBookingByStatus(status),
       ]);
       if (user.role.name === UserRoles.USER && booking.user.id !== user.id) {
         throw new ForbiddenException();
       }
       if (
         user.role.name === UserRoles.PLACE_ADMIN &&
-        booking.place.id !== user.adminFor.id
+        booking.place.some((p) => p.id === user.adminFor.id)
       ) {
         throw new ForbiddenException();
       }
