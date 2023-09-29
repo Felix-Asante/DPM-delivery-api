@@ -10,10 +10,18 @@ import { MessagesService } from 'src/messages/messages.service';
 import { Place } from 'src/places/entities/place.entity';
 import { LikesModule } from 'src/likes/likes.module';
 import { Booking } from 'src/bookings/entities/booking.entity';
+import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ProductsCategory, Role, User, Place, Booking]),
+    TypeOrmModule.forFeature([
+      ProductsCategory,
+      Role,
+      User,
+      Place,
+      Booking,
+      BookingStatus,
+    ]),
     LikesModule,
   ],
   controllers: [ProductsCategoryController],

@@ -15,6 +15,7 @@ import { ProductsCategoryService } from 'src/products-category/products-category
 import { ProductsCategory } from 'src/products-category/entities/products-category.entity';
 import { LikesModule } from 'src/likes/likes.module';
 import { Booking } from 'src/bookings/entities/booking.entity';
+import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { Booking } from 'src/bookings/entities/booking.entity';
       Category,
       ProductsCategory,
       Booking,
+      BookingStatus,
     ]),
     FilesModule,
     LikesModule,

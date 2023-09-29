@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -19,6 +20,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from './entities/role.entity';
 import { User } from './entities/user.entity';
 import { Booking } from 'src/bookings/entities/booking.entity';
+import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
 
 @Injectable()
 export class UsersService {
@@ -31,6 +33,8 @@ export class UsersService {
     private readonly likeService: LikesService,
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
+    @InjectRepository(BookingStatus)
+    private readonly bookingStatusRepository: Repository<BookingStatus>,
   ) {}
   async create(createUserDto: CreateUserDto, isPlaceAdmin = false) {
     const user = await this.userRepository.findOne({
@@ -71,10 +75,15 @@ export class UsersService {
 
   findUserBookings(status: string = BookingState.CONFIRMED, { id }: User) {
     return tryCatch(async () => {
-      const bookings = await this.bookingRepository.find({
-        where: { user: { id }, status: { label: status } },
+      const bookingStatus = await this.bookingStatusRepository.findOne({
+        where: { label: status },
       });
-      return bookings;
+      if (!bookingStatus) {
+        throw new BadRequestException('Invalid booking status');
+      }
+      return await this.bookingRepository.find({
+        where: { user: { id }, status: { id: bookingStatus.id } },
+      });
     });
   }
   findAll() {
