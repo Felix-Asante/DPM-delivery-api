@@ -152,6 +152,7 @@ export class PlacesService {
   async getAllPlaces() {
     try {
       const places = await this.placeRepository.find();
+      await this.filesService.createBookingReceipt();
       return places;
     } catch (error) {
       console.log(error);
