@@ -7,11 +7,12 @@ import { Booking } from './entities/booking.entity';
 import { ProductsModule } from 'src/products/products.module';
 import { PlacesModule } from 'src/places/places.module';
 import { BookingStatus } from './entities/booking-status.entity';
+import { OrderedProducts } from 'src/products/entities/ordered-product.entity';
 
 @Module({
   imports: [
     UsersModule,
-    TypeOrmModule.forFeature([Booking, BookingStatus]),
+    TypeOrmModule.forFeature([Booking, BookingStatus, OrderedProducts]),
     UsersModule,
     ProductsModule,
     PlacesModule,

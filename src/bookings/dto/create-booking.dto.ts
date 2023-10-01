@@ -1,12 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsNumber, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsInt,
+  IsNumber,
+  IsPhoneNumber,
+  IsString,
+} from 'class-validator';
 
 export class CreateBookingDto {
-  @IsString()
+  @IsArray()
   @ApiProperty()
   place: string[];
 
-  @IsString()
+  @IsArray()
   @ApiPropertyOptional()
   services: {
     product: string;
@@ -15,7 +21,7 @@ export class CreateBookingDto {
     place: string;
   }[];
 
-  @IsNumber()
+  @IsInt()
   @ApiPropertyOptional()
   quantity: number;
 
@@ -31,7 +37,7 @@ export class CreateBookingDto {
   @ApiProperty()
   delivery_address: string;
 
-  @IsString()
+  @IsPhoneNumber('GH')
   @ApiProperty()
   recipient_phone: string;
 

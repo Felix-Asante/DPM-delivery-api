@@ -1,10 +1,17 @@
 import { AbstractEntity } from 'src/entities/abstract.entity';
-import { generateOtpCode } from 'src/utils/helpers';
-import { BeforeInsert, Column, Entity, ManyToOne } from 'typeorm';
-import { BookingStatus } from './booking-status.entity';
-import { User } from 'src/users/entities/user.entity';
 import { Place } from 'src/places/entities/place.entity';
 import { Products } from 'src/products/entities/product.entity';
+import { User } from 'src/users/entities/user.entity';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
+import { BookingStatus } from './booking-status.entity';
+import { OrderedProducts } from 'src/products/entities/ordered-product.entity';
 
 @Entity('bookings')
 export class Booking extends AbstractEntity {
@@ -36,17 +43,16 @@ export class Booking extends AbstractEntity {
   @ManyToOne(() => User, (user) => user.bookings, { eager: true })
   user: User;
 
-  @ManyToOne(() => Place, (place) => place.bookings, { eager: true })
+  @ManyToMany(() => Place, (place) => place.bookings, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   place: Place[];
 
-  services: {
-    //   @ManyToOne(() => Products, (products) => products.bookings, {
-    //   eager: true,
-    //   nullable: true,
-    // })
-    product: Products;
-    quantity: number;
-    price: number;
-    place: string;
-  }[];
+  @OneToMany(
+    () => OrderedProducts,
+    (orderedProduct) => orderedProduct.booking,
+    { eager: true, onDelete: 'CASCADE' },
+  )
+  services: OrderedProducts[];
 }
