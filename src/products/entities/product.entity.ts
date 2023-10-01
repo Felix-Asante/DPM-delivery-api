@@ -3,6 +3,7 @@ import { AbstractEntity } from 'src/entities/abstract.entity';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { ProductsCategory } from 'src/products-category/entities/products-category.entity';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { OrderedProducts } from './ordered-product.entity';
 
 @Entity('products')
 export class Products extends AbstractEntity {
@@ -29,6 +30,9 @@ export class Products extends AbstractEntity {
     },
   )
   productCategory: ProductsCategory;
-  @OneToMany(() => Booking, (booking) => booking.place, { onDelete: 'CASCADE' })
-  bookings: Booking;
+  // @OneToMany(() => Booking, (booking) => booking.place, { onDelete: 'CASCADE' })
+  // bookings: Booking;
+
+  @OneToMany(() => OrderedProducts, (orders) => orders.product)
+  orders: OrderedProducts[];
 }

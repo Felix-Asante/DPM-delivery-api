@@ -10,6 +10,8 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
 } from 'typeorm';
@@ -58,7 +60,8 @@ export class Place extends AbstractEntity {
   @OneToMany(() => Offer, (offer) => offer.product, {
     onDelete: 'CASCADE',
   })
-  @OneToMany(() => Booking, (booking) => booking.place, { onDelete: 'CASCADE' })
+  @ManyToMany(() => Booking, (booking) => booking.place)
+  @JoinTable()
   bookings: Booking;
 
   offers: Offer;

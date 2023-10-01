@@ -16,6 +16,7 @@ import { PlacesService } from 'src/places/places.service';
 import { ProductsService } from 'src/products/products.service';
 import { UsersService } from 'src/users/users.service';
 import { BookingStatus } from './entities/booking-status.entity';
+import { OrderedProducts } from 'src/products/entities/ordered-product.entity';
 
 @Injectable()
 export class BookingsService {
@@ -24,10 +25,13 @@ export class BookingsService {
     private readonly bookingRepository: Repository<Booking>,
     @InjectRepository(BookingStatus)
     private readonly bookingStatusRepository: Repository<BookingStatus>,
+    @InjectRepository(OrderedProducts)
+    private readonly orderedProductRepository: Repository<OrderedProducts>,
     private readonly placeService: PlacesService,
     private readonly productsService: ProductsService,
     private readonly userService: UsersService,
   ) {}
+
   create(bookings: CreateBookingDto, { phone: userPhone }: User) {
     return tryCatch<Booking>(async () => {
       const reference = `DPM-BK-${generateOtpCode(8)}`;
@@ -67,26 +71,30 @@ export class BookingsService {
 
       newBooking.place = reservedPlaces;
 
-      if (services.length) {
-        const reservedProducts: any[] = await Promise.all(
-          services.map(async (service) => {
-            const product = await this.productsService.findProductById(
-              service.product,
-            );
-
-            return new Promise((resolve) => {
-              resolve({ product, ...service });
-            });
-          }),
-        );
-        console.log('first', reservedProducts);
-        newBooking.services = reservedProducts;
-      }
       if (rider_tip) {
         newBooking.rider_tip = rider_tip;
       }
 
-      await newBooking.save();
+      const savedBooking = await newBooking.save();
+
+      if (services.length) {
+        const orderProducts = await Promise.all(
+          services.map(async (service) => {
+            const product = await this.productsService.findProductById(
+              service.product,
+            );
+            const newOrderedProduct = this.orderedProductRepository.create({
+              product,
+              quantity: service.quantity,
+              booking: savedBooking,
+            });
+            return newOrderedProduct;
+          }),
+        );
+
+        await this.orderedProductRepository.save(orderProducts);
+      }
+      return 'booking created successfully!!';
     });
   }
 
