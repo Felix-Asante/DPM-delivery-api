@@ -27,6 +27,10 @@ export class CreateBookingDto {
 
   @IsInt()
   @ApiPropertyOptional()
+  delivery_fee: number;
+
+  @IsInt()
+  @ApiPropertyOptional()
   price: number;
 
   @IsInt()

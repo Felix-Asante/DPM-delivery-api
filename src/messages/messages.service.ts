@@ -14,7 +14,7 @@ export class MessagesService {
     try {
       const smsResponse = await TwilioClient.messages.create({
         body: payload.message,
-        from: this.configService.get('TWILIO_NUMBER'),
+        from: `${this.configService.get('TWILIO_NUMBER')}`,
         to: payload.recipient,
       });
 

@@ -24,6 +24,8 @@ export class Booking extends AbstractEntity {
 
   @Column({ default: 0 })
   rider_tip: number;
+  @Column({ default: 0 })
+  delivery_fee: number;
 
   @Column()
   recipient_address: string;

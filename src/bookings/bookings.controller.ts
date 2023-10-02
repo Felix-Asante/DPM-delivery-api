@@ -62,7 +62,7 @@ export class BookingsController {
   findAll(@Query('status') status: string) {
     return this.bookingsService.findAll(status);
   }
-  @Get('our')
+  @Get('ours')
   @ApiForbiddenResponse()
   @ApiOperation({ summary: '(place admin)' })
   @ApiOkResponse()
@@ -87,8 +87,8 @@ export class BookingsController {
   @ApiBadRequestResponse()
   @ApiForbiddenResponse()
   @ApiOkResponse()
-  @ApiOperation({ summary: '(super admin/place admin/user)' })
-  @hasRoles(UserRoles.ADMIN, UserRoles.USER, UserRoles.PLACE_ADMIN)
+  @ApiOperation({ summary: '(super admin/place admin)' })
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   cancelBooking(
     @Param('id', ParseUUIDPipe) id: string,
@@ -106,7 +106,7 @@ export class BookingsController {
   @ApiForbiddenResponse()
   @ApiOkResponse()
   @ApiOperation({ summary: '(super admin/place admin)' })
-  @hasRoles(UserRoles.ADMIN, UserRoles.USER, UserRoles.PLACE_ADMIN)
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   confirmBooking(
     @Param('id', ParseUUIDPipe) id: string,
@@ -115,6 +115,23 @@ export class BookingsController {
     return this.bookingsService.changeBookingStatus(
       id,
       BookingState.CONFIRMED,
+      user,
+    );
+  }
+  @Put(':id/deliver-booking')
+  @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  @ApiOkResponse()
+  @ApiOperation({ summary: '(super admin/place admin)' })
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  deliverBooking(
+    @Param('id', ParseUUIDPipe) id: string,
+    @currentUser() user: User,
+  ) {
+    return this.bookingsService.changeBookingStatus(
+      id,
+      BookingState.DELIVERED,
       user,
     );
   }

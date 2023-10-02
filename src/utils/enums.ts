@@ -25,6 +25,7 @@ export enum PaymentMethodTypes {
 export enum BookingState {
   PENDING = 'pending',
   CONFIRMED = 'confirmed',
+  DELIVERED = 'delivered',
   CANCELLED = 'cancelled',
   REJECTED = 'rejected',
 }

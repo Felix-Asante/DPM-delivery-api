@@ -8,6 +8,8 @@ import { ProductsModule } from 'src/products/products.module';
 import { PlacesModule } from 'src/places/places.module';
 import { BookingStatus } from './entities/booking-status.entity';
 import { OrderedProducts } from 'src/products/entities/ordered-product.entity';
+import { FilesModule } from 'src/files/files.module';
+import { MessagesService } from 'src/messages/messages.service';
 
 @Module({
   imports: [
@@ -16,9 +18,10 @@ import { OrderedProducts } from 'src/products/entities/ordered-product.entity';
     UsersModule,
     ProductsModule,
     PlacesModule,
+    FilesModule,
   ],
   controllers: [BookingsController],
-  providers: [BookingsService],
+  providers: [BookingsService, MessagesService],
   exports: [BookingsService],
 })
 export class BookingsModule {}
