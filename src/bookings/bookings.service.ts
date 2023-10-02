@@ -17,6 +17,8 @@ import { ProductsService } from 'src/products/products.service';
 import { UsersService } from 'src/users/users.service';
 import { BookingStatus } from './entities/booking-status.entity';
 import { OrderedProducts } from 'src/products/entities/ordered-product.entity';
+import { FilesService } from 'src/files/files.service';
+import { MessagesService } from 'src/messages/messages.service';
 
 @Injectable()
 export class BookingsService {
@@ -30,6 +32,8 @@ export class BookingsService {
     private readonly placeService: PlacesService,
     private readonly productsService: ProductsService,
     private readonly userService: UsersService,
+    private readonly filesService: FilesService,
+    private readonly messageService: MessagesService,
   ) {}
 
   create(bookings: CreateBookingDto, { phone: userPhone }: User) {
@@ -45,6 +49,7 @@ export class BookingsService {
         transaction_id,
         quantity,
         total_amount,
+        delivery_fee,
       } = bookings;
 
       const newBooking = new Booking();
@@ -74,6 +79,9 @@ export class BookingsService {
       if (rider_tip) {
         newBooking.rider_tip = rider_tip;
       }
+      if (delivery_fee) {
+        newBooking.delivery_fee = delivery_fee;
+      }
 
       const savedBooking = await newBooking.save();
 
@@ -94,6 +102,18 @@ export class BookingsService {
 
         await this.orderedProductRepository.save(orderProducts);
       }
+
+      const uploadedPdf: any = await this.filesService.createBookingReceipt({
+        ...bookings,
+        reference,
+        place: reservedPlaces,
+      });
+
+      await this.messageService.sendSmsMessage({
+        recipient: '+212638118002',
+        message: `We have received your booking. Download receipt ${uploadedPdf?.secure_url}`,
+      });
+
       return 'booking created successfully!!';
     });
   }

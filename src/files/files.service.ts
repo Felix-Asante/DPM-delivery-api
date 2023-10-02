@@ -11,6 +11,8 @@ import * as AWS from 'aws-sdk';
 import { ConfigService } from '@nestjs/config';
 import * as PDFDocument from 'pdfkit';
 import { tryCatch } from 'src/utils/helpers';
+import { CreateBookingDto } from 'src/bookings/dto/create-booking.dto';
+import { ICreateBooking } from 'src/utils/interface';
 
 const pdfStartX = 10;
 @Injectable()
@@ -68,6 +70,15 @@ export class FilesService {
     });
   }
 
+  async uploadDocument(document: string) {
+    return new Promise((resolve, reject) => {
+      Cloudinary.uploader.upload(document, {}, (error, result) => {
+        if (error) reject(error);
+        resolve(result);
+      });
+    });
+  }
+
   async deleteImage(publicId: string) {
     try {
       const deletedImage = await Cloudinary.uploader.destroy(publicId);
@@ -78,23 +89,63 @@ export class FilesService {
     }
   }
 
-  async createBookingReceipt() {
+  async createBookingReceipt(booking: ICreateBooking) {
+    const deliveryCost = booking.delivery_fee || 0;
+    const subTotal = booking.total_amount - deliveryCost;
+    const tip = booking?.rider_tip || 0;
+    const itemsInterval = 12;
+    let distance = 164;
     return tryCatch(async () => {
       this.generateBookingReceiptHeader();
       this.generatePdfHr(70);
       this.generateBookingMeta();
       this.generateTableRow('QTY', 'DESCRIPTION', 'AMOUNT', 143);
       this.generatePdfHr(152);
-      this.generateTableRow('1', "Mama's kitchen", '12', 164);
-      this.generatePdfHr(180);
-      this.generateTableRow('SubTotal:', '', '200', 196); // +15
-      this.generateTableRow('Service Fee:', '', '1', 211);
-      this.generateTableRow('Courier Tip:', '', '0', 226);
-      this.generatePdfHr(241);
-      this.generateTableRow('TOTAL', '', '400', 257, 16);
+      booking.place.forEach((place, i) => {
+        distance += itemsInterval * i;
+        this.generateTableRow(
+          '1',
+          place?.name,
+          place?.averagePrice?.toFixed(2)?.toString(),
+          distance,
+        );
+        distance += 12;
+        this.generatePdfHr(distance);
+      });
+      const hasItems = booking.place.length || booking.services.length;
+
+      this.generateTableRow(
+        'SubTotal:',
+        '',
+        subTotal?.toFixed(2)?.toString(),
+        hasItems ? distance + 15 : 196,
+      ); // +15
+      this.generateTableRow(
+        'Delivery Fee:',
+        '',
+        deliveryCost?.toFixed(2)?.toString(),
+        hasItems ? distance + 30 : 211,
+      );
+      this.generateTableRow(
+        'Courier Tip:',
+        '',
+        tip?.toFixed(2)?.toString(),
+        hasItems ? distance + 45 : 226,
+      );
+      this.generatePdfHr(hasItems ? distance + 60 : 241);
+      this.generateTableRow(
+        'TOTAL',
+        '',
+        booking.total_amount?.toFixed(2)?.toString(),
+        hasItems ? distance + 75 : 257,
+        16,
+      );
       this.generateBookingReceiptFooter();
       this.doc.end();
-      this.doc.pipe(fs.createWriteStream('receipt.pdf'));
+      this.doc.pipe(fs.createWriteStream(`${booking.reference}.pdf`));
+
+      const fileName = process.cwd() + `/${booking.reference}.pdf`;
+      return await this.uploadDocument(fileName);
     });
   }
 
