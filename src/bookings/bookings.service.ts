@@ -114,7 +114,7 @@ export class BookingsService {
         message: `We have received your booking. Download receipt ${uploadedPdf?.secure_url}`,
       });
 
-      return 'booking created successfully!!';
+      return 'booking recorded successfully!!';
     });
   }
 
