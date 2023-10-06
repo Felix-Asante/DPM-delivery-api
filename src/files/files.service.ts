@@ -7,24 +7,16 @@ import {
 } from 'cloudinary';
 
 import { BufferStream } from '@myrotvorets/buffer-stream';
-import * as AWS from 'aws-sdk';
 import { ConfigService } from '@nestjs/config';
 import * as PDFDocument from 'pdfkit';
 import { tryCatch } from 'src/utils/helpers';
-import { CreateBookingDto } from 'src/bookings/dto/create-booking.dto';
 import { ICreateBooking } from 'src/utils/interface';
 
 const pdfStartX = 10;
 @Injectable()
 export class FilesService {
-  private s3: AWS.S3;
   private doc: PDFKit.PDFDocument;
   constructor(private readonly configService: ConfigService) {
-    AWS.config.update({
-      accessKeyId: this.configService.get('AWS_ACCESS_KEY_ID'),
-      secretAccessKey: this.configService.get('AWS_ACCESS_KEY_SECRET'),
-    });
-    this.s3 = new AWS.S3();
     this.doc = new PDFDocument({
       size: 'A5',
       margins: {
@@ -35,27 +27,6 @@ export class FilesService {
       },
     });
   }
-
-  uploadFileToS3 = async (file: Express.Multer.File, type: string) => {
-    try {
-      const params: AWS.S3.PutObjectRequest = {
-        Bucket: this.configService.get('S3_BUCKET_NAME'),
-        Key: `${type}/${Date.now().toString()}_${file.originalname.replace(
-          /\s/g,
-          '_',
-        )}`,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-      };
-      const data = await this.s3.upload(params).promise();
-      const splits = data.Key.split('/');
-      const fileName = splits[splits.length - 1];
-      return fileName;
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  };
 
   async uploadImage(
     file: Express.Multer.File,
