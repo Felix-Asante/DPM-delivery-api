@@ -6,7 +6,7 @@ export const ERRORS = {
     EN: 'This phone number does not belong to any account',
   },
   INVALID_PASSWORD: {
-    EN: 'The password your provided is invalid',
+    EN: 'The password you provided is invalid',
   },
   ALREADY_REQUESTED_CODE: {
     EN: 'You already requested a code less than 5 minutes ago !',
@@ -25,6 +25,9 @@ export const ERRORS = {
   },
   PASSWORD_MISMATCH: {
     EN: 'Passwords do not match',
+  },
+  INVALID_PASSWORD_PATTERN: {
+    EN: 'Password must contain at lowercase,uppercase,number and a special character',
   },
   PASSWORD_ALREADY_IN_USE: {
     EN: 'You are already using this password',

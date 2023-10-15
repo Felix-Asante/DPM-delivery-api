@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LikesService } from 'src/likes/likes.service';
@@ -21,6 +22,9 @@ import { Role } from './entities/role.entity';
 import { User } from './entities/user.entity';
 import { Booking } from 'src/bookings/entities/booking.entity';
 import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import * as bcrypt from 'bcrypt';
+import { authRules } from 'src/utils/rules';
 
 @Injectable()
 export class UsersService {
@@ -143,8 +147,45 @@ export class UsersService {
     }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  update({ email }: User, updateUserDto: UpdateUserDto) {
+    return tryCatch(async () => {
+      const user = await this.findUserByEmail(email);
+      const { fullName, email: newEmail } = updateUserDto;
+      if (fullName.length && user.fullName !== fullName) {
+        user.fullName = fullName;
+      }
+      if (user.email !== email && newEmail.length) {
+        user.email = newEmail;
+      }
+      return await user.save();
+    });
+  }
+
+  changePassword({ email }: User, body: ChangePasswordDto) {
+    return tryCatch(async () => {
+      const user = await this.findUserByEmail(email);
+      const passwordValid = await bcrypt.compare(body.password, user.password);
+      if (!passwordValid) {
+        throw new UnauthorizedException(ERRORS.INVALID_PASSWORD);
+      }
+
+      if (!authRules.password.test(body.newPassword)) {
+        throw new BadRequestException(ERRORS.INVALID_PASSWORD_PATTERN);
+      }
+      if (body.confirmPassword !== body.newPassword) {
+        throw new BadRequestException(ERRORS.PASSWORD_MISMATCH.EN);
+      }
+
+      if (await bcrypt.compare(body.newPassword, user.password)) {
+        throw new BadRequestException(ERRORS.PASSWORD_ALREADY_IN_USE.EN);
+      }
+      const hashedPassword = await bcrypt.hash(body.newPassword, 10);
+      user.password = hashedPassword;
+
+      await user.save();
+
+      return 'Password successfully changed';
+    });
   }
 
   remove(id: number) {
