@@ -161,16 +161,16 @@ export class UsersService {
     });
   }
 
-  changePassword({ email }: User, body: ChangePasswordDto) {
+  changePassword({ phone }: User, body: ChangePasswordDto) {
     return tryCatch(async () => {
-      const user = await this.findUserByEmail(email);
+      const user = await this.findUserByPhone(phone);
       const passwordValid = await bcrypt.compare(body.password, user.password);
       if (!passwordValid) {
-        throw new UnauthorizedException(ERRORS.INVALID_PASSWORD);
+        throw new BadRequestException(ERRORS.INVALID_PASSWORD.EN);
       }
 
       if (!authRules.password.test(body.newPassword)) {
-        throw new BadRequestException(ERRORS.INVALID_PASSWORD_PATTERN);
+        throw new BadRequestException(ERRORS.INVALID_PASSWORD_PATTERN.EN);
       }
       if (body.confirmPassword !== body.newPassword) {
         throw new BadRequestException(ERRORS.PASSWORD_MISMATCH.EN);
@@ -180,6 +180,7 @@ export class UsersService {
         throw new BadRequestException(ERRORS.PASSWORD_ALREADY_IN_USE.EN);
       }
       const hashedPassword = await bcrypt.hash(body.newPassword, 10);
+      console.log(hashedPassword, body.newPassword);
       user.password = hashedPassword;
 
       await user.save();

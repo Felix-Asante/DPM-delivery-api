@@ -34,7 +34,7 @@ export class AuthService {
     try {
       const user = await this.usersService.findUserByPhone(body.phone);
       const passwordValid = await bcrypt.compare(body.password, user.password);
-      if (user && !passwordValid) {
+      if (!passwordValid) {
         throw new BadRequestException(ERRORS.INVALID_PASSWORD.EN);
       }
 
