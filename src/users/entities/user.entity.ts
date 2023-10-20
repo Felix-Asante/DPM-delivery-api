@@ -50,7 +50,9 @@ export class User extends AbstractEntity {
 
   @BeforeInsert()
   async hashPassword() {
+    console.log('triger');
     if (this.password) {
+      console.log('trigerxs');
       this.password = await bcrypt.hash(this.password, 10);
     }
   }
