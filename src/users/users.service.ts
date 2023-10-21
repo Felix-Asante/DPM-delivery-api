@@ -150,7 +150,7 @@ export class UsersService {
   update({ phone }: User, updateUserDto: UpdateUserDto) {
     return tryCatch(async () => {
       const user = await this.findUserByPhone(phone);
-      console.log(updateUserDto);
+
       const { fullName, email: newEmail } = updateUserDto;
       if (fullName.length && user.fullName !== fullName) {
         user.fullName = fullName;
