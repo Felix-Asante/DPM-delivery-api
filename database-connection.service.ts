@@ -16,14 +16,15 @@ export class DatabaseConnectionService implements TypeOrmOptionsFactory {
       password: this.configService.get<string>('TYPEORM_PASSWORD'),
       database: this.configService.get<string>('TYPEORM_DATABASE'),
 
-      synchronize: NODE_ENV !== 'production',
+      // synchronize: NODE_ENV !== 'production',
       dropSchema: false,
       logging: ['error', 'warn'],
       autoLoadEntities: true,
-      ssl: NODE_ENV === 'production',
-      extra: {
-        sslmode: 'require',
-      },
+      ssl: true,
+      // extra: {
+      //   sslmode: 'require',
+      //   // trustedConnection: tr ue,
+      // },
       entities: [
         `${NODE_ENV === 'test' ? 'src' : 'dist'}/**/**.entity{.ts,.js}`,
       ],
