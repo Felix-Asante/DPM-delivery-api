@@ -5,7 +5,7 @@ import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 @Injectable()
 export class DatabaseConnectionService implements TypeOrmOptionsFactory {
   constructor(private configService: ConfigService) {}
-  createTypeOrmOptions(): TypeOrmModuleOptions {
+  createTypeOrmOptions(): any {
     const NODE_ENV = this.configService.get<string>('NODE_ENV');
     return {
       name: 'default',
