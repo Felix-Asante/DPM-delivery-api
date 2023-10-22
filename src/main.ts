@@ -20,17 +20,17 @@ async function bootstrap() {
       'https://res.cloudinary.com/fedev/image/upload/v1690627890/moment/app-logo_tmonpb.jpg',
   };
 
-  if (process.env.NODE_ENV !== 'production') {
-    const config = new DocumentBuilder()
-      .setTitle('DPM Delivery API')
-      .setDescription('DPM Delivery Service API Documentation')
-      .setVersion('1.0')
-      .addTag('DPM Delivery')
-      .addBearerAuth()
-      .build();
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/v1/doc', app, document, options);
-  }
+  // if (process.env.NODE_ENV !== 'production') {
+  const config = new DocumentBuilder()
+    .setTitle('DPM Delivery API')
+    .setDescription('DPM Delivery Service API Documentation')
+    .setVersion('1.0')
+    .addTag('DPM Delivery')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/v1/doc', app, document, options);
+  // }
   // class validator
   app.useGlobalPipes(
     new ValidationPipe({
