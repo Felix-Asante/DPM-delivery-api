@@ -5,7 +5,7 @@ import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 @Injectable()
 export class DatabaseConnectionService implements TypeOrmOptionsFactory {
   constructor(private configService: ConfigService) {}
-  createTypeOrmOptions(): TypeOrmModuleOptions {
+  createTypeOrmOptions(): any {
     const NODE_ENV = this.configService.get<string>('NODE_ENV');
     return {
       name: 'default',
@@ -16,15 +16,12 @@ export class DatabaseConnectionService implements TypeOrmOptionsFactory {
       password: this.configService.get<string>('TYPEORM_PASSWORD'),
       database: this.configService.get<string>('TYPEORM_DATABASE'),
 
-      // synchronize: NODE_ENV !== 'production',
+      synchronize: NODE_ENV !== 'production',
       dropSchema: false,
       logging: ['error', 'warn'],
       autoLoadEntities: true,
       ssl: true,
-      // extra: {
-      //   sslmode: 'require',
-      //   // trustedConnection: tr ue,
-      // },
+      sslmode: 'require',
       entities: [
         `${NODE_ENV === 'test' ? 'src' : 'dist'}/**/**.entity{.ts,.js}`,
       ],
