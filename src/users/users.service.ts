@@ -95,6 +95,7 @@ export class UsersService {
       const users = await this.userRepository.find({
         where: { role: { name: UserRoles.USER } },
       });
+
       return users;
     });
   }
