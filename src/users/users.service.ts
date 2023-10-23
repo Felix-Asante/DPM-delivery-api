@@ -45,6 +45,7 @@ export class UsersService {
     const user = await this.userRepository.findOne({
       where: { phone: "0554436269" },
     });
+
     if (user) {
       throw new ConflictException(ERRORS.PHONE_ALREADY_TAKEN.EN);
     }
@@ -61,9 +62,9 @@ export class UsersService {
       newUser.codeUseCase = CodeUseCases.ACTIVATE_ACCOUNT;
     }
     newUser.role = role;
-    newUser.fullName = 'Ashigbogbo';
-    newUser.phone = `0554436269`;
-    newUser.password = 'dpm';
+    newUser.fullName = createUserDto.fullName;
+    newUser.phone = createUserDto.phone;
+    newUser.password = createUserDto.password;
 
     const savedUser = await newUser.save();
     // send sms
