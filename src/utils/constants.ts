@@ -6,3 +6,8 @@ export const ENV = {
 };
 
 export const MAX_DELIVERY_DISTANCE = 5;
+
+export const ARKESEL_ENDPOINTS = {
+  SEND_SM: 'sms/send',
+  CHECK_BALANCE: 'clients/balance-details',
+};

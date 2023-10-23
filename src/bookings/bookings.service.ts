@@ -110,7 +110,7 @@ export class BookingsService {
       });
 
       await this.messageService.sendSmsMessage({
-        recipient: '+212638118002',
+        recipient: [bookings.recipient_phone],
         message: `We have received your booking. Download receipt ${uploadedPdf?.secure_url}`,
       });
 

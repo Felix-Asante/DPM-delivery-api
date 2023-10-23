@@ -10,6 +10,7 @@ import { BookingStatus } from './entities/booking-status.entity';
 import { OrderedProducts } from 'src/products/entities/ordered-product.entity';
 import { FilesModule } from 'src/files/files.module';
 import { MessagesService } from 'src/messages/messages.service';
+import { SmsService } from 'src/sms/sms.service';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { MessagesService } from 'src/messages/messages.service';
     FilesModule,
   ],
   controllers: [BookingsController],
-  providers: [BookingsService, MessagesService],
+  providers: [BookingsService, MessagesService, SmsService],
   exports: [BookingsService],
 })
 export class BookingsModule {}

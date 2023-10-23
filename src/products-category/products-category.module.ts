@@ -11,6 +11,7 @@ import { Place } from 'src/places/entities/place.entity';
 import { LikesModule } from 'src/likes/likes.module';
 import { Booking } from 'src/bookings/entities/booking.entity';
 import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
+import { SmsService } from 'src/sms/sms.service';
 
 @Module({
   imports: [
@@ -25,6 +26,11 @@ import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
     LikesModule,
   ],
   controllers: [ProductsCategoryController],
-  providers: [ProductsCategoryService, UsersService, MessagesService],
+  providers: [
+    ProductsCategoryService,
+    UsersService,
+    MessagesService,
+    SmsService,
+  ],
 })
 export class ProductsCategoryModule {}
