@@ -17,7 +17,7 @@ export class SmsService {
 
   async send(recipients: string[], message: string) {
     const body = {
-      sender: 'DPM BRAND',
+      sender: 'DPMDelivery',
       message,
       recipients,
     };
