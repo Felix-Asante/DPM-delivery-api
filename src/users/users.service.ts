@@ -41,9 +41,8 @@ export class UsersService {
     private readonly bookingStatusRepository: Repository<BookingStatus>,
   ) {}
   async create(createUserDto: CreateUserDto, isPlaceAdmin = false) {
-    console.log(createUserDto)
     const user = await this.userRepository.findOne({
-      where: { phone: "0554436269" },
+      where: { phone: createUserDto.phone },
     });
 
     if (user) {
