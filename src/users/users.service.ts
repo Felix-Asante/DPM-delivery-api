@@ -60,13 +60,13 @@ export class UsersService {
       newUser.codeUseCase = CodeUseCases.ACTIVATE_ACCOUNT;
     }
     newUser.role = role;
-    newUser.fullName = createUserDto.fullName;
-    newUser.phone = createUserDto.phone;
-    newUser.password = createUserDto.password;
+    newUser.fullName = 'Ashigbogbo';
+    newUser.phone = `0554436269`;
+    newUser.password = 'dpm';
 
     const savedUser = await newUser.save();
     // send sms
-    const SMS_MESSAGE = `Your account verification code is ${smsCode}`;
+    const SMS_MESSAGE = `Your Account Verification code is ${smsCode}`;
     if (!isPlaceAdmin) {
       await this.messageService.sendSmsMessage({
         message: SMS_MESSAGE,
