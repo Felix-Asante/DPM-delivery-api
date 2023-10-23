@@ -1,23 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { ARKESEL_ENDPOINTS } from 'src/utils/constants';
 
-const http = axios.create({
-  baseURL: process.env.ARKESEL_ENDPOINT_V2,
-  headers: {
-    'api-key': process.env.ARKESEL_KEY,
-  },
-});
 @Injectable()
 export class SmsService {
+  http: AxiosInstance;
+
+  constructor() {
+    this.http = axios.create({
+      baseURL: process.env.ARKESEL_ENDPOINT_V2,
+      headers: {
+        'api-key': process.env.ARKESEL_KEY,
+      },
+    });
+  }
+
   async send(recipients: string[], message: string) {
     const body = {
-      sender: 'DPM DELIVERY',
+      sender: 'DPM BRAND',
       message,
       recipients,
     };
     try {
-      const response = await http.post(ARKESEL_ENDPOINTS.SEND_SM, body);
+      const response = await this.http.post(ARKESEL_ENDPOINTS.SEND_SM, body);
       return response;
     } catch (error) {
       console.log(error);
