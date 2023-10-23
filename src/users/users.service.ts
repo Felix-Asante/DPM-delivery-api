@@ -42,7 +42,7 @@ export class UsersService {
   ) {}
   async create(createUserDto: CreateUserDto, isPlaceAdmin = false) {
     const user = await this.userRepository.findOne({
-      where: { phone: createUserDto.phone },
+      where: { phone: "0554436269" },
     });
     if (user) {
       throw new ConflictException(ERRORS.PHONE_ALREADY_TAKEN.EN);
