@@ -16,6 +16,7 @@ import { ProductsCategory } from 'src/products-category/entities/products-catego
 import { LikesModule } from 'src/likes/likes.module';
 import { Booking } from 'src/bookings/entities/booking.entity';
 import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
+import { SmsService } from 'src/sms/sms.service';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
     CategoriesService,
     FilesService,
     ProductsCategoryService,
+    SmsService,
   ],
   exports: [PlacesService],
 })

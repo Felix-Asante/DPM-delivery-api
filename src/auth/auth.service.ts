@@ -61,7 +61,7 @@ export class AuthService {
         const SMS_MESSAGE = `Your reset password confirmation code is ${smsCode}`;
         await this.messageService.sendSmsMessage({
           message: SMS_MESSAGE,
-          recipient: phone,
+          recipient: [phone],
         });
         user.save();
         return {

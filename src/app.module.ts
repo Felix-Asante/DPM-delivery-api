@@ -21,6 +21,7 @@ import { PaymentTypeModule } from './payment-type/payment-type.module';
 import { PaymentmethodModule } from './paymentmethod/paymentmethod.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { BookingStatus } from './bookings/entities/booking-status.entity';
+import { SmsService } from './sms/sms.service';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -48,6 +49,6 @@ import { BookingStatus } from './bookings/entities/booking-status.entity';
     BookingsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, SmsService],
 })
 export class AppModule {}

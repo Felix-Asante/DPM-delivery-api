@@ -70,7 +70,7 @@ export class UsersService {
     if (!isPlaceAdmin) {
       await this.messageService.sendSmsMessage({
         message: SMS_MESSAGE,
-        recipient: createUserDto.phone,
+        recipient: [createUserDto.phone],
       });
     }
 

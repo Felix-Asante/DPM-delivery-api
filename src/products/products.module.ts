@@ -12,6 +12,7 @@ import { Role } from 'src/users/entities/role.entity';
 import { LikesModule } from 'src/likes/likes.module';
 import { Booking } from 'src/bookings/entities/booking.entity';
 import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
+import { SmsService } from 'src/sms/sms.service';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
     LikesModule,
   ],
   controllers: [ProductsController],
-  providers: [ProductsService, UsersService, MessagesService],
+  providers: [ProductsService, UsersService, MessagesService, SmsService],
   exports: [ProductsService],
 })
 export class ProductsModule {}
