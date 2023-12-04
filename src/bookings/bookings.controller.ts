@@ -164,4 +164,14 @@ export class BookingsController {
   remove(@Param('id', ParseUUIDPipe) id: string, @currentUser() user: User) {
     return this.bookingsService.remove(id, user);
   }
+  @Get('all/count')
+  @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  @ApiOkResponse()
+  @ApiOperation({ summary: '(super admin/user)' })
+  @hasRoles(UserRoles.ADMIN, UserRoles.USER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  findTotalBooking() {
+    return this.bookingsService.findTotalBooking();
+  }
 }
