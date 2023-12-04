@@ -17,7 +17,11 @@ import { UpdatePlaceDto } from './dto/update-place.dto';
 import { User } from 'src/users/entities/user.entity';
 import { isDecimal, toDecimal } from 'geolib';
 import { IDistance, Like } from 'src/utils/interface';
-import { extractIdFromImage, getNearbyPlaces } from 'src/utils/helpers';
+import {
+  extractIdFromImage,
+  getNearbyPlaces,
+  tryCatch,
+} from 'src/utils/helpers';
 import { LikesService } from 'src/likes/likes.service';
 
 @Injectable()
@@ -151,6 +155,7 @@ export class PlacesService {
 
   async getAllPlaces() {
     try {
+      // ADD FILTER BY CATEGORY AND SEARCH
       const places = await this.placeRepository.find();
       // await this.filesService.createBookingReceipt();
       return places;
@@ -329,5 +334,12 @@ export class PlacesService {
   }
   async UnLikePlace(data: Like) {
     return await this.likesService.unLike(data);
+  }
+
+  async findTotalPlaces() {
+    return tryCatch(async () => {
+      const count = await this.placeRepository.count();
+      return count;
+    });
   }
 }

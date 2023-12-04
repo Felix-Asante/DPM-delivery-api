@@ -110,4 +110,14 @@ export class CategoriesController {
   async deleteCategory(@Param('id', ParseUUIDPipe) id: string) {
     return await this.categoriesService.deleteCategory(id);
   }
+  @Get('all/count')
+  @ApiBadRequestResponse()
+  @ApiUnauthorizedResponse()
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '(super admin)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
+  async totalCategory() {
+    return await this.categoriesService.findTotalCategory();
+  }
 }
