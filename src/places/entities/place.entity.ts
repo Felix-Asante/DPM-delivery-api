@@ -50,7 +50,7 @@ export class Place extends AbstractEntity {
   minPrepTime: number;
   @Column({ default: 15 })
   maxPrepTime: number;
-  @ManyToOne(() => Category, (category) => category.place)
+  @ManyToOne(() => Category, (category) => category.place, { eager: true })
   category: Category;
   @OneToMany(() => ProductsCategory, (category) => category.place, {
     onDelete: 'CASCADE',

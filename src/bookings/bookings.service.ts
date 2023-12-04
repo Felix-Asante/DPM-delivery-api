@@ -207,4 +207,10 @@ export class BookingsService {
       throw new BadRequestException(ERRORS.BOOKINGS.FAILED.EN);
     });
   }
+  async findTotalBooking() {
+    return tryCatch(async () => {
+      const count = await this.bookingRepository.count();
+      return count;
+    });
+  }
 }
