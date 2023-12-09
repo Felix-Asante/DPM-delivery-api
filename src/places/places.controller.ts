@@ -33,6 +33,7 @@ import { currentUser } from 'src/auth/decorators/currentUser.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { IDistance } from 'src/utils/interface';
 import { UpdatePlaceDto } from './dto/update-place.dto';
+import { PaginationOptions } from 'src/entities/pagination.entity';
 
 @Controller('places')
 @ApiTags('Places')
@@ -96,10 +97,16 @@ export class PlacesController {
   @ApiBearerAuth()
   @ApiBadRequestResponse()
   @ApiOperation({ summary: '(super admin)' })
+  @ApiQuery({ name: 'page', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: String })
+  @ApiQuery({ name: 'category', required: false, type: String })
+  @ApiQuery({ name: 'query', required: false, type: String })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @hasRoles(UserRoles.ADMIN)
-  async getAllPlaces() {
-    return await this.placesService.getAllPlaces();
+  async getAllPlaces(
+    @Query() queries: PaginationOptions & { category: string },
+  ) {
+    return await this.placesService.getAllPlaces(queries);
   }
 
   @Get('search')

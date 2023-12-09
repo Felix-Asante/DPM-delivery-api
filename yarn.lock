@@ -4337,6 +4337,11 @@ nestjs-twilio@^4.1.1:
   dependencies:
     twilio "^4.7.2"
 
+nestjs-typeorm-paginate@^4.0.4:
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/nestjs-typeorm-paginate/-/nestjs-typeorm-paginate-4.0.4.tgz#cc705100dc19a1ed4014830930180d0ab650560a"
+  integrity sha512-arinWDc78wPV/EYWMmLYyeMSE5Lae1FHWD/2QpOdTmHaOVqK4PYf19EqZBqT9gbbPugkNW9JAMz3G2WmvSgR/A==
+
 node-abort-controller@^3.0.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/node-abort-controller/-/node-abort-controller-3.1.1.tgz#a94377e964a9a37ac3976d848cb5c765833b8548"

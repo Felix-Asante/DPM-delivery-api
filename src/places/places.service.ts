@@ -23,6 +23,8 @@ import {
   tryCatch,
 } from 'src/utils/helpers';
 import { LikesService } from 'src/likes/likes.service';
+import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
+import { PaginationOptions } from 'src/entities/pagination.entity';
 
 @Injectable()
 export class PlacesService {
@@ -153,12 +155,54 @@ export class PlacesService {
     }
   }
 
-  async getAllPlaces() {
+  async getAllPlaces(options: PaginationOptions & { category: string }) {
+    const { query = '', category = '', ...paginationOptions } = options;
     try {
       // ADD FILTER BY CATEGORY AND SEARCH
-      const places = await this.placeRepository.find();
-      // await this.filesService.createBookingReceipt();
-      return places;
+      if (!query && !category) {
+        const places = paginate<Place>(this.placeRepository, paginationOptions);
+        return places;
+      }
+      let searchWhereClause;
+      if (!query.length && !category?.length) return [];
+      if (category) {
+        searchWhereClause = [
+          {
+            name: ILike(`%${query}%`),
+            category: { id: category },
+          },
+          {
+            website: ILike(`%${query}%`),
+            category: { id: category },
+          },
+          {
+            address: ILike(`%${query}%`),
+            category: { id: category },
+          },
+          {
+            name: ILike(`%${query}%`),
+            category: { id: category },
+          },
+          {
+            name: ILike(`%${query}%`),
+            category: { id: category },
+          },
+        ];
+      } else {
+        searchWhereClause = [
+          { name: ILike(`%${query}%`) },
+          { website: ILike(`%${query}%`) },
+          { address: ILike(`%${query}%`) },
+          { name: ILike(`%${query}%`) },
+          { name: ILike(`%${query}%`) },
+        ];
+      }
+
+      const results = paginate(this.placeRepository, paginationOptions, {
+        where: searchWhereClause,
+        relations: ['category'],
+      });
+      return results;
     } catch (error) {
       console.log(error);
       throw error;
@@ -285,23 +329,23 @@ export class PlacesService {
         searchWhereClause = [
           {
             name: ILike(`%${query}%`),
-            category: { name: ILike(`%${category}%`) },
+            category: { id: category },
           },
           {
             website: ILike(`%${query}%`),
-            category: { name: ILike(`%${category}%`) },
+            category: { id: category },
           },
           {
             address: ILike(`%${query}%`),
-            category: { name: ILike(`%${category}%`) },
+            category: { id: category },
           },
           {
             name: ILike(`%${query}%`),
-            category: { name: ILike(`%${category}%`) },
+            category: { id: category },
           },
           {
             name: ILike(`%${query}%`),
-            category: { name: ILike(`%${category}%`) },
+            category: { id: category },
           },
         ];
       } else {
