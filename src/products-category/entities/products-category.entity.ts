@@ -18,10 +18,14 @@ export class ProductsCategory extends AbstractEntity {
   name: string;
   @Column()
   slug: string;
-  @ManyToOne(() => Place, (place) => place.productCategory)
+  @ManyToOne(() => Place, (place) => place.productCategory, {
+    onDelete: 'CASCADE',
+  })
   place: Place;
 
-  @OneToMany(() => Products, (product) => product.productCategory)
+  @OneToMany(() => Products, (product) => product.productCategory, {
+    onDelete: 'CASCADE',
+  })
   products: Products;
 
   @BeforeInsert()

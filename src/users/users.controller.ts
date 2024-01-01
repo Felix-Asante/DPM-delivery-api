@@ -31,6 +31,7 @@ import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { BookingState, UserRoles } from 'src/utils/enums';
 import { User } from './entities/user.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { IFindUserQuery } from 'src/utils/interface';
 
 @ApiTags('users')
 @Controller('users')
@@ -53,8 +54,16 @@ export class UsersController {
   @ApiUnauthorizedResponse()
   @ApiForbiddenResponse()
   @ApiOperation({ summary: '(Admin)' })
-  findAll() {
-    return this.usersService.findAll();
+  @ApiQuery({
+    name: 'role',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'query',
+    required: false,
+  })
+  findAll(@Query() query: IFindUserQuery) {
+    return this.usersService.findAll(query);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -105,12 +114,13 @@ export class UsersController {
     return this.usersService.changePassword(user, body);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
   @ApiBearerAuth()
   @ApiNotFoundResponse()
   @ApiUnauthorizedResponse()
+  @hasRoles(UserRoles.ADMIN)
   remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    return this.usersService.remove(id);
   }
 }

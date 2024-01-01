@@ -27,6 +27,7 @@ import { User } from 'src/users/entities/user.entity';
 import { BookingState, UserRoles } from 'src/utils/enums';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { IFindBookingQuery } from 'src/utils/interface';
 
 @Controller('bookings')
 @ApiTags('Bookings')
@@ -59,8 +60,12 @@ export class BookingsController {
     required: false,
     enum: Object.values(BookingState),
   })
-  findAll(@Query('status') status: string) {
-    return this.bookingsService.findAll(status);
+  @ApiQuery({ name: 'page', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: String })
+  @ApiQuery({ name: 'category', required: false, type: String })
+  @ApiQuery({ name: 'query', required: false, type: String })
+  findAll(@Query() queries: IFindBookingQuery) {
+    return this.bookingsService.findAll(queries);
   }
   @Get('ours')
   @ApiForbiddenResponse()

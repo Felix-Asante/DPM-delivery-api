@@ -215,4 +215,13 @@ export class PlacesController {
   async totalPlace() {
     return await this.placesService.findTotalPlaces();
   }
+  @Get('admin/:id')
+  @ApiBearerAuth()
+  @ApiBadRequestResponse()
+  @ApiOperation({ summary: '(super admin)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
+  async getPlaceAdmin(@Param('id') placeId: string) {
+    return await this.placesService.getPlaceAdmin(placeId);
+  }
 }
