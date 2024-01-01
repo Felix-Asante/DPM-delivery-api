@@ -1,3 +1,4 @@
+import { PaginationOptions } from 'src/entities/pagination.entity';
 import { Place } from 'src/places/entities/place.entity';
 import { User } from 'src/users/entities/user.entity';
 
@@ -36,4 +37,14 @@ export interface ICreateBooking {
   transaction_id: string;
 
   total_amount: number;
+}
+
+export interface IFindBookingQuery extends PaginationOptions {
+  category?: string;
+  from?: string;
+  to?: string;
+  status?: string;
+}
+export interface IFindUserQuery extends PaginationOptions {
+  role?: string;
 }

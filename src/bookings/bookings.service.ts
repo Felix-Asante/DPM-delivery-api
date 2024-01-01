@@ -19,6 +19,8 @@ import { BookingStatus } from './entities/booking-status.entity';
 import { OrderedProducts } from 'src/products/entities/ordered-product.entity';
 import { FilesService } from 'src/files/files.service';
 import { MessagesService } from 'src/messages/messages.service';
+import { IFindBookingQuery } from 'src/utils/interface';
+import { paginate } from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class BookingsService {
@@ -118,15 +120,18 @@ export class BookingsService {
     });
   }
 
-  findAll(status?: string) {
+  findAll(queries: IFindBookingQuery) {
     return tryCatch<Booking>(async () => {
+      const { status, page = 1, limit = 10 } = queries;
+      const paginationOption = { page, limit };
       if (status) {
-        const bookings = await this.bookingRepository.find({
+        const bookings = paginate(this.bookingRepository, paginationOption, {
           where: { status: { label: status } },
         });
+
         return bookings;
       }
-      const bookings = await this.bookingRepository.find();
+      const bookings = paginate(this.bookingRepository, paginationOption);
       return bookings;
     });
   }

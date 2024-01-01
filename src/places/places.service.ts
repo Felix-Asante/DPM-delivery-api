@@ -45,10 +45,17 @@ export class PlacesService {
     logo: Express.Multer.File,
   ) {
     try {
+      const { placeAdminFullName, placeAdminPassword, placeAdminPhone } = place;
+      const placeAdmin = {
+        fullName: placeAdminFullName,
+        password: placeAdminPassword,
+        phone: placeAdminPhone,
+      };
       const newPlace = new Place();
       const category = await this.categoriesService.findCategoryById(
         place.category,
       );
+
       if (logo) {
         const uploadedLogo = await this.filesService.uploadImage(logo);
         newPlace.logo = uploadedLogo.url;
@@ -59,8 +66,8 @@ export class PlacesService {
       newPlace.email = place.email;
       newPlace.phone = place.phone;
       newPlace.address = place.address;
-      newPlace.minPrepTime = place.minPrepTime;
-      newPlace.maxPrepTime = place.maxPrepTime;
+      newPlace.minPrepTime = +place.minPrepTime;
+      newPlace.maxPrepTime = +place.maxPrepTime;
       newPlace.latitude = isDecimal(place.latitude)
         ? place.latitude
         : toDecimal(place.latitude);
@@ -68,13 +75,13 @@ export class PlacesService {
         ? place.longitude
         : toDecimal(place.longitude);
       newPlace.website = place?.website;
-      newPlace.averagePrice = place?.averagePrice;
+      newPlace.averagePrice = +place?.averagePrice;
       newPlace.category = category;
       if (place.deliveryFee) {
-        newPlace.deliveryFee = place.deliveryFee;
+        newPlace.deliveryFee = +place.deliveryFee;
       }
 
-      const savedUser = await this.usersService.create(place.placeAdmin, true);
+      const savedUser = await this.usersService.create(placeAdmin, true);
       const result = await newPlace.save();
 
       await this.productCategoryService.create({
@@ -123,7 +130,7 @@ export class PlacesService {
         place.category = category;
       }
       if (averagePrice) {
-        place.averagePrice = averagePrice;
+        place.averagePrice = +averagePrice;
       }
       if (logo) {
         const imagePublicId = extractIdFromImage(place?.logo);
@@ -302,6 +309,13 @@ export class PlacesService {
     }
   }
 
+  async getPlaceAdmin(id: string) {
+    return tryCatch(async () => {
+      await this.findPlaceById(id);
+      const admin = await this.usersService.findPlaceAdmin(id);
+      return admin;
+    });
+  }
   async getPopularPlaces(coords?: IDistance) {
     try {
       const popularPlaces = await this.placeRepository.find({

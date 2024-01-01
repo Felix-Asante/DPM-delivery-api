@@ -3,9 +3,12 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
+import { paginate } from 'nestjs-typeorm-paginate';
+import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
+import { Booking } from 'src/bookings/entities/booking.entity';
 import { LikesService } from 'src/likes/likes.service';
 import { MessagesService } from 'src/messages/messages.service';
 import { BookingState, CodeUseCases, UserRoles } from 'src/utils/enums';
@@ -15,16 +18,14 @@ import {
   generateOtpCode,
   tryCatch,
 } from 'src/utils/helpers';
-import { Repository } from 'typeorm';
+import { IFindUserQuery } from 'src/utils/interface';
+import { authRules } from 'src/utils/rules';
+import { ILike, Repository } from 'typeorm';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from './entities/role.entity';
 import { User } from './entities/user.entity';
-import { Booking } from 'src/bookings/entities/booking.entity';
-import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import * as bcrypt from 'bcrypt';
-import { authRules } from 'src/utils/rules';
 
 @Injectable()
 export class UsersService {
@@ -91,11 +92,36 @@ export class UsersService {
       });
     });
   }
-  findAll() {
+  findAll(searchQuery: IFindUserQuery) {
     return tryCatch(async () => {
-      const users = await this.userRepository.find({
-        where: { role: { name: UserRoles.USER } },
-      });
+      const {
+        role = UserRoles.USER,
+        query,
+        page = 1,
+        limit = 10,
+      } = searchQuery;
+      let searchWhereClause = [];
+      if (role && !query) {
+        searchWhereClause = [{ role: { name: role } }];
+      }
+      if (query && !role) {
+        searchWhereClause = [
+          { fullName: ILike(`%${query}%`) },
+          { email: ILike(`%${query}%`) },
+        ];
+      }
+      if (query && role) {
+        searchWhereClause = [
+          { fullName: ILike(`%${query}%`), role: { name: role } },
+          { email: ILike(`%${query}%`), role: { name: role } },
+        ];
+      }
+
+      const users = paginate(
+        this.userRepository,
+        { page, limit },
+        { where: searchWhereClause, relations: ['role'] },
+      );
 
       return users;
     });
@@ -193,7 +219,33 @@ export class UsersService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async findPlaceAdmin(placeId: string) {
+    return tryCatch(async () => {
+      const user = await this.userRepository.findOne({
+        where: { adminFor: { id: placeId } },
+      });
+      if (!user) {
+        return new NotFoundException(ERRORS.PLACES.NOT_FOUND);
+      }
+      delete user.adminFor;
+      return user;
+    });
+  }
+
+  remove(id: string) {
+    return tryCatch(async () => {
+      const user = await this.userRepository.findOne({
+        where: { id },
+        relations: ['role'],
+      });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      const results = await this.userRepository.delete(id);
+      if (!results.affected) {
+        return { success: false };
+      }
+      return { success: true };
+    });
   }
 }

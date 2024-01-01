@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { OffersService } from './offers.service';
@@ -19,10 +20,13 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiOkResponse,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { OfferTypeDto } from './dtos/create-offer-types.dto';
 import { CreateOfferDto } from './dtos/create-offer.dto';
+import { PaginationOptions } from 'src/entities/pagination.entity';
+import { UpdateOfferDto } from './dtos/update-offer.dto';
 
 @Controller('offers')
 @ApiTags('Offers Type / Offers')
@@ -99,14 +103,26 @@ export class OffersController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
   @ApiBearerAuth()
   @ApiCreatedResponse()
   @ApiBadRequestResponse()
   @ApiForbiddenResponse()
-  async getAllOffers() {
-    return this.offersService.getAllOffers();
+  @ApiQuery({
+    name: 'page',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'query',
+    required: false,
+  })
+  async getAllOffers(@Query() options: PaginationOptions) {
+    return this.offersService.getAllOffers(options);
   }
   @Get('place-offers')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -125,6 +141,24 @@ export class OffersController {
   @ApiForbiddenResponse()
   async getProductOffers() {
     return this.offersService.getProductOffers();
+  }
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN, UserRoles.USER)
+  @ApiBearerAuth()
+  @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  async getOffer(@Param('id') id: string) {
+    return this.offersService.getOfferById(id);
+  }
+  @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
+  @ApiBearerAuth()
+  @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  async updateOffer(@Param('id') id: string, @Body() body: UpdateOfferDto) {
+    return this.offersService.updateOffer(id, body);
   }
 
   @Delete(':id')
