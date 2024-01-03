@@ -27,6 +27,8 @@ import { OfferTypeDto } from './dtos/create-offer-types.dto';
 import { CreateOfferDto } from './dtos/create-offer.dto';
 import { PaginationOptions } from 'src/entities/pagination.entity';
 import { UpdateOfferDto } from './dtos/update-offer.dto';
+import { currentUser } from 'src/auth/decorators/currentUser.decorator';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('offers')
 @ApiTags('Offers Type / Offers')
@@ -141,6 +143,16 @@ export class OffersController {
   @ApiForbiddenResponse()
   async getProductOffers() {
     return this.offersService.getProductOffers();
+  }
+  @Get('count')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
+  @ApiBearerAuth()
+  @ApiOkResponse()
+  @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  async getTotalOffersCreated(@currentUser() user: User) {
+    return this.offersService.getTotalOffers(user);
   }
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)

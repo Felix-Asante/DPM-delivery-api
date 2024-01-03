@@ -16,6 +16,7 @@ import { ERRORS } from 'src/utils/errors';
 import {
   generateExpiryDate,
   generateOtpCode,
+  getTotalItems,
   tryCatch,
 } from 'src/utils/helpers';
 import { IFindUserQuery } from 'src/utils/interface';
@@ -127,6 +128,16 @@ export class UsersService {
     });
   }
 
+  getTotalUsers(user: User) {
+    return tryCatch(
+      async () =>
+        await getTotalItems({
+          user,
+          repository: this.userRepository,
+          where: { role: { name: ILike(`%${UserRoles.USER}%`) } },
+        }),
+    );
+  }
   async findLikes(id: string) {
     return await this.likeService.getLikesByUser(id);
   }

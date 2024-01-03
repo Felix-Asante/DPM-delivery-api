@@ -21,9 +21,14 @@ export class Offer extends AbstractEntity {
   @Column({ nullable: true })
   description: string;
 
-  @ManyToOne(() => Products, (product) => product.offers, { nullable: true })
+  @ManyToOne(() => Products, (product) => product.offers, {
+    nullable: true,
+  })
   product: Products;
-  @ManyToOne(() => Place, (place) => place.offers, { nullable: true })
+  @ManyToOne(() => Place, (place) => place.offers, {
+    nullable: true,
+    eager: true,
+  })
   place: Place;
   @ManyToOne(() => OfferTypes, (type) => type.offers, { eager: true })
   type: OfferTypes;

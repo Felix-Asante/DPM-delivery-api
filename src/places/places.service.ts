@@ -20,6 +20,7 @@ import { IDistance, Like } from 'src/utils/interface';
 import {
   extractIdFromImage,
   getNearbyPlaces,
+  getTotalItems,
   tryCatch,
 } from 'src/utils/helpers';
 import { LikesService } from 'src/likes/likes.service';
@@ -394,10 +395,10 @@ export class PlacesService {
     return await this.likesService.unLike(data);
   }
 
-  async findTotalPlaces() {
-    return tryCatch(async () => {
-      const count = await this.placeRepository.count();
-      return count;
-    });
+  async findTotalPlaces(user: User) {
+    return tryCatch(
+      async () =>
+        await getTotalItems({ user, repository: this.placeRepository }),
+    );
   }
 }

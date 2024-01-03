@@ -67,6 +67,16 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
+  @Get('count')
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse()
+  @ApiForbiddenResponse()
+  @ApiOperation({ summary: '(super admin)' })
+  getTotalUsers(@currentUser() user) {
+    return this.usersService.getTotalUsers(user);
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @hasRoles(UserRoles.USER)
   @Get('likes')
   @ApiBearerAuth()

@@ -212,8 +212,8 @@ export class PlacesController {
   @ApiOperation({ summary: '(super admin)' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @hasRoles(UserRoles.ADMIN)
-  async totalPlace() {
-    return await this.placesService.findTotalPlaces();
+  async totalPlace(@currentUser() user: User) {
+    return await this.placesService.findTotalPlaces(user);
   }
   @Get('admin/:id')
   @ApiBearerAuth()

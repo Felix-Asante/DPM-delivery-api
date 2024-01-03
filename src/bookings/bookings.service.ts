@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { BookingState, UserRoles } from 'src/utils/enums';
 import { ERRORS } from 'src/utils/errors';
-import { generateOtpCode, tryCatch } from 'src/utils/helpers';
+import { generateOtpCode, getTotalItems, tryCatch } from 'src/utils/helpers';
 import { Repository } from 'typeorm';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { Booking } from './entities/booking.entity';
@@ -212,10 +212,10 @@ export class BookingsService {
       throw new BadRequestException(ERRORS.BOOKINGS.FAILED.EN);
     });
   }
-  async findTotalBooking() {
-    return tryCatch(async () => {
-      const count = await this.bookingRepository.count();
-      return count;
-    });
+  async findTotalBooking(user: User) {
+    return tryCatch(
+      async () =>
+        await getTotalItems({ user, repository: this.bookingRepository }),
+    );
   }
 }

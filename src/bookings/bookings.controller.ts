@@ -176,7 +176,7 @@ export class BookingsController {
   @ApiOperation({ summary: '(super admin/user)' })
   @hasRoles(UserRoles.ADMIN, UserRoles.USER)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  findTotalBooking() {
-    return this.bookingsService.findTotalBooking();
+  findTotalBooking(@currentUser() user: User) {
+    return this.bookingsService.findTotalBooking(user);
   }
 }
