@@ -218,4 +218,37 @@ export class BookingsService {
         await getTotalItems({ user, repository: this.bookingRepository }),
     );
   }
+
+  async getBookingsByYear(year?: number): Promise<any[]> {
+    return tryCatch(async () => {
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+
+      // If no year is provided, use the current year
+      year = year || currentYear;
+
+      if (year.toString().length < 4 || year.toString().length > 4) {
+        throw new BadRequestException('Invalid year');
+      }
+
+      // Set the start date to the beginning of the specified year
+      const startDate = new Date(`${year}-01-01T00:00:00Z`);
+
+      // Set the end date to the end of the specified year
+      const endDate = new Date(`${year}-12-31T23:59:59Z`);
+
+      // Query the database for bookings within the specified date range
+      const sales = await this.bookingRepository
+        .createQueryBuilder('bookings')
+        .select("DATE_TRUNC('month', bookings.createdAt) AS month")
+        .addSelect('SUM(bookings.total_amount) AS totalAmount')
+        .where('bookings.createdAt >= :startDate', { startDate })
+        .andWhere('bookings.createdAt <= :endDate', { endDate })
+        .groupBy('month')
+        .orderBy('month', 'ASC')
+        .getRawMany();
+
+      return sales;
+    });
+  }
 }
