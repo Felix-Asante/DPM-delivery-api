@@ -6,19 +6,25 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { OfferTypes } from './entities/offer-type.entity';
 import { Offer } from './entities/offer.entity';
-import { ILike, Repository } from 'typeorm';
+import { Between, FindOptionsWhere, ILike, In, Repository } from 'typeorm';
 import { ERRORS } from 'src/utils/errors';
 import { IDistance } from 'src/utils/interface';
-import { getNearbyPlaces, tryCatch } from 'src/utils/helpers';
+import {
+  getCurrentMonthDate,
+  getNearbyPlaces,
+  getTotalItems,
+  tryCatch,
+} from 'src/utils/helpers';
 import { OfferTypeDto } from './dtos/create-offer-types.dto';
 import { CreateOfferDto } from './dtos/create-offer.dto';
 import { ProductsService } from 'src/products/products.service';
 import { PlacesService } from 'src/places/places.service';
 import { Place } from 'src/places/entities/place.entity';
-import { OffersTypes } from 'src/utils/enums';
+import { OffersTypes, UserRoles } from 'src/utils/enums';
 import { PaginationOptions } from 'src/entities/pagination.entity';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { UpdateOfferDto } from './dtos/update-offer.dto';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class OffersService {
@@ -284,6 +290,13 @@ export class OffersService {
       console.log(error);
       throw error;
     }
+  }
+
+  async getTotalOffers(user: User) {
+    return tryCatch(
+      async () =>
+        await getTotalItems({ repository: this.offerRepository, user }),
+    );
   }
 
   async deleteOffer(id: string) {
