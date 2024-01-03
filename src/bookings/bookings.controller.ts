@@ -179,4 +179,18 @@ export class BookingsController {
   findTotalBooking(@currentUser() user: User) {
     return this.bookingsService.findTotalBooking(user);
   }
+  @Get('all/sales')
+  @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  @ApiOkResponse()
+  @ApiOperation({ summary: '(super admin/user)' })
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiQuery({
+    name: 'year',
+    required: false,
+  })
+  getSales(@Query('year') year: string) {
+    return this.bookingsService.getBookingsByYear(+year);
+  }
 }
