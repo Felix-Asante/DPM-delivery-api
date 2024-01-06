@@ -108,6 +108,11 @@ interface CountOptions<T> {
   where: object;
 }
 
+export function isValidDateString(dateString: string): boolean {
+  const date = new Date(dateString);
+  return !isNaN(date.getTime());
+}
+
 async function getCount<T>(options: CountOptions<T>): Promise<number> {
   return options.repository.count({ where: options.where });
 }
