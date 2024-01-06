@@ -8,8 +8,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { BookingState, UserRoles } from 'src/utils/enums';
 import { ERRORS } from 'src/utils/errors';
-import { generateOtpCode, getTotalItems, tryCatch } from 'src/utils/helpers';
-import { Repository } from 'typeorm';
+import {
+  generateOtpCode,
+  getTotalItems,
+  isValidDateString,
+  tryCatch,
+} from 'src/utils/helpers';
+import { Between, ILike, Repository } from 'typeorm';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { Booking } from './entities/booking.entity';
 import { PlacesService } from 'src/places/places.service';
@@ -21,6 +26,7 @@ import { FilesService } from 'src/files/files.service';
 import { MessagesService } from 'src/messages/messages.service';
 import { IFindBookingQuery } from 'src/utils/interface';
 import { paginate } from 'nestjs-typeorm-paginate';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class BookingsService {
@@ -122,16 +128,59 @@ export class BookingsService {
 
   findAll(queries: IFindBookingQuery) {
     return tryCatch<Booking>(async () => {
-      const { status, page = 1, limit = 10 } = queries;
+      const {
+        status,
+        page = 1,
+        limit = 10,
+        category,
+        from,
+        to,
+        query,
+      } = queries;
       const paginationOption = { page, limit };
-      if (status) {
-        const bookings = paginate(this.bookingRepository, paginationOption, {
-          where: { status: { label: status } },
-        });
 
-        return bookings;
+      const statusQuery = { status: { label: status } };
+
+      const searchWhereClause: object = {};
+
+      if (query) {
+        if (category) {
+          Object.assign(searchWhereClause, {
+            place: { name: query, category: { id: category } },
+          });
+        } else {
+          Object.assign(searchWhereClause, { place: { name: query } });
+        }
+      } else if (category) {
+        Object.assign(searchWhereClause, {
+          place: { category: { id: category } },
+        });
       }
-      const bookings = paginate(this.bookingRepository, paginationOption);
+
+      if (status) {
+        Object.assign(searchWhereClause, statusQuery);
+      }
+
+      if ((from && !to) || (to && !from)) {
+        throw new BadRequestException('Invalid date range');
+      }
+
+      if (from && to && isValidDateString(from) && isValidDateString(to)) {
+        Object.assign(searchWhereClause, {
+          createdAt: Between(new Date(from), new Date(to)),
+        });
+      }
+
+      const where =
+        Object.entries(searchWhereClause).length > 0
+          ? { where: [searchWhereClause] }
+          : undefined;
+
+      const bookings = paginate(
+        this.bookingRepository,
+        paginationOption,
+        where,
+      );
       return bookings;
     });
   }

@@ -53,8 +53,8 @@ export class BookingsController {
   @ApiOperation({ summary: '(super admin)' })
   @ApiForbiddenResponse()
   @ApiOkResponse()
-  @hasRoles(UserRoles.ADMIN)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @hasRoles(UserRoles.ADMIN)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiQuery({
     name: 'status',
     required: false,
@@ -64,6 +64,8 @@ export class BookingsController {
   @ApiQuery({ name: 'limit', required: false, type: String })
   @ApiQuery({ name: 'category', required: false, type: String })
   @ApiQuery({ name: 'query', required: false, type: String })
+  @ApiQuery({ name: 'from', required: false, type: String })
+  @ApiQuery({ name: 'to', required: false, type: String })
   findAll(@Query() queries: IFindBookingQuery) {
     return this.bookingsService.findAll(queries);
   }
