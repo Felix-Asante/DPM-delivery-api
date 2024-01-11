@@ -31,6 +31,8 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { imageFileFilter } from 'src/utils/helpers';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { currentUser } from 'src/auth/decorators/currentUser.decorator';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('categories')
 @ApiTags('Categories')
@@ -109,5 +111,15 @@ export class CategoriesController {
   @hasRoles(UserRoles.ADMIN)
   async deleteCategory(@Param('id', ParseUUIDPipe) id: string) {
     return await this.categoriesService.deleteCategory(id);
+  }
+  @Get('all/count')
+  @ApiBadRequestResponse()
+  @ApiUnauthorizedResponse()
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '(super admin)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
+  async totalCategory(@currentUser() user: User) {
+    return await this.categoriesService.findTotalCategory(user);
   }
 }

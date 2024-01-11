@@ -6,16 +6,25 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { OfferTypes } from './entities/offer-type.entity';
 import { Offer } from './entities/offer.entity';
-import { Repository } from 'typeorm';
+import { Between, FindOptionsWhere, ILike, In, Repository } from 'typeorm';
 import { ERRORS } from 'src/utils/errors';
 import { IDistance } from 'src/utils/interface';
-import { getNearbyPlaces } from 'src/utils/helpers';
+import {
+  getCurrentMonthDate,
+  getNearbyPlaces,
+  getTotalItems,
+  tryCatch,
+} from 'src/utils/helpers';
 import { OfferTypeDto } from './dtos/create-offer-types.dto';
 import { CreateOfferDto } from './dtos/create-offer.dto';
 import { ProductsService } from 'src/products/products.service';
 import { PlacesService } from 'src/places/places.service';
 import { Place } from 'src/places/entities/place.entity';
-import { OffersTypes } from 'src/utils/enums';
+import { OffersTypes, UserRoles } from 'src/utils/enums';
+import { PaginationOptions } from 'src/entities/pagination.entity';
+import { paginate } from 'nestjs-typeorm-paginate';
+import { UpdateOfferDto } from './dtos/update-offer.dto';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class OffersService {
@@ -138,11 +147,15 @@ export class OffersService {
         start_date,
         end_date,
         offerType,
+        description,
+        title,
       } = body;
       newOffer.price = price;
       newOffer.reductionPercent = reductionPercent;
       newOffer.start_date = start_date;
       newOffer.end_date = end_date;
+      newOffer.description = description;
+      newOffer.title = title;
       const type = await this.getOfferTypeById(offerType);
       newOffer.type = type;
       if (type.name === OffersTypes.PLACE_OFFER && !placeId) {
@@ -167,11 +180,67 @@ export class OffersService {
     }
   }
 
-  async getAllOffers() {
-    try {
-      const offers = await this.offerRepository.find({
-        relations: ['place', 'product'],
+  async updateOffer(offerId: string, body: UpdateOfferDto) {
+    return tryCatch(async () => {
+      const { placeId, productId, offerType, ...updatedData } = body;
+      const offer = await this.getOfferById(offerId);
+
+      const updatedOffer = await this.offerRepository.preload({
+        id: offerId,
+        ...updatedData,
       });
+
+      if (offerType !== offer?.type?.id) {
+        const type = await this.getOfferTypeById(offerType);
+        updatedOffer.type = type;
+        if (type.name === OffersTypes.PLACE_OFFER && !placeId) {
+          throw new BadRequestException(ERRORS.PLACES.NOT_EMPTY);
+        }
+        if (type.name === OffersTypes.PRODUCT_OFFER && !productId) {
+          throw new BadRequestException(ERRORS.PRODUCTS.NOT_EMPTY.EN);
+        }
+      }
+      if (placeId && placeId !== offer.place.id) {
+        const place = (await this.placeService.findPlaceById(
+          body?.placeId,
+        )) as Place;
+        if (place) {
+          updatedOffer.place = place;
+        }
+      }
+
+      if (productId && productId !== offer?.product.id) {
+        const product = await this.productService.findProductById(
+          body?.productId,
+        );
+        updatedOffer.product = product;
+      }
+
+      const newOffer = await updatedOffer.save();
+      return newOffer;
+    });
+  }
+
+  async getAllOffers(paginationOptions: PaginationOptions) {
+    try {
+      const { page = 1, limit = 10, query } = paginationOptions;
+
+      const whereClause = query
+        ? [
+            { title: ILike(`%${query}%`) },
+            { place: { name: ILike(`%${query}%`) } },
+            { product: { name: ILike(`%${query}%`) } },
+          ]
+        : {};
+      const offers = await paginate(
+        this.offerRepository,
+        { page, limit },
+        {
+          relations: ['place', 'product'],
+          where: whereClause,
+        },
+      );
+
       return offers;
     } catch (error) {
       console.log(error);
@@ -221,6 +290,13 @@ export class OffersService {
       console.log(error);
       throw error;
     }
+  }
+
+  async getTotalOffers(user: User) {
+    return tryCatch(
+      async () =>
+        await getTotalItems({ repository: this.offerRepository, user }),
+    );
   }
 
   async deleteOffer(id: string) {

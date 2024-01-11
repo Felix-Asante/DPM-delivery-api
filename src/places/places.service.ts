@@ -17,8 +17,15 @@ import { UpdatePlaceDto } from './dto/update-place.dto';
 import { User } from 'src/users/entities/user.entity';
 import { isDecimal, toDecimal } from 'geolib';
 import { IDistance, Like } from 'src/utils/interface';
-import { extractIdFromImage, getNearbyPlaces } from 'src/utils/helpers';
+import {
+  extractIdFromImage,
+  getNearbyPlaces,
+  getTotalItems,
+  tryCatch,
+} from 'src/utils/helpers';
 import { LikesService } from 'src/likes/likes.service';
+import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
+import { PaginationOptions } from 'src/entities/pagination.entity';
 
 @Injectable()
 export class PlacesService {
@@ -39,10 +46,17 @@ export class PlacesService {
     logo: Express.Multer.File,
   ) {
     try {
+      const { placeAdminFullName, placeAdminPassword, placeAdminPhone } = place;
+      const placeAdmin = {
+        fullName: placeAdminFullName,
+        password: placeAdminPassword,
+        phone: placeAdminPhone,
+      };
       const newPlace = new Place();
       const category = await this.categoriesService.findCategoryById(
         place.category,
       );
+
       if (logo) {
         const uploadedLogo = await this.filesService.uploadImage(logo);
         newPlace.logo = uploadedLogo.url;
@@ -53,8 +67,8 @@ export class PlacesService {
       newPlace.email = place.email;
       newPlace.phone = place.phone;
       newPlace.address = place.address;
-      newPlace.minPrepTime = place.minPrepTime;
-      newPlace.maxPrepTime = place.maxPrepTime;
+      newPlace.minPrepTime = +place.minPrepTime;
+      newPlace.maxPrepTime = +place.maxPrepTime;
       newPlace.latitude = isDecimal(place.latitude)
         ? place.latitude
         : toDecimal(place.latitude);
@@ -62,13 +76,13 @@ export class PlacesService {
         ? place.longitude
         : toDecimal(place.longitude);
       newPlace.website = place?.website;
-      newPlace.averagePrice = place?.averagePrice;
+      newPlace.averagePrice = +place?.averagePrice;
       newPlace.category = category;
       if (place.deliveryFee) {
-        newPlace.deliveryFee = place.deliveryFee;
+        newPlace.deliveryFee = +place.deliveryFee;
       }
 
-      const savedUser = await this.usersService.create(place.placeAdmin, true);
+      const savedUser = await this.usersService.create(placeAdmin, true);
       const result = await newPlace.save();
 
       await this.productCategoryService.create({
@@ -117,7 +131,7 @@ export class PlacesService {
         place.category = category;
       }
       if (averagePrice) {
-        place.averagePrice = averagePrice;
+        place.averagePrice = +averagePrice;
       }
       if (logo) {
         const imagePublicId = extractIdFromImage(place?.logo);
@@ -149,11 +163,54 @@ export class PlacesService {
     }
   }
 
-  async getAllPlaces() {
+  async getAllPlaces(options: PaginationOptions & { category: string }) {
+    const { query = '', category = '', ...paginationOptions } = options;
     try {
-      const places = await this.placeRepository.find();
-      // await this.filesService.createBookingReceipt();
-      return places;
+      // ADD FILTER BY CATEGORY AND SEARCH
+      if (!query && !category) {
+        const places = paginate<Place>(this.placeRepository, paginationOptions);
+        return places;
+      }
+      let searchWhereClause;
+      if (!query.length && !category?.length) return [];
+      if (category) {
+        searchWhereClause = [
+          {
+            name: ILike(`%${query}%`),
+            category: { id: category },
+          },
+          {
+            website: ILike(`%${query}%`),
+            category: { id: category },
+          },
+          {
+            address: ILike(`%${query}%`),
+            category: { id: category },
+          },
+          {
+            name: ILike(`%${query}%`),
+            category: { id: category },
+          },
+          {
+            name: ILike(`%${query}%`),
+            category: { id: category },
+          },
+        ];
+      } else {
+        searchWhereClause = [
+          { name: ILike(`%${query}%`) },
+          { website: ILike(`%${query}%`) },
+          { address: ILike(`%${query}%`) },
+          { name: ILike(`%${query}%`) },
+          { name: ILike(`%${query}%`) },
+        ];
+      }
+
+      const results = paginate(this.placeRepository, paginationOptions, {
+        where: searchWhereClause,
+        relations: ['category'],
+      });
+      return results;
     } catch (error) {
       console.log(error);
       throw error;
@@ -253,6 +310,13 @@ export class PlacesService {
     }
   }
 
+  async getPlaceAdmin(id: string) {
+    return tryCatch(async () => {
+      await this.findPlaceById(id);
+      const admin = await this.usersService.findPlaceAdmin(id);
+      return admin;
+    });
+  }
   async getPopularPlaces(coords?: IDistance) {
     try {
       const popularPlaces = await this.placeRepository.find({
@@ -280,23 +344,23 @@ export class PlacesService {
         searchWhereClause = [
           {
             name: ILike(`%${query}%`),
-            category: { name: ILike(`%${category}%`) },
+            category: { id: category },
           },
           {
             website: ILike(`%${query}%`),
-            category: { name: ILike(`%${category}%`) },
+            category: { id: category },
           },
           {
             address: ILike(`%${query}%`),
-            category: { name: ILike(`%${category}%`) },
+            category: { id: category },
           },
           {
             name: ILike(`%${query}%`),
-            category: { name: ILike(`%${category}%`) },
+            category: { id: category },
           },
           {
             name: ILike(`%${query}%`),
-            category: { name: ILike(`%${category}%`) },
+            category: { id: category },
           },
         ];
       } else {
@@ -329,5 +393,12 @@ export class PlacesService {
   }
   async UnLikePlace(data: Like) {
     return await this.likesService.unLike(data);
+  }
+
+  async findTotalPlaces(user: User) {
+    return tryCatch(
+      async () =>
+        await getTotalItems({ user, repository: this.placeRepository }),
+    );
   }
 }

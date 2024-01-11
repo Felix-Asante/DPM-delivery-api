@@ -8,6 +8,8 @@ import { FilesService } from 'src/files/files.service';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PlacesService } from 'src/places/places.service';
 import { Place } from 'src/places/entities/place.entity';
+import { getTotalItems, tryCatch } from 'src/utils/helpers';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class CategoriesService {
@@ -127,5 +129,12 @@ export class CategoriesService {
       console.log(error);
       throw error;
     }
+  }
+
+  async findTotalCategory(user: User) {
+    return tryCatch(
+      async () =>
+        await getTotalItems({ user, repository: this.categoryRepository }),
+    );
   }
 }

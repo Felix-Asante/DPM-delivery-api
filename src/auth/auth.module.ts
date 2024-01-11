@@ -9,6 +9,7 @@ import { MessagesService } from 'src/messages/messages.service';
 import { LikesModule } from 'src/likes/likes.module';
 import { Booking } from 'src/bookings/entities/booking.entity';
 import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
+import { SmsService } from 'src/sms/sms.service';
 
 @Module({
   imports: [
@@ -16,6 +17,6 @@ import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
     LikesModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, UsersService, MessagesService],
+  providers: [AuthService, UsersService, MessagesService, SmsService],
 })
 export class AuthModule {}

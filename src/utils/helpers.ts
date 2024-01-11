@@ -6,6 +6,9 @@ import { ERRORS } from './errors';
 import { convertDistance, getPreciseDistance } from 'geolib';
 import { Place } from 'src/places/entities/place.entity';
 import { IDistance } from './interface';
+import { Repository, Between } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { UserRoles } from './enums';
 
 export const generateOtpCode = (length = 4) => {
   return crypto.randomInt(100000, 999999).toString().slice(0, length);
@@ -79,4 +82,77 @@ export async function tryCatch<T>(cb: any): Promise<T> {
     console.log(error);
     throw error;
   }
+}
+
+export function getCurrentMonthDate() {
+  const currentDate = new Date();
+  const startOfMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    1,
+  );
+  const endOfMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+  );
+
+  return { startOfMonth, endOfMonth };
+}
+
+interface CountOptions<T> {
+  repository: Repository<T>;
+  where: object;
+}
+
+export function isValidDateString(dateString: string): boolean {
+  const date = new Date(dateString);
+  return !isNaN(date.getTime());
+}
+
+async function getCount<T>(options: CountOptions<T>): Promise<number> {
+  return options.repository.count({ where: options.where });
+}
+
+interface GetTotalItems<T> {
+  user: User;
+  repository: Repository<T>;
+  where?: object;
+  // entity: new () => T;
+}
+
+interface GetTotalItemsResponse {
+  currentMonth: number;
+  all_time: number;
+}
+
+export async function getTotalItems<T>(
+  options: GetTotalItems<T>,
+): Promise<GetTotalItemsResponse> {
+  return tryCatch(async () => {
+    const isAdmin = options.user?.role?.name === UserRoles.ADMIN;
+    const placeFilter = isAdmin
+      ? { ...options?.where }
+      : { place: { id: options.user?.adminFor?.id }, ...options?.where };
+
+    const { startOfMonth, endOfMonth } = getCurrentMonthDate();
+
+    const currentMonthOffers = await getCount<T>({
+      repository: options.repository,
+      where: {
+        createdAt: Between(startOfMonth, endOfMonth),
+        ...placeFilter,
+      },
+    });
+
+    const totalOffers = await getCount({
+      repository: options.repository,
+      where: placeFilter,
+    });
+
+    return { currentMonth: currentMonthOffers, all_time: totalOffers };
+  });
 }

@@ -27,6 +27,7 @@ import { User } from 'src/users/entities/user.entity';
 import { BookingState, UserRoles } from 'src/utils/enums';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { IFindBookingQuery } from 'src/utils/interface';
 
 @Controller('bookings')
 @ApiTags('Bookings')
@@ -59,8 +60,14 @@ export class BookingsController {
     required: false,
     enum: Object.values(BookingState),
   })
-  findAll(@Query('status') status: string) {
-    return this.bookingsService.findAll(status);
+  @ApiQuery({ name: 'page', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: String })
+  @ApiQuery({ name: 'category', required: false, type: String })
+  @ApiQuery({ name: 'query', required: false, type: String })
+  @ApiQuery({ name: 'from', required: false, type: String })
+  @ApiQuery({ name: 'to', required: false, type: String })
+  findAll(@Query() queries: IFindBookingQuery) {
+    return this.bookingsService.findAll(queries);
   }
   @Get('ours')
   @ApiForbiddenResponse()
@@ -163,5 +170,29 @@ export class BookingsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   remove(@Param('id', ParseUUIDPipe) id: string, @currentUser() user: User) {
     return this.bookingsService.remove(id, user);
+  }
+  @Get('all/count')
+  @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  @ApiOkResponse()
+  @ApiOperation({ summary: '(super admin/user)' })
+  @hasRoles(UserRoles.ADMIN, UserRoles.USER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  findTotalBooking(@currentUser() user: User) {
+    return this.bookingsService.findTotalBooking(user);
+  }
+  @Get('all/sales')
+  @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  @ApiOkResponse()
+  @ApiOperation({ summary: '(super admin/user)' })
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiQuery({
+    name: 'year',
+    required: false,
+  })
+  getSales(@Query('year') year: string) {
+    return this.bookingsService.getBookingsByYear(+year);
   }
 }
