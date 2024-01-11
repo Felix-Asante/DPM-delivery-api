@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDecimal,
   IsEmail,
+  IsNumber,
   IsOptional,
   IsPhoneNumber,
   IsString,
@@ -39,20 +40,30 @@ export class CreatePlaceDto {
   @IsString()
   category: string;
   @ApiProperty()
-  @IsDecimal()
-  averagePrice: number;
+  @IsDecimal({ force_decimal: false })
+  averagePrice: string;
   @ApiProperty()
   @ApiPropertyOptional()
-  @IsDecimal()
-  deliveryFee: number;
+  @IsOptional()
+  @IsDecimal({ force_decimal: false })
+  deliveryFee: string;
   @ApiProperty()
   @ApiPropertyOptional()
-  @IsDecimal()
-  minPrepTime: number;
+  @IsDecimal({ force_decimal: false })
+  @IsOptional()
+  minPrepTime: string;
   @ApiPropertyOptional()
   @ApiProperty()
-  @IsDecimal()
-  maxPrepTime: number;
+  @IsDecimal({ force_decimal: false })
+  @IsOptional()
+  maxPrepTime: string;
   @ApiProperty()
-  placeAdmin: CreateUserDto;
+  @IsString()
+  placeAdminFullName: string;
+  @ApiProperty()
+  @IsString()
+  placeAdminPhone: string;
+  @ApiProperty()
+  @IsString()
+  placeAdminPassword: string;
 }

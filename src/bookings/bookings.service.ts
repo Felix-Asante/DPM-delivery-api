@@ -8,8 +8,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { BookingState, UserRoles } from 'src/utils/enums';
 import { ERRORS } from 'src/utils/errors';
-import { generateOtpCode, tryCatch } from 'src/utils/helpers';
-import { Repository } from 'typeorm';
+import {
+  generateOtpCode,
+  getTotalItems,
+  isValidDateString,
+  tryCatch,
+} from 'src/utils/helpers';
+import { Between, ILike, Repository } from 'typeorm';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { Booking } from './entities/booking.entity';
 import { PlacesService } from 'src/places/places.service';
@@ -19,6 +24,9 @@ import { BookingStatus } from './entities/booking-status.entity';
 import { OrderedProducts } from 'src/products/entities/ordered-product.entity';
 import { FilesService } from 'src/files/files.service';
 import { MessagesService } from 'src/messages/messages.service';
+import { IFindBookingQuery } from 'src/utils/interface';
+import { paginate } from 'nestjs-typeorm-paginate';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class BookingsService {
@@ -110,7 +118,7 @@ export class BookingsService {
       });
 
       await this.messageService.sendSmsMessage({
-        recipient: '+212638118002',
+        recipient: [bookings.recipient_phone],
         message: `We have received your booking. Download receipt ${uploadedPdf?.secure_url}`,
       });
 
@@ -118,15 +126,61 @@ export class BookingsService {
     });
   }
 
-  findAll(status?: string) {
+  findAll(queries: IFindBookingQuery) {
     return tryCatch<Booking>(async () => {
-      if (status) {
-        const bookings = await this.bookingRepository.find({
-          where: { status: { label: status } },
+      const {
+        status,
+        page = 1,
+        limit = 10,
+        category,
+        from,
+        to,
+        query,
+      } = queries;
+      const paginationOption = { page, limit };
+
+      const statusQuery = { status: { label: status } };
+
+      const searchWhereClause: object = {};
+
+      if (query) {
+        if (category) {
+          Object.assign(searchWhereClause, {
+            place: { name: query, category: { id: category } },
+          });
+        } else {
+          Object.assign(searchWhereClause, { place: { name: query } });
+        }
+      } else if (category) {
+        Object.assign(searchWhereClause, {
+          place: { category: { id: category } },
         });
-        return bookings;
       }
-      const bookings = await this.bookingRepository.find();
+
+      if (status) {
+        Object.assign(searchWhereClause, statusQuery);
+      }
+
+      if ((from && !to) || (to && !from)) {
+        throw new BadRequestException('Invalid date range');
+      }
+
+      if (from && to && isValidDateString(from) && isValidDateString(to)) {
+        Object.assign(searchWhereClause, {
+          createdAt: Between(new Date(from), new Date(to)),
+        });
+      }
+
+      const where =
+        Object.entries(searchWhereClause).length > 0
+          ? { where: [searchWhereClause] }
+          : undefined;
+
+      const bookings = paginate(
+        this.bookingRepository,
+        paginationOption,
+        where,
+      );
       return bookings;
     });
   }
@@ -205,6 +259,45 @@ export class BookingsService {
         return { success: true };
       }
       throw new BadRequestException(ERRORS.BOOKINGS.FAILED.EN);
+    });
+  }
+  async findTotalBooking(user: User) {
+    return tryCatch(
+      async () =>
+        await getTotalItems({ user, repository: this.bookingRepository }),
+    );
+  }
+
+  async getBookingsByYear(year?: number): Promise<any[]> {
+    return tryCatch(async () => {
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+
+      // If no year is provided, use the current year
+      year = year || currentYear;
+
+      if (year.toString().length < 4 || year.toString().length > 4) {
+        throw new BadRequestException('Invalid year');
+      }
+
+      // Set the start date to the beginning of the specified year
+      const startDate = new Date(`${year}-01-01T00:00:00Z`);
+
+      // Set the end date to the end of the specified year
+      const endDate = new Date(`${year}-12-31T23:59:59Z`);
+
+      // Query the database for bookings within the specified date range
+      const sales = await this.bookingRepository
+        .createQueryBuilder('bookings')
+        .select("DATE_TRUNC('month', bookings.createdAt) AS month")
+        .addSelect('SUM(bookings.total_amount) AS totalAmount')
+        .where('bookings.createdAt >= :startDate', { startDate })
+        .andWhere('bookings.createdAt <= :endDate', { endDate })
+        .groupBy('month')
+        .orderBy('month', 'ASC')
+        .getRawMany();
+
+      return sales;
     });
   }
 }

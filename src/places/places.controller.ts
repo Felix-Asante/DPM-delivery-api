@@ -7,12 +7,11 @@ import {
   Post,
   Put,
   Query,
-  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { PlacesService } from './places.service';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -20,21 +19,21 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
-  ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwtAuth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { UserRoles } from 'src/utils/enums';
 import { CreatePlaceDto } from './dto/create-place.dto';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { PlacesService } from './places.service';
 
-import { UpdatePlaceDto } from './dto/update-place.dto';
 import { currentUser } from 'src/auth/decorators/currentUser.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { IDistance } from 'src/utils/interface';
+import { UpdatePlaceDto } from './dto/update-place.dto';
+import { PaginationOptions } from 'src/entities/pagination.entity';
 
 @Controller('places')
 @ApiTags('Places')
@@ -98,10 +97,16 @@ export class PlacesController {
   @ApiBearerAuth()
   @ApiBadRequestResponse()
   @ApiOperation({ summary: '(super admin)' })
+  @ApiQuery({ name: 'page', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: String })
+  @ApiQuery({ name: 'category', required: false, type: String })
+  @ApiQuery({ name: 'query', required: false, type: String })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @hasRoles(UserRoles.ADMIN)
-  async getAllPlaces() {
-    return await this.placesService.getAllPlaces();
+  async getAllPlaces(
+    @Query() queries: PaginationOptions & { category: string },
+  ) {
+    return await this.placesService.getAllPlaces(queries);
   }
 
   @Get('search')
@@ -199,5 +204,24 @@ export class PlacesController {
   @hasRoles(UserRoles.ADMIN)
   async deletePlace(@Param('id') id: string) {
     return await this.placesService.deletePlace(id);
+  }
+
+  @Get('all/count')
+  @ApiBearerAuth()
+  @ApiBadRequestResponse()
+  @ApiOperation({ summary: '(super admin)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
+  async totalPlace(@currentUser() user: User) {
+    return await this.placesService.findTotalPlaces(user);
+  }
+  @Get('admin/:id')
+  @ApiBearerAuth()
+  @ApiBadRequestResponse()
+  @ApiOperation({ summary: '(super admin)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
+  async getPlaceAdmin(@Param('id') placeId: string) {
+    return await this.placesService.getPlaceAdmin(placeId);
   }
 }
