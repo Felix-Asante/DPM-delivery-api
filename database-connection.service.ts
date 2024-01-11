@@ -21,7 +21,7 @@ export class DatabaseConnectionService implements TypeOrmOptionsFactory {
       logging: ['error', 'warn'],
       autoLoadEntities: true,
       ssl: true,
-      sslmode: 'require',
+      // sslmode: 'require',
       entities: [
         `${NODE_ENV === 'test' ? 'src' : 'dist'}/**/**.entity{.ts,.js}`,
       ],
