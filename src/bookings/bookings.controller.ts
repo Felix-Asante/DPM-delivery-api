@@ -53,8 +53,8 @@ export class BookingsController {
   @ApiOperation({ summary: '(super admin)' })
   @ApiForbiddenResponse()
   @ApiOkResponse()
-  // @hasRoles(UserRoles.ADMIN)
-  // @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiQuery({
     name: 'status',
     required: false,

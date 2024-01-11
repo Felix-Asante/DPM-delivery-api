@@ -11,3 +11,10 @@ export const ARKESEL_ENDPOINTS = {
   SEND_SM: 'sms/send',
   CHECK_BALANCE: 'clients/balance-details',
 };
+
+export const PAYSTACK_ENDPOINT = {
+  INITIALIZE_TRANSACTION: 'https://api.paystack.co/transaction/initialize',
+  VERIFY_TRANSACTION: (reference: string) =>
+    `https://api.paystack.co/transaction/verify/${reference}`,
+  LIST_TRANSACTION: () => `https://api.paystack.co/transaction`,
+};
