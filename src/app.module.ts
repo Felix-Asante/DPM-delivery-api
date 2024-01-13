@@ -24,11 +24,13 @@ import { BookingStatus } from './bookings/entities/booking-status.entity';
 import { SmsService } from './sms/sms.service';
 import { PaymentService } from './payment/payment.service';
 import { PaymentModule } from './payment/payment.module';
+import { dataSourceOption } from 'db/data-source';
 @Module({
   imports: [
-    TypeOrmModule.forRootAsync({
-      useClass: DatabaseConnectionService,
-    }),
+    // TypeOrmModule.forRootAsync({
+    //   useClass: DatabaseConnectionService,
+    // }),
+    TypeOrmModule.forRoot(dataSourceOption),
     TypeOrmModule.forFeature([Role, OfferTypes, BookingStatus]),
     ConfigModule.forRoot({ isGlobal: true }),
     JwtModule.register({
