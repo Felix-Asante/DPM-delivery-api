@@ -94,5 +94,16 @@ export const ERRORS = {
     UNAUTHORIZED: {
       EN: 'Unauthorized!!, you cannot access this booking',
     },
+    ALREADY_RATED: {
+      EN: 'You have already rated this place',
+    },
+  },
+  REVIEWS: {
+    NOT_FOUND: {
+      EN: 'Review not found',
+    },
+    NOT_YOURS: {
+      EN: 'You cannot delete this review',
+    },
   },
 };

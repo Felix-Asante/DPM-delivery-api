@@ -10,7 +10,7 @@ import {
 export class CreateBookingDto {
   @IsArray()
   @ApiProperty()
-  place: string[];
+  place: string;
 
   @IsArray()
   @ApiPropertyOptional()

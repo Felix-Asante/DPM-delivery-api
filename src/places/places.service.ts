@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -26,6 +27,9 @@ import {
 import { LikesService } from 'src/likes/likes.service';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 import { PaginationOptions } from 'src/entities/pagination.entity';
+import { Review } from 'src/reviews/entities/review.entity';
+import { RatePlaceDto } from 'src/reviews/dto/create-review.dto';
+import { Booking } from 'src/bookings/entities/booking.entity';
 
 @Injectable()
 export class PlacesService {
@@ -38,6 +42,10 @@ export class PlacesService {
     private readonly productCategoryService: ProductsCategoryService,
     private readonly usersService: UsersService,
     private readonly likesService: LikesService,
+    @InjectRepository(Review)
+    private readonly reviewsRepository: Repository<Review>,
+    @InjectRepository(Booking)
+    private readonly bookingRepository: Repository<Booking>,
   ) {}
 
   async createPlace(
@@ -401,4 +409,82 @@ export class PlacesService {
         await getTotalItems({ user, repository: this.placeRepository }),
     );
   }
+  async ratePlace(user: User, { comment, rating }: RatePlaceDto, id: string) {
+    try {
+      const userBookings = await this.bookingRepository.find({
+        where: {
+          user: {
+            id: user.id,
+          },
+          place: {
+            id: id,
+          },
+        },
+        order: {
+          createdAt: 'DESC',
+        },
+
+        take: 1,
+      });
+      const userLastBooking = userBookings[0];
+      if (!userLastBooking) {
+        throw new BadRequestException(
+          'You have nt yet ordered from this place',
+        );
+      }
+      const bookingRating = await this.reviewsRepository.findOneBy({
+        booking: {
+          id: userLastBooking.id,
+        },
+      });
+      if (bookingRating !== null) {
+        await this.reviewsRepository.delete(bookingRating.id);
+      }
+      if (userLastBooking.place) {
+        const placeRatingCount = await this.reviewsRepository.countBy({
+          booking: {
+            place: {
+              id: userLastBooking.place.id,
+            },
+          },
+        });
+        userLastBooking.place.rating = userLastBooking.place.rating
+          ? (userLastBooking.place.rating * placeRatingCount + rating) /
+            (placeRatingCount + 1)
+          : rating;
+        await userLastBooking.place.save();
+      }
+      const review = new Review();
+      review.user = user;
+      review.booking = userLastBooking;
+      review.comment = comment;
+      review.rating = rating;
+      review.date = new Date();
+      await userLastBooking.save();
+      return await review.save();
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  findPlaceRatings = async (id: string, options: IPaginationOptions) => {
+    try {
+      await this.findPlaceById(id, false);
+      const reviews = paginate(this.reviewsRepository, options, {
+        where: {
+          booking: {
+            place: {
+              id,
+            },
+          },
+        },
+        order: { createdAt: 'DESC' },
+      });
+      return reviews;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
 }

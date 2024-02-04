@@ -25,6 +25,7 @@ import { SmsService } from './sms/sms.service';
 import { PaymentService } from './payment/payment.service';
 import { PaymentModule } from './payment/payment.module';
 import { dataSourceOption } from 'db/data-source';
+import { ReviewsModule } from './reviews/reviews.module';
 @Module({
   imports: [
     // TypeOrmModule.forRootAsync({
@@ -52,6 +53,7 @@ import { dataSourceOption } from 'db/data-source';
     PaymentmethodModule,
     BookingsModule,
     PaymentModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService, SmsService, PaymentService],

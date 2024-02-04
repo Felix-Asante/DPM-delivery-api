@@ -41,6 +41,7 @@
     "geolib": "^3.3.4",
     "nestjs-twilio": "^4.1.1",
     "nestjs-typeorm-paginate": "^4.0.4",
+    "paystack-sdk": "^2.5.10",
     "pdfkit": "^0.13.0",
     "pg": "^8.11.1",
     "reflect-metadata": "^0.1.13",
