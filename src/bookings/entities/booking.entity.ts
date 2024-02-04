@@ -49,7 +49,7 @@ export class Booking extends AbstractEntity {
     eager: true,
     onDelete: 'CASCADE',
   })
-  place: Place[];
+  place: Place;
 
   @OneToMany(
     () => OrderedProducts,

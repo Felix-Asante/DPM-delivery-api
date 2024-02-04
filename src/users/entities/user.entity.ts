@@ -12,6 +12,7 @@ import { Role } from './role.entity';
 import * as bcrypt from 'bcrypt';
 import { Place } from 'src/places/entities/place.entity';
 import { Booking } from 'src/bookings/entities/booking.entity';
+import { Review } from 'src/reviews/entities/review.entity';
 
 @Entity('users')
 export class User extends AbstractEntity {
@@ -47,6 +48,9 @@ export class User extends AbstractEntity {
   @OneToOne(() => Place, { onDelete: 'CASCADE', eager: true })
   @JoinColumn()
   adminFor: Place;
+
+  @OneToMany(() => Review, (review) => review.user)
+  reviews: Review[];
 
   @BeforeInsert()
   async hashPassword() {

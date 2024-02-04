@@ -11,15 +11,18 @@ import { OrderedProducts } from 'src/products/entities/ordered-product.entity';
 import { FilesModule } from 'src/files/files.module';
 import { MessagesService } from 'src/messages/messages.service';
 import { SmsService } from 'src/sms/sms.service';
+import { ReviewsModule } from 'src/reviews/reviews.module';
+import { Review } from 'src/reviews/entities/review.entity';
 
 @Module({
   imports: [
     UsersModule,
-    TypeOrmModule.forFeature([Booking, BookingStatus, OrderedProducts]),
+    TypeOrmModule.forFeature([Booking, BookingStatus, OrderedProducts, Review]),
     UsersModule,
     ProductsModule,
     PlacesModule,
     FilesModule,
+    ReviewsModule,
   ],
   controllers: [BookingsController],
   providers: [BookingsService, MessagesService, SmsService],

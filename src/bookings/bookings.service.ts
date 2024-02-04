@@ -27,6 +27,8 @@ import { MessagesService } from 'src/messages/messages.service';
 import { IFindBookingQuery } from 'src/utils/interface';
 import { paginate } from 'nestjs-typeorm-paginate';
 import dayjs from 'dayjs';
+import { Review } from 'src/reviews/entities/review.entity';
+import { RatePlaceDto } from 'src/reviews/dto/create-review.dto';
 
 @Injectable()
 export class BookingsService {
@@ -37,6 +39,8 @@ export class BookingsService {
     private readonly bookingStatusRepository: Repository<BookingStatus>,
     @InjectRepository(OrderedProducts)
     private readonly orderedProductRepository: Repository<OrderedProducts>,
+    @InjectRepository(Review)
+    private readonly reviewsRepository: Repository<Review>,
     private readonly placeService: PlacesService,
     private readonly productsService: ProductsService,
     private readonly userService: UsersService,
@@ -49,7 +53,7 @@ export class BookingsService {
       const reference = `DPM-BK-${generateOtpCode(8)}`;
 
       const {
-        place: places,
+        place,
         services,
         rider_tip,
         delivery_address,
@@ -78,10 +82,10 @@ export class BookingsService {
       const user = await this.userService.findUserByPhone(userPhone);
       newBooking.user = user;
 
-      const reservedPlaces = await Promise.all(
-        places.map((place) => this.placeService.findPlaceById(place, false)),
+      const reservedPlaces = await this.placeService.findPlaceById(
+        place,
+        false,
       );
-
       newBooking.place = reservedPlaces;
 
       if (rider_tip) {
@@ -114,7 +118,7 @@ export class BookingsService {
       const uploadedPdf: any = await this.filesService.createBookingReceipt({
         ...bookings,
         reference,
-        place: reservedPlaces,
+        place: [reservedPlaces],
       });
 
       await this.messageService.sendSmsMessage({
@@ -122,7 +126,7 @@ export class BookingsService {
         message: `We have received your booking. Download receipt ${uploadedPdf?.secure_url}`,
       });
 
-      return 'booking recorded successfully!!';
+      return { message: 'booking recorded successfully!!' };
     });
   }
 
@@ -237,7 +241,7 @@ export class BookingsService {
       }
       if (
         user.role.name === UserRoles.PLACE_ADMIN &&
-        booking.place.some((p) => p.id === user.adminFor.id)
+        booking.place.id === user.adminFor.id
       ) {
         throw new ForbiddenException();
       }
@@ -300,4 +304,52 @@ export class BookingsService {
       return sales;
     });
   }
+
+  rateBooking = async (
+    user: User,
+    { comment, rating }: RatePlaceDto,
+    id: string,
+  ) => {
+    try {
+      const booking = await this.findBookingById(id);
+      const alreadyRated = await this.reviewsRepository.exists({
+        where: {
+          booking: {
+            id,
+          },
+          user: {
+            id: user.id,
+          },
+        },
+      });
+      if (alreadyRated) {
+        throw new BadRequestException(ERRORS.BOOKINGS.ALREADY_RATED.EN);
+      }
+      if (booking.place) {
+        const placeRatingCount = await this.reviewsRepository.countBy({
+          booking: {
+            place: {
+              id: booking.place.id,
+            },
+          },
+        });
+        booking.place.rating = booking.place.rating
+          ? (booking.place.rating * placeRatingCount + rating) /
+            (placeRatingCount + 1)
+          : rating;
+        await booking.place.save();
+      }
+      const review = new Review();
+      review.user = user;
+      review.booking = booking;
+      review.comment = comment;
+      review.rating = rating;
+      review.date = new Date();
+      await booking.save();
+      return await review.save();
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
 }
