@@ -67,6 +67,9 @@ export class Place extends AbstractEntity {
   offers: Offer;
   @Column({ default: 0 })
   rating: number;
+  @Column({ default: 0 })
+  total_reviews: number;
+
   @BeforeInsert()
   @BeforeUpdate()
   createSlug() {
