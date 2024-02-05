@@ -452,6 +452,7 @@ export class PlacesService {
           ? (userLastBooking.place.rating * placeRatingCount + rating) /
             (placeRatingCount + 1)
           : rating;
+        userLastBooking.place.total_reviews = placeRatingCount + 1;
         await userLastBooking.place.save();
       }
       const review = new Review();
