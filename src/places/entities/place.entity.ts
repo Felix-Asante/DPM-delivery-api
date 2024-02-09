@@ -60,7 +60,8 @@ export class Place extends AbstractEntity {
   @OneToMany(() => Offer, (offer) => offer.product, {
     onDelete: 'CASCADE',
   })
-  @ManyToMany(() => Booking, (booking) => booking.place)
+  // @ManyToMany(() => Booking, (booking) => booking.place)
+  @OneToMany(() => Booking, (booking) => booking.place)
   @JoinTable()
   bookings: Booking;
 

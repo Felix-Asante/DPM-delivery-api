@@ -13,11 +13,14 @@ import {
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiCreatedResponse,
   ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { currentUser } from 'src/auth/decorators/currentUser.decorator';
 import { hasRoles } from 'src/auth/decorators/roles.decorator';
@@ -28,6 +31,7 @@ import { BookingState, UserRoles } from 'src/utils/enums';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { IFindBookingQuery } from 'src/utils/interface';
+import { RatePlaceDto } from 'src/reviews/dto/create-review.dto';
 
 @Controller('bookings')
 @ApiTags('Bookings')
@@ -195,5 +199,23 @@ export class BookingsController {
   })
   getSales(@Query('year') year: string) {
     return this.bookingsService.getBookingsByYear(+year);
+  }
+
+  @ApiCreatedResponse({
+    description: 'Rating has been successfully created.',
+  })
+  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
+  @ApiNotFoundResponse({ description: 'booking not found' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '(User)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.USER)
+  @Post(':id/rate')
+  async ratePlace(
+    @currentUser() user: User,
+    @Body() ratePlaceDto: RatePlaceDto,
+    @Param('id') id: string,
+  ) {
+    return await this.bookingsService.rateBooking(user, ratePlaceDto, id);
   }
 }

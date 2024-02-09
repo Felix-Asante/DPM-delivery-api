@@ -115,6 +115,8 @@ export class FilesService {
       this.doc.end();
       this.doc.pipe(fs.createWriteStream(`${booking.reference}.pdf`));
 
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       const fileName = process.cwd() + `/${booking.reference}.pdf`;
       return await this.uploadDocument(fileName);
     });
