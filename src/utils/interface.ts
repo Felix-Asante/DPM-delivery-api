@@ -43,6 +43,7 @@ export interface IFindBookingQuery extends PaginationOptions {
   category?: string;
   from?: string;
   to?: string;
+  place?: string;
   status?: string;
 }
 export interface IFindUserQuery extends PaginationOptions {

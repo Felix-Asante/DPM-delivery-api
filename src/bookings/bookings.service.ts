@@ -140,6 +140,7 @@ export class BookingsService {
         from,
         to,
         query,
+        place,
       } = queries;
       const paginationOption = { page, limit };
 
@@ -147,13 +148,13 @@ export class BookingsService {
 
       const searchWhereClause: object = {};
 
-      if (query) {
+      if (place) {
         if (category) {
           Object.assign(searchWhereClause, {
-            place: { name: query, category: { id: category } },
+            place: { id: place, category: { id: category } },
           });
         } else {
-          Object.assign(searchWhereClause, { place: { name: query } });
+          Object.assign(searchWhereClause, { place: { id: place } });
         }
       } else if (category) {
         Object.assign(searchWhereClause, {
