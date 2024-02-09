@@ -17,7 +17,7 @@ import { OrderedProducts } from 'src/products/entities/ordered-product.entity';
 export class Booking extends AbstractEntity {
   @Column()
   total_amount: number;
-  @Column({ default: 0 })
+  @Column({ default: 1 })
   quantity: number;
   @Column({ default: 0 })
   price: number;
@@ -48,9 +48,13 @@ export class Booking extends AbstractEntity {
   @ManyToOne(() => User, (user) => user.bookings, { eager: true })
   user: User;
 
-  @ManyToMany(() => Place, (place) => place.bookings, {
+  // @ManyToMany(() => Place, (place) => place.bookings, {
+  //   eager: true,
+  //   // onDelete: 'CASCADE',
+  // })
+  @ManyToOne(() => Place, (place) => place.bookings, {
     eager: true,
-    onDelete: 'CASCADE',
+    // onDelete: 'CASCADE',
   })
   place: Place;
 
