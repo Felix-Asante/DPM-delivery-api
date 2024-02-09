@@ -30,6 +30,9 @@ export class Booking extends AbstractEntity {
   @Column()
   recipient_address: string;
 
+  @Column({ default: false })
+  paid: boolean;
+
   @Column()
   recipient_phone: string;
 

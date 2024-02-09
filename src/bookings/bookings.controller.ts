@@ -66,6 +66,7 @@ export class BookingsController {
   @ApiQuery({ name: 'query', required: false, type: String })
   @ApiQuery({ name: 'from', required: false, type: String })
   @ApiQuery({ name: 'to', required: false, type: String })
+  @ApiQuery({ name: 'place', required: false, type: String })
   findAll(@Query() queries: IFindBookingQuery) {
     return this.bookingsService.findAll(queries);
   }
