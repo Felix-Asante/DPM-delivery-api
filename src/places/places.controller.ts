@@ -252,7 +252,6 @@ export class PlacesController {
     description: 'The place ratings are returned successfully',
   })
   @ApiNotFoundResponse({ description: 'Place not found' })
-  @ApiBearerAuth()
   @ApiOperation({ summary: '(user)' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })

@@ -22,7 +22,7 @@ export class DatabaseConnectionService implements TypeOrmOptionsFactory {
       autoLoadEntities: true,
       ssl: true,
       //   @ts-ignore
-      sslmode: 'require',
+      //   sslmode: 'require',
       entities: [
         `${NODE_ENV === 'test' ? 'src' : 'dist'}/**/**.entity{.ts,.js}`,
       ],
