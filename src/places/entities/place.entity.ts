@@ -10,11 +10,14 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
+import { OpeningHours } from './opening-hours.entity';
 
 @Entity('places')
 export class Place extends AbstractEntity {
@@ -70,6 +73,10 @@ export class Place extends AbstractEntity {
   rating: number;
   @Column({ default: 0 })
   total_reviews: number;
+
+  @OneToOne(() => OpeningHours, { eager: true })
+  @JoinColumn()
+  openingHours: OpeningHours;
 
   @BeforeInsert()
   @BeforeUpdate()

@@ -30,6 +30,8 @@ import { PaginationOptions } from 'src/entities/pagination.entity';
 import { Review } from 'src/reviews/entities/review.entity';
 import { RatePlaceDto } from 'src/reviews/dto/create-review.dto';
 import { Booking } from 'src/bookings/entities/booking.entity';
+import { UpdateOpeningHoursDto } from './dto/update-opening-hours.dto';
+import { OpeningHours } from './entities/opening-hours.entity';
 
 @Injectable()
 export class PlacesService {
@@ -46,6 +48,8 @@ export class PlacesService {
     private readonly reviewsRepository: Repository<Review>,
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
+    @InjectRepository(OpeningHours)
+    private readonly openingHoursRepository: Repository<OpeningHours>,
   ) {}
 
   async createPlace(
@@ -483,6 +487,55 @@ export class PlacesService {
         order: { createdAt: 'DESC' },
       });
       return reviews;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
+  updatePlaceOpeningHours = async (
+    id: string,
+    user: User,
+    {
+      monday,
+      tuesday,
+      wednesday,
+      thursday,
+      friday,
+      saturday,
+      sunday,
+      exceptions,
+    }: UpdateOpeningHoursDto,
+  ) => {
+    try {
+      if (
+        user.role.name === UserRoles.PLACE_ADMIN &&
+        user.adminFor?.id !== id
+      ) {
+        throw new ForbiddenException(
+          'You are not allowed to update this place',
+        );
+      }
+      const place = await this.findPlaceById(id);
+      if (place.openingHours) {
+        const id = place.openingHours.id;
+        place.openingHours = null;
+        await place.save();
+        await this.openingHoursRepository.delete(id);
+      }
+      const openingHours = new OpeningHours();
+      openingHours.monday = monday;
+      openingHours.tuesday = tuesday;
+      openingHours.wednesday = wednesday;
+      openingHours.thursday = thursday;
+      openingHours.friday = friday;
+      openingHours.saturday = saturday;
+      openingHours.sunday = sunday;
+      openingHours.exceptions = exceptions;
+      const savedOpeningHours = await openingHours.save();
+      place.openingHours = savedOpeningHours;
+      await place.save();
+      return savedOpeningHours;
     } catch (error) {
       console.log(error);
       throw error;

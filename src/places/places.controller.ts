@@ -23,6 +23,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
+  ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -39,6 +40,7 @@ import { IDistance } from 'src/utils/interface';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import { PaginationOptions } from 'src/entities/pagination.entity';
 import { RatePlaceDto } from 'src/reviews/dto/create-review.dto';
+import { UpdateOpeningHoursDto } from './dto/update-opening-hours.dto';
 
 @Controller('places')
 @ApiTags('Places')
@@ -261,5 +263,28 @@ export class PlacesController {
     @Query() queries: PaginationOptions,
   ) {
     return await this.placesService.findPlaceRatings(id, queries);
+  }
+
+  @ApiOkResponse({
+    description:
+      'The openning hours of the place has been successfully updated',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '(Admin)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
+  @Post(':id/openingHours')
+  async setPlaceOpeningHours(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateopeningHoursDto: UpdateOpeningHoursDto,
+    @currentUser() user: User,
+  ) {
+    return await this.placesService.updatePlaceOpeningHours(
+      id,
+      user,
+      updateopeningHoursDto,
+    );
   }
 }

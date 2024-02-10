@@ -25,6 +25,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { SmsService } from './sms/sms.service';
 import { Role } from './users/entities/role.entity';
 import { UsersModule } from './users/users.module';
+import { VariablesModule } from './variables/variables.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -53,6 +54,7 @@ import { UsersModule } from './users/users.module';
     BookingsModule,
     PaymentModule,
     ReviewsModule,
+    VariablesModule,
   ],
   controllers: [AppController],
   providers: [AppService, SmsService, PaymentService],
