@@ -272,7 +272,7 @@ export class PlacesController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
   @ApiBearerAuth()
-  @ApiOperation({ summary: '(Admin)' })
+  @ApiOperation({ summary: '(Admin/place admin)' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
   @Post(':id/openingHours')
