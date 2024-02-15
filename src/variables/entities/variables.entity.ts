@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity('variables')
 export class Variable {
   constructor(label: string, value: string) {
     this.label = label;
