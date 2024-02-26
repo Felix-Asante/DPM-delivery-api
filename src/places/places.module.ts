@@ -17,6 +17,8 @@ import { LikesModule } from 'src/likes/likes.module';
 import { Booking } from 'src/bookings/entities/booking.entity';
 import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
 import { SmsService } from 'src/sms/sms.service';
+import { Review } from 'src/reviews/entities/review.entity';
+import { OpeningHours } from './entities/opening-hours.entity';
 
 @Module({
   imports: [
@@ -28,6 +30,9 @@ import { SmsService } from 'src/sms/sms.service';
       ProductsCategory,
       Booking,
       BookingStatus,
+      Review,
+      Booking,
+      OpeningHours,
     ]),
     FilesModule,
     LikesModule,

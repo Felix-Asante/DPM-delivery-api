@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -16,11 +17,15 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiConsumes,
+  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
+  ApiResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwtAuth.guard';
@@ -34,6 +39,8 @@ import { User } from 'src/users/entities/user.entity';
 import { IDistance } from 'src/utils/interface';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import { PaginationOptions } from 'src/entities/pagination.entity';
+import { RatePlaceDto } from 'src/reviews/dto/create-review.dto';
+import { UpdateOpeningHoursDto } from './dto/update-opening-hours.dto';
 
 @Controller('places')
 @ApiTags('Places')
@@ -223,5 +230,61 @@ export class PlacesController {
   @hasRoles(UserRoles.ADMIN)
   async getPlaceAdmin(@Param('id') placeId: string) {
     return await this.placesService.getPlaceAdmin(placeId);
+  }
+  @ApiCreatedResponse({
+    description: 'The place has been successfully rated.',
+  })
+  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
+  @ApiNotFoundResponse({ description: 'Place not found' })
+  // @ApiBadRequestResponse({ description: 'User already rated the place' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '(User)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.USER)
+  @Post(':id/rate')
+  async ratePlace(
+    @currentUser() user: User,
+    @Body() ratePlaceDto: RatePlaceDto,
+    @Param('id') id: string,
+  ) {
+    return await this.placesService.ratePlace(user, ratePlaceDto, id);
+  }
+
+  @ApiOkResponse({
+    description: 'The place ratings are returned successfully',
+  })
+  @ApiNotFoundResponse({ description: 'Place not found' })
+  @ApiOperation({ summary: '(user)' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @Get(':id/ratings')
+  async getPlaceRatings(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() queries: PaginationOptions,
+  ) {
+    return await this.placesService.findPlaceRatings(id, queries);
+  }
+
+  @ApiOkResponse({
+    description:
+      'The openning hours of the place has been successfully updated',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '(Admin/place admin)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN)
+  @Post(':id/openingHours')
+  async setPlaceOpeningHours(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateopeningHoursDto: UpdateOpeningHoursDto,
+    @currentUser() user: User,
+  ) {
+    return await this.placesService.updatePlaceOpeningHours(
+      id,
+      user,
+      updateopeningHoursDto,
+    );
   }
 }

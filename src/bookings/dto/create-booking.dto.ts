@@ -8,9 +8,9 @@ import {
 } from 'class-validator';
 
 export class CreateBookingDto {
-  @IsArray()
+  @IsString()
   @ApiProperty()
-  place: string[];
+  place: string;
 
   @IsArray()
   @ApiPropertyOptional()
