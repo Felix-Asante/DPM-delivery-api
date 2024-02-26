@@ -127,8 +127,8 @@ export class OffersController {
     return this.offersService.getAllOffers(options);
   }
   @Get('place-offers')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN, UserRoles.USER)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN, UserRoles.USER)
   @ApiBearerAuth()
   @ApiBadRequestResponse()
   @ApiForbiddenResponse()
@@ -136,8 +136,8 @@ export class OffersController {
     return this.offersService.getPlaceOffers();
   }
   @Get('product-offers')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN, UserRoles.USER)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @hasRoles(UserRoles.ADMIN, UserRoles.PLACE_ADMIN, UserRoles.USER)
   @ApiBearerAuth()
   @ApiBadRequestResponse()
   @ApiForbiddenResponse()

@@ -2,10 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { PAYSTACK_ENDPOINT } from 'src/utils/constants';
+import { Paystack } from 'paystack-sdk';
 
 @Injectable()
 export class PaymentService {
-  constructor(private configService: ConfigService) {}
+  paystack: Paystack;
+  constructor(private configService: ConfigService) {
+    this.paystack = new Paystack(
+      this.configService.get<string>('PAYSTACK_SECRET_KEY'),
+    );
+  }
   payStackHeaders() {
     const secret = this.configService.get<string>('PAYSTACK_SECRET_KEY');
     return {
@@ -18,12 +24,13 @@ export class PaymentService {
   async acceptPayment() {
     try {
       const endpoint = PAYSTACK_ENDPOINT.INITIALIZE_TRANSACTION;
-
+      // const result = await this.paystack.
       const result = await axios.post(
-        endpoint,
+        'https://api.paystack.co/paymentrequest',
         {
-          amount: 500,
-          email: 'customer@email.com',
+          amount: 5,
+          // email: 'customer@email.com',
+          customer: 'CUS_q7e4my0my7s2hi5',
           currency: 'GHS',
           channels: ['mobile_money'],
           mobile_money: {
@@ -33,7 +40,8 @@ export class PaymentService {
         },
         this.payStackHeaders(),
       );
-      return result?.data;
+      console.log(result);
+      return result.data;
     } catch (error) {
       console.log(error?.response);
     }

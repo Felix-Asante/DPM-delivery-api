@@ -10,11 +10,14 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
+import { OpeningHours } from './opening-hours.entity';
 
 @Entity('places')
 export class Place extends AbstractEntity {
@@ -60,11 +63,20 @@ export class Place extends AbstractEntity {
   @OneToMany(() => Offer, (offer) => offer.product, {
     onDelete: 'CASCADE',
   })
-  @ManyToMany(() => Booking, (booking) => booking.place)
+  // @ManyToMany(() => Booking, (booking) => booking.place)
+  @OneToMany(() => Booking, (booking) => booking.place)
   @JoinTable()
   bookings: Booking;
 
   offers: Offer;
+  @Column({ default: 0 })
+  rating: number;
+  @Column({ default: 0 })
+  total_reviews: number;
+
+  @OneToOne(() => OpeningHours, { eager: true })
+  @JoinColumn()
+  openingHours: OpeningHours;
 
   @BeforeInsert()
   @BeforeUpdate()
