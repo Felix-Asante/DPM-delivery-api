@@ -1,12 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDecimal, IsInt, IsString, Max, Min } from 'class-validator';
+import {
+  IsDecimal,
+  IsInt,
+  IsNumber,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class RatePlaceDto {
   @IsString()
   @ApiProperty()
   comment: string;
 
-  @IsDecimal()
+  @IsNumber()
   @Max(5)
   @Min(1)
   @ApiProperty()
