@@ -1,6 +1,10 @@
 import * as crypto from 'crypto';
 import * as dayjs from 'dayjs';
-import { CODE_EXPIRATION_MINUTE, MAX_DELIVERY_DISTANCE } from './constants';
+import {
+  CODE_EXPIRATION_MINUTE,
+  MAX_DELIVERY_DISTANCE,
+  WEEKS,
+} from './constants';
 import { BadRequestException } from '@nestjs/common';
 import { ERRORS } from './errors';
 import { convertDistance, getPreciseDistance } from 'geolib';
@@ -154,5 +158,27 @@ export async function getTotalItems<T>(
     });
 
     return { currentMonth: currentMonthOffers, all_time: totalOffers };
+  });
+}
+
+export function isPlaceOpened(openHours: any) {
+  const currentDate = new Date('2024-03-08');
+  const day = WEEKS[currentDate.getDay()];
+
+  const openHour = openHours[day];
+  if (!openHour) return true;
+
+  if (openHour?.closed) return false;
+
+  if (openHour?.openAllDay) return true;
+
+  return openHour.ranges.some((range) => {
+    const fromTime = new Date(`2024-03-08T${range.from}`);
+    const toTime = new Date(`2024-03-08T${range.to}`);
+
+    if (currentDate >= fromTime && currentDate <= toTime) {
+      return true; // Within opening hours range
+    }
+    return false;
   });
 }

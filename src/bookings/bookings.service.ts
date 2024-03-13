@@ -11,6 +11,7 @@ import { ERRORS } from 'src/utils/errors';
 import {
   generateOtpCode,
   getTotalItems,
+  isPlaceOpened,
   isValidDateString,
   tryCatch,
 } from 'src/utils/helpers';
@@ -73,6 +74,17 @@ export class BookingsService {
       newBooking.quantity = quantity;
       newBooking.reference_code = reference;
 
+      const reservedPlaces = await this.placeService.findPlaceById(
+        place,
+        false,
+      );
+
+      if (!isPlaceOpened(reservedPlaces?.openingHours)) {
+        throw new BadRequestException(
+          `${reservedPlaces?.name} is currently not accepting orders`,
+        );
+      }
+
       const pendingBooking = await this.getBookingByStatus(
         BookingState.PENDING,
       );
@@ -82,10 +94,6 @@ export class BookingsService {
       const user = await this.userService.findUserByPhone(userPhone);
       newBooking.user = user;
 
-      const reservedPlaces = await this.placeService.findPlaceById(
-        place,
-        false,
-      );
       newBooking.place = reservedPlaces;
 
       if (rider_tip) {
