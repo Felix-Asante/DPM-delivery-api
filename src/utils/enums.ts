@@ -29,3 +29,8 @@ export enum BookingState {
   CANCELLED = 'cancelled',
   REJECTED = 'rejected',
 }
+
+export enum TransactionTypes {
+  PAYMENT_RECEIVED = 'payment_received',
+  WITHDRAWAL = 'withdraw',
+}

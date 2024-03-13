@@ -18,3 +18,13 @@ export const PAYSTACK_ENDPOINT = {
     `https://api.paystack.co/transaction/verify/${reference}`,
   LIST_TRANSACTION: () => `https://api.paystack.co/transaction`,
 };
+
+export const WEEKS = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+] as const;

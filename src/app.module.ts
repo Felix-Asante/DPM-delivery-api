@@ -57,6 +57,6 @@ import { VariablesModule } from './variables/variables.module';
     VariablesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, SmsService, PaymentService],
+  providers: [AppService, SmsService],
 })
 export class AppModule {}
