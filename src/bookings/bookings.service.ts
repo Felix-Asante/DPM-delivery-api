@@ -5,7 +5,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { paginate } from 'nestjs-typeorm-paginate';
+import { FilesService } from 'src/files/files.service';
+import { MessagesService } from 'src/messages/messages.service';
+import { PlacesService } from 'src/places/places.service';
+import { OrderedProducts } from 'src/products/entities/ordered-product.entity';
+import { ProductsService } from 'src/products/products.service';
+import { RatePlaceDto } from 'src/reviews/dto/create-review.dto';
+import { Review } from 'src/reviews/entities/review.entity';
 import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 import { BookingState, UserRoles } from 'src/utils/enums';
 import { ERRORS } from 'src/utils/errors';
 import {
@@ -15,21 +24,11 @@ import {
   isValidDateString,
   tryCatch,
 } from 'src/utils/helpers';
-import { Between, ILike, Repository } from 'typeorm';
-import { CreateBookingDto } from './dto/create-booking.dto';
-import { Booking } from './entities/booking.entity';
-import { PlacesService } from 'src/places/places.service';
-import { ProductsService } from 'src/products/products.service';
-import { UsersService } from 'src/users/users.service';
-import { BookingStatus } from './entities/booking-status.entity';
-import { OrderedProducts } from 'src/products/entities/ordered-product.entity';
-import { FilesService } from 'src/files/files.service';
-import { MessagesService } from 'src/messages/messages.service';
 import { IFindBookingQuery } from 'src/utils/interface';
-import { paginate } from 'nestjs-typeorm-paginate';
-import dayjs from 'dayjs';
-import { Review } from 'src/reviews/entities/review.entity';
-import { RatePlaceDto } from 'src/reviews/dto/create-review.dto';
+import { Between, Repository } from 'typeorm';
+import { CreateBookingDto } from './dto/create-booking.dto';
+import { BookingStatus } from './entities/booking-status.entity';
+import { Booking } from './entities/booking.entity';
 
 @Injectable()
 export class BookingsService {
@@ -63,6 +62,7 @@ export class BookingsService {
         quantity,
         total_amount,
         delivery_fee,
+        request_id,
       } = bookings;
 
       const newBooking = new Booking();
@@ -70,6 +70,7 @@ export class BookingsService {
       newBooking.recipient_address = delivery_address;
       newBooking.recipient_phone = recipient_phone;
       newBooking.transaction_id = transaction_id;
+      newBooking.request_id = request_id;
       newBooking.total_amount = total_amount;
       newBooking.quantity = quantity;
       newBooking.reference_code = reference;
