@@ -48,6 +48,9 @@ export class CreateBookingDto {
   @IsString()
   @ApiProperty()
   transaction_id: string;
+  @IsString()
+  @ApiProperty()
+  request_id: string;
 
   @IsInt()
   @ApiPropertyOptional()

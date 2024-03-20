@@ -38,6 +38,8 @@ export class Booking extends AbstractEntity {
 
   @Column()
   transaction_id: string;
+  @Column({ default: null })
+  request_id: string;
 
   @Column()
   reference_code: string;

@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { CreateMobilePaymentDto } from './dto/create-mobile-payment.dto';
 import axios from 'axios';
 import { externalApis } from 'src/lib/external-api';
-import { generateOtpCode } from 'src/utils/helpers';
 import { CheckPaymentStatusDto } from './dto/check-payment-status.dto';
+import { CreateMobilePaymentDto } from './dto/create-mobile-payment.dto';
 
 @Injectable()
 export class PaymentService {
@@ -13,14 +12,9 @@ export class PaymentService {
   async acceptPayment(body: CreateMobilePaymentDto) {
     try {
       const appId = this.configService.get('KOWRI_APP_ID');
-      const appReference = 'DPMDeliveries';
-      const appSecret = 'dotcom@88';
+      const appReference = this.configService.get('KOWRI_APP_REFERENCE');
+      const appSecret = this.configService.get('KOWRI_APP_SECRET');
       const environment = 'Test';
-
-      // const transactionId = `trans-${generateOtpCode(
-      //   10,
-      // )}-${new Date().getTime()}`;
-      // const requestId = `req-${generateOtpCode(10)}-${new Date().getTime()}`;
 
       const payload = {
         ...body,
@@ -30,16 +24,17 @@ export class PaymentService {
         customerSegment: environment,
         serviceCode: '3058',
       };
-      console.log(payload);
-      const response = axios.post(externalApis.payment.payNow(), payload, {
+
+      const endpoint = externalApis.payment.payNow();
+      const response = await axios.post(endpoint, payload, {
         headers: {
-          appId: '86a39935-2035-4509-92b7-79c60296438f',
+          appId,
         },
       });
-      return response;
+      return response.data;
     } catch (error) {
-      console.log('resss', error?.response);
-      return { error: error?.response };
+      console.log('resss', error?.response?.data);
+      return error?.response?.data;
     }
   }
 
