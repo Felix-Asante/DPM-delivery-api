@@ -163,16 +163,16 @@ export async function getTotalItems<T>(
 
 export function isPlaceOpened(openHours: any) {
   const currentDate = new Date('2024-03-08');
-  const day = WEEKS[currentDate.getDay()];
+  const day = WEEKS?.[currentDate.getDay()];
 
-  const openHour = openHours[day];
+  const openHour = openHours?.[day];
   if (!openHour) return true;
 
   if (openHour?.closed) return false;
 
   if (openHour?.openAllDay) return true;
 
-  return openHour.ranges.some((range) => {
+  return openHour.ranges?.some((range) => {
     const fromTime = new Date(`2024-03-08T${range.from}`);
     const toTime = new Date(`2024-03-08T${range.to}`);
 
