@@ -362,4 +362,13 @@ export class BookingsService {
       throw error;
     }
   };
+
+  findUnPaidBookings() {
+    return tryCatch<Booking[]>(async () => {
+      const bookings = await this.bookingRepository.find({
+        where: { paid: false },
+      });
+      return bookings;
+    });
+  }
 }
