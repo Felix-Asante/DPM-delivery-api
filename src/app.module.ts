@@ -26,6 +26,8 @@ import { SmsService } from './sms/sms.service';
 import { Role } from './users/entities/role.entity';
 import { UsersModule } from './users/users.module';
 import { VariablesModule } from './variables/variables.module';
+import { CronsModule } from './crons/crons.module';
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -39,6 +41,7 @@ import { VariablesModule } from './variables/variables.module';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '365 days' },
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     UsersModule,
     MessagesModule,
@@ -55,6 +58,7 @@ import { VariablesModule } from './variables/variables.module';
     PaymentModule,
     ReviewsModule,
     VariablesModule,
+    CronsModule,
   ],
   controllers: [AppController],
   providers: [AppService, SmsService],
