@@ -129,6 +129,8 @@ export class BookingsService {
         reference,
         place: [reservedPlaces],
       });
+
+      await new Promise((resolve) => setTimeout(() => resolve(1), 2000));
       await this.messageService.sendSmsMessage({
         recipient: [bookings.recipient_phone],
         message: `We have received your booking. Download receipt ${uploadedPdf?.secure_url}`,
