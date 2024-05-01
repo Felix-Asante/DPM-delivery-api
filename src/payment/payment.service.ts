@@ -49,15 +49,17 @@ export class PaymentService {
         appReference,
         secret: appSecret,
       };
-      const response = axios.post(externalApis.payment.checkStatus(), payload, {
+
+      const endpoint = externalApis.payment.checkStatus();
+      console.log({ endpoint, payload });
+      const response = await axios.post(endpoint, payload, {
         headers: {
           appId,
         },
       });
-      return response;
+      return response.data;
     } catch (error) {
-      console.log(error?.response);
-      return { error: error?.response };
+      return { error: error?.message };
     }
   }
 }

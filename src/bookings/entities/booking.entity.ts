@@ -43,6 +43,8 @@ export class Booking extends AbstractEntity {
 
   @Column()
   reference_code: string;
+  @Column({ nullable: true })
+  receipt_url: string;
 
   @ManyToOne(() => BookingStatus, (status) => status.bookings, { eager: true })
   status: BookingStatus;

@@ -37,6 +37,7 @@ export interface ICreateBooking {
   transaction_id: string;
 
   total_amount: number;
+  id: string;
 }
 
 export interface IFindBookingQuery extends PaginationOptions {
