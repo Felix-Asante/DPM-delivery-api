@@ -189,14 +189,15 @@ export class BookingsService {
 
       const where =
         Object.entries(searchWhereClause).length > 0
-          ? { where: [searchWhereClause] }
+          ? { where: searchWhereClause }
           : undefined;
 
-      const bookings = paginate(
-        this.bookingRepository,
-        paginationOption,
-        where,
-      );
+      const bookings = paginate(this.bookingRepository, paginationOption, {
+        ...where,
+        order: {
+          createdAt: 'DESC',
+        },
+      });
       return bookings;
     });
   }
@@ -237,6 +238,7 @@ export class BookingsService {
     return tryCatch(async () => {
       const placeBookings = await this.bookingRepository.find({
         where: { place: { id } },
+        order: { createdAt: 'DESC' },
       });
       return placeBookings;
     });

@@ -89,7 +89,11 @@ export class UsersService {
         throw new BadRequestException('Invalid booking status');
       }
       return await this.bookingRepository.find({
-        where: { user: { id }, status: { id: bookingStatus.id } },
+        where: {
+          user: { id },
+          status: { id: bookingStatus.id },
+        },
+        order: { createdAt: 'DESC' },
       });
     });
   }
