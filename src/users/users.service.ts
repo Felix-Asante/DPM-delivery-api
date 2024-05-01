@@ -61,6 +61,8 @@ export class UsersService {
       newUser.codeExpiryDate = generateExpiryDate();
       newUser.code = smsCode;
       newUser.codeUseCase = CodeUseCases.ACTIVATE_ACCOUNT;
+    } else {
+      newUser.isVerified = true;
     }
     newUser.role = role;
     newUser.fullName = createUserDto.fullName;
