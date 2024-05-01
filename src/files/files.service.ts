@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import * as fs from 'fs';
 import {
   v2 as Cloudinary,
   UploadApiErrorResponse,
@@ -7,16 +6,21 @@ import {
 } from 'cloudinary';
 
 import { BufferStream } from '@myrotvorets/buffer-stream';
-import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as PDFDocument from 'pdfkit';
+import { Booking } from 'src/bookings/entities/booking.entity';
 import { tryCatch } from 'src/utils/helpers';
 import { ICreateBooking } from 'src/utils/interface';
+import { Repository } from 'typeorm';
 
 const pdfStartX = 10;
 @Injectable()
 export class FilesService {
   private doc: PDFKit.PDFDocument;
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    @InjectRepository(Booking)
+    private readonly bookingRepository: Repository<Booking>,
+  ) {
     this.doc = new PDFDocument({
       size: 'A5',
       margins: {
@@ -69,7 +73,7 @@ export class FilesService {
     return tryCatch(async () => {
       this.generateBookingReceiptHeader();
       this.generatePdfHr(70);
-      this.generateBookingMeta();
+      this.generateBookingMeta(booking.reference);
       this.generateTableRow('QTY', 'DESCRIPTION', 'AMOUNT', 143);
       this.generatePdfHr(152);
       booking.place.forEach((place, i) => {
@@ -112,13 +116,38 @@ export class FilesService {
         16,
       );
       this.generateBookingReceiptFooter();
-      this.doc.end();
-      this.doc.pipe(fs.createWriteStream(`${booking.reference}.pdf`));
-
-      await new Promise((resolve) => setTimeout(resolve, 4000));
-
-      const fileName = process.cwd() + `/${booking.reference}.pdf`;
-      return await this.uploadDocument(fileName);
+      // this.doc.end();
+      // const stream = this.doc.pipe(
+      //   fs.createWriteStream(`${booking.reference}.pdf`),
+      // );
+      const buffer = await new Promise((resolve, reject) => {
+        const buffers: Buffer[] = [];
+        this.doc.on('data', (chunk: Buffer) => buffers.push(chunk));
+        this.doc.on('end', () => {
+          const pdfBuffer = Buffer.concat(buffers);
+          // Log or inspect the PDF buffer
+          console.log('PDF Buffer:', pdfBuffer);
+          resolve(pdfBuffer);
+        });
+        this.doc.end();
+      });
+      await Cloudinary.uploader
+        .upload_stream(
+          { resource_type: 'auto' },
+          async (error: any, result: any) => {
+            if (error) {
+              console.log('ERROR', error);
+            } else {
+              console.log('RESULTS', result.secure_url, booking.id);
+              const bookings = await this.bookingRepository.findOne({
+                where: { id: booking.id },
+              });
+              bookings.receipt_url = result.secure_url;
+              await bookings.save();
+            }
+          },
+        )
+        .end(buffer);
     });
   }
 
@@ -143,10 +172,10 @@ export class FilesService {
       .moveDown();
   }
 
-  generateBookingMeta() {
+  generateBookingMeta(reference: string) {
     this.doc
       .fontSize(11)
-      .text('Reference: DPM-BK-20303', pdfStartX, 90)
+      .text(`Reference: ${reference}`, pdfStartX, 90)
       .moveDown()
       .fontSize(11)
       .text('Paid with: Mobile Money', pdfStartX, 103)

@@ -121,20 +121,21 @@ export class BookingsService {
           }),
         );
 
-        await this.orderedProductRepository.save(orderProducts);
+        // await this.orderedProductRepository.save(orderProducts);
       }
 
-      const uploadedPdf: any = await this.filesService.createBookingReceipt({
+      await this.filesService.createBookingReceipt({
         ...bookings,
         reference,
         place: [reservedPlaces],
+        id: savedBooking.id,
       });
 
-      await new Promise((resolve) => setTimeout(() => resolve(1), 2000));
-      await this.messageService.sendSmsMessage({
-        recipient: [bookings.recipient_phone],
-        message: `We have received your booking. Download receipt ${uploadedPdf?.secure_url}`,
-      });
+      // await new Promise((resolve) => setTimeout(() => resolve(1), 2000));
+      // await this.messageService.sendSmsMessage({
+      //   recipient: [bookings.recipient_phone],
+      //   message: `We have received your booking. Download receipt ${uploadedPdf?.secure_url}`,
+      // });
 
       return { message: 'booking recorded successfully!!' };
     });
