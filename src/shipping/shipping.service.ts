@@ -1,16 +1,14 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { paginate } from 'nestjs-typeorm-paginate';
+import { ENV } from 'src/app.environment';
+import { PaginationOptions } from 'src/entities/pagination.entity';
 import { MessagesService } from 'src/messages/messages.service';
 import { generateBookingReference } from 'src/utils/bookings';
-import {
-  BookingState,
-  MessagesTemplates,
-  ShipmentOptions,
-} from 'src/utils/enums';
+import { BookingState, MessagesTemplates } from 'src/utils/enums';
 import { DataSource, Repository } from 'typeorm';
 import { CreateShipmentDto } from './dto/create-shipment.dto';
 import { ShippingOrder } from './entities/shipping-order.entity';
-import { ENV } from 'src/app.environment';
 
 @Injectable()
 export class ShippingService {
@@ -58,8 +56,25 @@ export class ShippingService {
       queryRunner.rollbackTransaction();
       console.log(error);
       throw new InternalServerErrorException();
-    } finally {
-      queryRunner.release();
     }
+  }
+
+  async findAll(options: PaginationOptions) {
+    const orders = await paginate(this.shippingOrderRepository, options);
+    return orders;
+  }
+
+  async findOne(id: string) {
+    return this.shippingOrderRepository.findOne({
+      where: { id },
+      relations: ['rider'],
+    });
+  }
+
+  async findByReference(reference: string) {
+    return this.shippingOrderRepository.findOne({
+      where: { reference },
+      relations: ['rider'],
+    });
   }
 }
