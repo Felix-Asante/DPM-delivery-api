@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -173,6 +174,22 @@ export class UsersService {
     }
   }
 
+  async findById(id: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id },
+        relations: ['role'],
+      });
+      if (!user) {
+        throw new NotFoundException(ERRORS.USER_NOT_FOUND.EN);
+      }
+      return user;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
   async findUserByCode(code: string): Promise<User | null> {
     try {
       const user = await this.userRepository.findOne({
@@ -186,18 +203,22 @@ export class UsersService {
     }
   }
 
-  update({ phone }: User, updateUserDto: UpdateUserDto) {
+  update(id: string, updateUserDto: UpdateUserDto, requestUser: User) {
     return tryCatch(async () => {
-      const user = await this.findUserByPhone(phone);
+      const user = await this.findById(id);
 
-      const { fullName, email: newEmail } = updateUserDto;
-      if (fullName.length && user.fullName !== fullName) {
-        user.fullName = fullName;
+      if (requestUser.id !== id && requestUser.role.name !== UserRoles.ADMIN) {
+        throw new UnauthorizedException(ERRORS.UNAUTHORIZED.EN);
       }
-      if (user.email !== newEmail && newEmail.length) {
-        user.email = newEmail;
-      }
-      const savedUser = await user.save();
+
+      const { fullName, email, address } = updateUserDto;
+      const updatedUser = user;
+
+      updatedUser.fullName = fullName || user.fullName;
+      updatedUser.email = email || user.email;
+      updatedUser.address = address || user.address;
+
+      const savedUser = await updatedUser.save();
       return savedUser;
     });
   }
