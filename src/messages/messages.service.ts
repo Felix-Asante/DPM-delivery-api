@@ -14,6 +14,17 @@ type MessagesParamsMap = {
     reference: string;
     trackLink: string;
   };
+  [MessagesTemplates.RIDER_ASSIGNED]: {
+    reference: string;
+    fullName: string;
+  };
+  [MessagesTemplates.RIDER_ASSIGNED_USER]: {
+    reference: string;
+  };
+  [MessagesTemplates.RIDER_REASSIGNED]: {
+    fullName: string;
+  };
+  [MessagesTemplates.NEW_ORDER_RECEIVED]: unknown;
 };
 
 type MessagesParams<T extends MessagesTemplates> = MessagesParamsMap[T];
@@ -78,7 +89,22 @@ export class MessagesService {
     params: MessagesParams<T>,
   ) {
     if (template === MessagesTemplates.SHIPMENT_RECEIVED) {
-      return messages.shipmentReceived(params.reference, params.trackLink);
+      const { reference, trackLink } =
+        params as MessagesParamsMap[MessagesTemplates.SHIPMENT_RECEIVED];
+      return messages.shipmentReceived(reference, trackLink);
+    }
+    if (template === MessagesTemplates.RIDER_ASSIGNED) {
+      const { reference, fullName } =
+        params as MessagesParamsMap[MessagesTemplates.RIDER_ASSIGNED];
+      return messages.riderAssigned(fullName, reference);
+    }
+    if (template === MessagesTemplates.RIDER_REASSIGNED) {
+      const { fullName } =
+        params as MessagesParamsMap[MessagesTemplates.RIDER_REASSIGNED];
+      return messages.riderReassigned(fullName);
+    }
+    if (template === MessagesTemplates.NEW_ORDER_RECEIVED) {
+      return messages.newOrderReceived();
     }
     return '';
   }

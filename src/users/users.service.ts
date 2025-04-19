@@ -280,4 +280,15 @@ export class UsersService {
       return { success: true };
     });
   }
+
+  async findRiderById(id: string) {
+    const rider = await this.userRepository.findOne({
+      where: { id, role: { name: UserRoles.COURIER } },
+      relations: ['role'],
+    });
+    if (!rider) {
+      throw new NotFoundException('Rider not found');
+    }
+    return rider;
+  }
 }

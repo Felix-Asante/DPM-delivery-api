@@ -46,4 +46,8 @@ export enum ModeOfShipment {
 
 export const enum MessagesTemplates {
   SHIPMENT_RECEIVED = 'shipment_received',
+  RIDER_ASSIGNED = 'rider_assigned',
+  RIDER_ASSIGNED_USER = 'rider_assigned_user',
+  RIDER_REASSIGNED = 'rider_reassigned',
+  NEW_ORDER_RECEIVED = 'new_order_received',
 }
