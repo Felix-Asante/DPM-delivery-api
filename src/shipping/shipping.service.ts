@@ -114,6 +114,7 @@ export class ShippingService {
       if (order.rider && order.rider.id !== riderId) {
         await this.messageService.sendSms(MessagesTemplates.RIDER_REASSIGNED, {
           fullName: order.rider.fullName,
+          reference: order.reference,
           recipients: [order.rider.phone],
         });
       }

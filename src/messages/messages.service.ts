@@ -23,6 +23,7 @@ type MessagesParamsMap = {
   };
   [MessagesTemplates.RIDER_REASSIGNED]: {
     fullName: string;
+    reference: string;
   };
   [MessagesTemplates.NEW_ORDER_RECEIVED]: unknown;
 };
@@ -99,9 +100,9 @@ export class MessagesService {
       return messages.riderAssigned(fullName, reference);
     }
     if (template === MessagesTemplates.RIDER_REASSIGNED) {
-      const { fullName } =
+      const { fullName, reference } =
         params as MessagesParamsMap[MessagesTemplates.RIDER_REASSIGNED];
-      return messages.riderReassigned(fullName);
+      return messages.riderReassigned(fullName, reference);
     }
     if (template === MessagesTemplates.NEW_ORDER_RECEIVED) {
       return messages.newOrderReceived();
