@@ -3,6 +3,7 @@ import {
   BeforeInsert,
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -13,8 +14,10 @@ import * as bcrypt from 'bcrypt';
 import { Place } from 'src/places/entities/place.entity';
 import { Booking } from 'src/bookings/entities/booking.entity';
 import { Review } from 'src/reviews/entities/review.entity';
+import { Rider } from 'src/rider/entities/rider.entity';
 
 @Entity('users')
+@Index(['phone', 'email', 'code'])
 export class User extends AbstractEntity {
   @Column()
   phone: string;
@@ -51,6 +54,10 @@ export class User extends AbstractEntity {
 
   @OneToMany(() => Review, (review) => review.user)
   reviews: Review[];
+
+  @OneToOne(() => Rider, { onDelete: 'CASCADE' })
+  @JoinColumn()
+  rider: Rider;
 
   @BeforeInsert()
   async hashPassword() {
