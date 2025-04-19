@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -62,5 +63,19 @@ export class ShippingController {
   @ApiBadRequestResponse()
   async findByReference(@Param('reference') reference: string) {
     return this.shippingService.findByReference(reference);
+  }
+
+  @Patch(':id/assign-rider/:riderId')
+  @ApiInternalServerErrorResponse()
+  @ApiOkResponse()
+  @ApiBadRequestResponse()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @hasRoles(UserRoles.ADMIN)
+  async assignRider(
+    @Param('id') id: string,
+    @Param('riderId') riderId: string,
+  ) {
+    return this.shippingService.assignRider(id, riderId);
   }
 }
