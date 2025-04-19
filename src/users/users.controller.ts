@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
@@ -103,16 +102,21 @@ export class UsersController {
     return this.usersService.findUserBookings(status, user);
   }
 
-  @Put()
+  @Patch(':id')
   @ApiBearerAuth()
   @ApiNotFoundResponse()
   @ApiUnauthorizedResponse()
   @ApiBadRequestResponse()
-  @hasRoles(UserRoles.PLACE_ADMIN, UserRoles.USER)
+  @hasRoles(UserRoles.PLACE_ADMIN, UserRoles.USER, UserRoles.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  update(@Body() updateUserDto: UpdateUserDto, @currentUser() user: User) {
-    return this.usersService.update(user, updateUserDto);
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @currentUser() user: User,
+  ) {
+    return this.usersService.update(id, updateUserDto, user);
   }
+
   @Put('change-password')
   @ApiBearerAuth()
   @ApiNotFoundResponse()

@@ -2,6 +2,9 @@ export const ERRORS = {
   USER_NOT_FOUND_EMAIL: {
     EN: 'User not found with this email address',
   },
+  USER_NOT_FOUND: {
+    EN: 'User not found with',
+  },
   USER_NOT_FOUND_PHONE: {
     EN: 'This phone number does not belong to any account',
   },
@@ -113,5 +116,9 @@ export const ERRORS = {
     NOT_FOUND: {
       EN: 'Rider not found',
     },
+  },
+
+  UNAUTHORIZED: {
+    EN: 'Unauthorized!!',
   },
 };
