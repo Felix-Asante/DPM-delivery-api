@@ -1,6 +1,7 @@
 import { AbstractEntity } from 'src/entities/abstract.entity';
+import { User } from 'src/users/entities/user.entity';
 import { BookingState, ModeOfShipment, ShipmentOptions } from 'src/utils/enums';
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('shipping_orders')
 export class ShippingOrder extends AbstractEntity {
@@ -37,4 +38,7 @@ export class ShippingOrder extends AbstractEntity {
   @Column()
   @Index('reference_idx')
   reference: string;
+
+  @ManyToOne(() => User, (rider) => rider.shippingOrders)
+  rider: User;
 }

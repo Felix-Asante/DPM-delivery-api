@@ -15,6 +15,7 @@ import { Place } from 'src/places/entities/place.entity';
 import { Booking } from 'src/bookings/entities/booking.entity';
 import { Review } from 'src/reviews/entities/review.entity';
 import { Rider } from 'src/rider/entities/rider.entity';
+import { ShippingOrder } from 'src/shipping/entities/shipping-order.entity';
 
 @Entity('users')
 @Index(['phone', 'email', 'code'])
@@ -54,6 +55,9 @@ export class User extends AbstractEntity {
 
   @OneToMany(() => Review, (review) => review.user)
   reviews: Review[];
+
+  @OneToMany(() => ShippingOrder, (shippingOrder) => shippingOrder.rider)
+  shippingOrders: ShippingOrder[];
 
   @OneToOne(() => Rider, { onDelete: 'CASCADE' })
   @JoinColumn()
