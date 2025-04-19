@@ -27,6 +27,8 @@ import { Role } from './users/entities/role.entity';
 import { UsersModule } from './users/users.module';
 import { VariablesModule } from './variables/variables.module';
 import { RiderModule } from './rider/rider.module';
+import { ShippingModule } from './shipping/shipping.module';
+import { AssetsModule } from './assets/assets.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -57,6 +59,8 @@ import { RiderModule } from './rider/rider.module';
     ReviewsModule,
     VariablesModule,
     RiderModule,
+    ShippingModule,
+    AssetsModule,
   ],
   controllers: [AppController],
   providers: [AppService, SmsService, PaymentService],
