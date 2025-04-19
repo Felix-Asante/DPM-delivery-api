@@ -14,6 +14,9 @@ export const ERRORS = {
   PHONE_ALREADY_TAKEN: {
     EN: 'Another user is already using this phone number',
   },
+  EMAIL_ALREADY_TAKEN: {
+    EN: 'Another user is already using this email address',
+  },
   INVALID_CODE: {
     EN: 'The code your provided code is invalid',
   },
@@ -104,6 +107,11 @@ export const ERRORS = {
     },
     NOT_YOURS: {
       EN: 'You cannot delete this review',
+    },
+  },
+  RIDER: {
+    NOT_FOUND: {
+      EN: 'Rider not found',
     },
   },
 };
