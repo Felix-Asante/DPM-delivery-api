@@ -1,7 +1,12 @@
 import { AbstractEntity } from 'src/entities/abstract.entity';
 import { User } from 'src/users/entities/user.entity';
-import { BookingState, ModeOfShipment, ShipmentOptions } from 'src/utils/enums';
+import {
+  ModeOfShipment,
+  ShipmentHistoryStatus,
+  ShipmentOptions,
+} from 'src/utils/enums';
 import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
+import { ShipmentHistory } from './shipment-history.entity';
 
 @Entity('shipping_orders')
 export class ShippingOrder extends AbstractEntity {
@@ -33,7 +38,7 @@ export class ShippingOrder extends AbstractEntity {
   modeOfShipment: ModeOfShipment;
 
   @Column()
-  status: BookingState;
+  status: ShipmentHistoryStatus;
 
   @Column()
   @Index('reference_idx')
@@ -41,4 +46,9 @@ export class ShippingOrder extends AbstractEntity {
 
   @ManyToOne(() => User, (rider) => rider.shippingOrders)
   rider: User;
+
+  @OneToMany(() => ShipmentHistory, (history) => history.order, {
+    cascade: true,
+  })
+  history: ShipmentHistory[];
 }

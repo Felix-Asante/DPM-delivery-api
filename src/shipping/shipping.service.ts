@@ -9,20 +9,26 @@ import { paginate } from 'nestjs-typeorm-paginate';
 import { ENV } from 'src/app.environment';
 import { PaginationOptions } from 'src/entities/pagination.entity';
 import { MessagesService } from 'src/messages/messages.service';
+import { UsersService } from 'src/users/users.service';
 import { generateBookingReference } from 'src/utils/bookings';
-import { BookingState, MessagesTemplates } from 'src/utils/enums';
+import { MessagesTemplates, ShipmentHistoryStatus } from 'src/utils/enums';
 import { DataSource, Repository } from 'typeorm';
 import { CreateShipmentDto } from './dto/create-shipment.dto';
 import { ShippingOrder } from './entities/shipping-order.entity';
-import { UsersService } from 'src/users/users.service';
+import { ShipmentHistory } from './entities/shipment-history.entity';
+import { CreateShipmentHistoryDto } from './dto/create-shipment-history.dto';
+import { FilesService } from 'src/files/files.service';
 
 @Injectable()
 export class ShippingService {
   constructor(
     @InjectRepository(ShippingOrder)
     private readonly shippingOrderRepository: Repository<ShippingOrder>,
+    @InjectRepository(ShipmentHistory)
+    private readonly shipmentHistoryRepository: Repository<ShipmentHistory>,
     private readonly messageService: MessagesService,
     private readonly userService: UsersService,
+    private readonly filesService: FilesService,
     private dataSource: DataSource,
   ) {}
 
@@ -37,7 +43,7 @@ export class ShippingService {
 
       const shipment = await queryRunner.manager.save(ShippingOrder, {
         ...createShipmentDto,
-        status: BookingState.PENDING,
+        status: ShipmentHistoryStatus.PENDING,
         reference,
       });
 
@@ -70,7 +76,7 @@ export class ShippingService {
   async findOne(id: string) {
     const order = await this.shippingOrderRepository.findOne({
       where: { id },
-      relations: ['rider'],
+      relations: ['rider', 'history'],
     });
 
     if (!order) {
@@ -82,7 +88,7 @@ export class ShippingService {
   async findByReference(reference: string) {
     const order = await this.shippingOrderRepository.findOne({
       where: { reference },
-      relations: ['rider'],
+      relations: ['rider', 'history'],
     });
 
     if (!order) {
@@ -105,6 +111,11 @@ export class ShippingService {
       }
 
       const rider = await this.userService.findRiderById(riderId);
+      let history = await this.findHistoryById(id);
+
+      if (!history) {
+        history = new ShipmentHistory();
+      }
 
       if (!rider.isVerified) {
         throw new BadRequestException('Rider is not verified');
@@ -117,11 +128,14 @@ export class ShippingService {
           reference: order.reference,
           recipients: [order.rider.phone],
         });
+        history.status = ShipmentHistoryStatus.RIDER_REASSIGNED;
+        order.status = ShipmentHistoryStatus.RIDER_REASSIGNED;
       }
 
       // Assign the new rider and update status
       order.rider = rider;
-      order.status = BookingState.RIDER_ASSIGNED;
+      order.status = ShipmentHistoryStatus.RIDER_ASSIGNED;
+      history.status = ShipmentHistoryStatus.RIDER_ASSIGNED;
 
       // Notify the new rider
       await this.messageService.sendSms(MessagesTemplates.RIDER_ASSIGNED, {
@@ -142,6 +156,9 @@ export class ShippingService {
       }
 
       const savedOrder = await this.shippingOrderRepository.save(order);
+      history.order = savedOrder;
+      await this.shipmentHistoryRepository.save(history);
+
       await queryRunner.commitTransaction();
       return savedOrder;
     } catch (error) {
@@ -151,5 +168,52 @@ export class ShippingService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async updateHistory(
+    createShipmentHistoryDto: CreateShipmentHistoryDto,
+    shippingId: string,
+  ) {
+    const order = await this.findOne(shippingId);
+    const history = new ShipmentHistory();
+    const data = {};
+
+    if (
+      createShipmentHistoryDto.status ===
+        ShipmentHistoryStatus.PICKUP_CONFIRMED &&
+      !createShipmentHistoryDto.photo
+    ) {
+      throw new BadRequestException(
+        'Photo is required for pickup confirmation',
+      );
+    }
+
+    if (createShipmentHistoryDto.photo) {
+      const upload = await this.filesService.uploadImage(
+        createShipmentHistoryDto.photo,
+      );
+      data['photo'] = upload.url;
+      data['status'] = createShipmentHistoryDto.status;
+    }
+
+    if (
+      createShipmentHistoryDto.status === ShipmentHistoryStatus.PICKUP_CONFIRMED
+    ) {
+      //   schedule cron job
+    }
+
+    history.status = createShipmentHistoryDto.status;
+    history.description = createShipmentHistoryDto.description;
+    history.data = data;
+    history.order = order;
+
+    return this.shipmentHistoryRepository.save(history);
+  }
+
+  async findHistoryById(shippingId: string) {
+    return this.shipmentHistoryRepository.findOne({
+      where: { order: { id: shippingId } },
+      relations: ['order'],
+    });
   }
 }
