@@ -18,6 +18,8 @@ import { ShippingOrder } from './entities/shipping-order.entity';
 import { ShipmentHistory } from './entities/shipment-history.entity';
 import { CreateShipmentHistoryDto } from './dto/create-shipment-history.dto';
 import { FilesService } from 'src/files/files.service';
+import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
+import { CronJob } from 'cron';
 
 @Injectable()
 export class ShippingService {
@@ -30,6 +32,7 @@ export class ShippingService {
     private readonly userService: UsersService,
     private readonly filesService: FilesService,
     private dataSource: DataSource,
+    private schedulerRegistry: SchedulerRegistry,
   ) {}
 
   async create(createShipmentDto: CreateShipmentDto) {
@@ -199,7 +202,7 @@ export class ShippingService {
     if (
       createShipmentHistoryDto.status === ShipmentHistoryStatus.PICKUP_CONFIRMED
     ) {
-      //   schedule cron job
+      await this.changeToOutForDelivery(order.id);
     }
 
     history.status = createShipmentHistoryDto.status;
@@ -208,6 +211,19 @@ export class ShippingService {
     history.order = order;
 
     return this.shipmentHistoryRepository.save(history);
+  }
+
+  async changeToOutForDelivery(id: string) {
+    const job = new CronJob(CronExpression.EVERY_5_MINUTES, async () => {
+      const order = await this.findOne(id);
+      order.status = ShipmentHistoryStatus.OUT_FOR_DELIVERY;
+      await this.shippingOrderRepository.save(order);
+      job.stop();
+      this.schedulerRegistry.deleteCronJob(`change_to_out_for_delivery_${id}`);
+    });
+
+    this.schedulerRegistry.addCronJob(`change_to_out_for_delivery_${id}`, job);
+    job.start();
   }
 
   async findHistoryById(shippingId: string) {
