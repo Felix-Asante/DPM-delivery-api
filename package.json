@@ -41,6 +41,7 @@
     "class-validator": "^0.14.0",
     "cloudinary": "^1.40.0",
     "dayjs": "^1.11.9",
+    "env-var": "^7.5.0",
     "geolib": "^3.3.4",
     "nestjs-twilio": "^4.1.1",
     "nestjs-typeorm-paginate": "^4.0.4",

@@ -1,17 +1,9 @@
 import { AbstractEntity } from 'src/entities/abstract.entity';
 import { Place } from 'src/places/entities/place.entity';
-import { Products } from 'src/products/entities/product.entity';
-import { User } from 'src/users/entities/user.entity';
-import {
-  Column,
-  Entity,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-} from 'typeorm';
-import { BookingStatus } from './booking-status.entity';
 import { OrderedProducts } from 'src/products/entities/ordered-product.entity';
+import { User } from 'src/users/entities/user.entity';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { BookingStatus } from './booking-status.entity';
 
 @Entity('bookings')
 export class Booking extends AbstractEntity {

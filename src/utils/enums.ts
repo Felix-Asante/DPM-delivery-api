@@ -28,6 +28,38 @@ export enum BookingState {
   DELIVERED = 'delivered',
   CANCELLED = 'cancelled',
   REJECTED = 'rejected',
+  RIDER_ASSIGNED = 'rider_assigned',
+}
+
+export enum ShipmentOptions {
+  STANDARD = 'standard_delivery',
+  EXPRESS = 'express_delivery',
+  SPECIAL = 'special_delivery',
+  BULK = 'bulk_delivery',
+}
+
+export enum ModeOfShipment {
+  Bike = 'Bike',
+  Aboboyaa = 'Aboboyaa',
+  Van = 'Van',
+}
+
+export const enum MessagesTemplates {
+  SHIPMENT_RECEIVED = 'shipment_received',
+  RIDER_ASSIGNED = 'rider_assigned',
+  RIDER_ASSIGNED_USER = 'rider_assigned_user',
+  RIDER_REASSIGNED = 'rider_reassigned',
+  NEW_ORDER_RECEIVED = 'new_order_received',
+}
+
+export enum ShipmentHistoryStatus {
+  OUT_FOR_DELIVERY = 'out_for_delivery',
+  FAILED_DELIVERY_ATTEMPT = 'failed_delivery_attempt',
+  DELIVERED = 'delivered',
+  RIDER_REASSIGNED = 'rider_reassigned',
+  PICKUP_CONFIRMED = 'pickup_confirmed',
+  PENDING = 'pending',
+  RIDER_ASSIGNED = 'rider_assigned',
 }
 
 export enum TransactionTypes {

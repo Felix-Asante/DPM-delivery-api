@@ -18,6 +18,12 @@ async function bootstrap() {
     customSiteTitle: 'DPM Delivery API',
     customfavIcon:
       'https://res.cloudinary.com/fedev/image/upload/v1690627890/moment/app-logo_tmonpb.jpg',
+    swaggerOptions: {
+      persistAuthorization: true,
+      tagsSorter: 'alpha',
+      tryItOutEnabled: true,
+      filter: true,
+    },
   };
 
   // if (process.env.NODE_ENV !== 'production') {

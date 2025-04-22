@@ -2,12 +2,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDecimal,
   IsEmail,
-  IsNumber,
   IsOptional,
   IsPhoneNumber,
   IsString,
 } from 'class-validator';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 export class CreatePlaceDto {
   @ApiProperty()
