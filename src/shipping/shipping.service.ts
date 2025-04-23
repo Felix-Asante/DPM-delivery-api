@@ -44,13 +44,15 @@ export class ShippingService {
       const serviceType = 'PD';
       const reference = generateBookingReference(serviceType);
 
-      const shipment = await queryRunner.manager.save(ShippingOrder, {
+      const shipment = this.shippingOrderRepository.create({
         ...createShipmentDto,
         status: ShipmentHistoryStatus.PENDING,
         reference,
       });
 
-      const trackingLink = `${ENV.FRONTEND_URL}/track-shipment?reference=${reference}`;
+      await queryRunner.manager.save(shipment);
+
+      const trackingLink = `${ENV.FRONTEND_URL}/track-delivery?reference=${reference}`;
 
       await this.messageService.sendSms(MessagesTemplates.SHIPMENT_RECEIVED, {
         reference,
@@ -62,12 +64,14 @@ export class ShippingService {
         recipients: [ENV.ADMIN_PHONE_NUMBER],
       });
 
-      queryRunner.commitTransaction();
+      await queryRunner.commitTransaction();
       return shipment;
     } catch (error) {
       queryRunner.rollbackTransaction();
       console.log(error);
       throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
     }
   }
 
@@ -135,7 +139,7 @@ export class ShippingService {
         order.status = ShipmentHistoryStatus.RIDER_REASSIGNED;
       }
 
-      // Assign the new rider and update status
+      // Assign the new rider and update shipping order status
       order.rider = rider;
       order.status = ShipmentHistoryStatus.RIDER_ASSIGNED;
       history.status = ShipmentHistoryStatus.RIDER_ASSIGNED;
