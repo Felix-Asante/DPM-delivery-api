@@ -66,3 +66,9 @@ export enum TransactionTypes {
   PAYMENT_RECEIVED = 'payment_received',
   WITHDRAWAL = 'withdraw',
 }
+
+export enum AllowedCities {
+  Nkawkaw = 'Nkawkaw',
+  Koforidua = 'Koforidua',
+  Donkorkrom = 'Donkorkrom',
+}

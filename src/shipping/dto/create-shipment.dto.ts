@@ -7,18 +7,32 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { ModeOfShipment, ShipmentOptions } from 'src/utils/enums';
+import {
+  AllowedCities,
+  ModeOfShipment,
+  ShipmentOptions,
+} from 'src/utils/enums';
 
 export class CreateShipmentDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  pickupAddress: string;
+  pickupArea: string;
+
+  @IsEnum(AllowedCities)
+  @ApiProperty({ enum: AllowedCities })
+  @IsNotEmpty()
+  pickupCity: AllowedCities;
 
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  dropOffAddress: string;
+  dropOffArea: string;
+
+  @IsEnum(AllowedCities)
+  @ApiProperty({ enum: AllowedCities })
+  @IsNotEmpty()
+  dropOffCity: AllowedCities;
 
   @IsString()
   @IsNotEmpty()

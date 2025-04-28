@@ -14,7 +14,9 @@ export class ShipmentHistory extends AbstractEntity {
   @Column('json', { default: {} })
   data: ShipmentHistoryData;
 
-  @ManyToOne(() => ShippingOrder, (order) => order.history)
+  @ManyToOne(() => ShippingOrder, (order) => order.history, {
+    onDelete: 'CASCADE',
+  })
   order: ShippingOrder;
 }
 
