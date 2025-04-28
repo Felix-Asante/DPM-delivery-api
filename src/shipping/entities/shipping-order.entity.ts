@@ -10,9 +10,6 @@ import { ShipmentHistory } from './shipment-history.entity';
 
 @Entity('shipping_orders')
 export class ShippingOrder extends AbstractEntity {
-  @Column({ nullable: true })
-  pickupAddress: string;
-
   @Column()
   pickupCity: string;
 
@@ -22,11 +19,8 @@ export class ShippingOrder extends AbstractEntity {
   @Column()
   senderPhone: string;
 
-  @Column()
+  @Column({ nullable: true })
   pickupDate: Date;
-
-  @Column()
-  dropOffAddress: string;
 
   @Column()
   dropOffArea: string;

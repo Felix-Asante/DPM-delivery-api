@@ -189,8 +189,8 @@ export class ShippingService {
       await queryRunner.commitTransaction();
       return savedOrder;
     } catch (error) {
-      await queryRunner.rollbackTransaction();
       console.log(error);
+      await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
       await queryRunner.release();
