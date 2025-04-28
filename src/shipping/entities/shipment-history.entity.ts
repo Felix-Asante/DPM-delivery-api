@@ -23,4 +23,10 @@ export type ShipmentHistoryData =
       status: ShipmentHistoryStatus.PICKUP_CONFIRMED;
       photo: string;
     }
+  | {
+      old_rider_id: string;
+      old_rider_name: string;
+      new_rider_id: string;
+      new_rider_name: string;
+    }
   | Record<string, unknown>;

@@ -20,6 +20,8 @@ import { CreateShipmentHistoryDto } from './dto/create-shipment-history.dto';
 import { FilesService } from 'src/files/files.service';
 import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
+import { generateOtpCode } from 'src/utils/helpers';
+import { FindAllShipmentDto } from './dto/find-all-shippment.dto';
 
 @Injectable()
 export class ShippingService {
@@ -75,8 +77,13 @@ export class ShippingService {
     }
   }
 
-  async findAll(options: PaginationOptions) {
-    const orders = await paginate(this.shippingOrderRepository, options);
+  async findAll(options: FindAllShipmentDto) {
+    const { status, ...rest } = options;
+    const where = status ? { status } : {};
+
+    const orders = await paginate(this.shippingOrderRepository, rest, {
+      where,
+    });
     return orders;
   }
 
@@ -84,6 +91,11 @@ export class ShippingService {
     const order = await this.shippingOrderRepository.findOne({
       where: { id },
       relations: ['rider', 'history'],
+      order: {
+        history: {
+          createdAt: 'DESC',
+        },
+      },
     });
 
     if (!order) {
@@ -96,6 +108,11 @@ export class ShippingService {
     const order = await this.shippingOrderRepository.findOne({
       where: { reference },
       relations: ['rider', 'history'],
+      order: {
+        history: {
+          createdAt: 'DESC',
+        },
+      },
     });
 
     if (!order) {
@@ -118,11 +135,7 @@ export class ShippingService {
       }
 
       const rider = await this.userService.findRiderById(riderId);
-      let history = await this.findHistoryById(id);
-
-      if (!history) {
-        history = new ShipmentHistory();
-      }
+      const history = new ShipmentHistory();
 
       if (!rider.isVerified) {
         throw new BadRequestException('Rider is not verified');
@@ -136,13 +149,20 @@ export class ShippingService {
           recipients: [order.rider.phone],
         });
         history.status = ShipmentHistoryStatus.RIDER_REASSIGNED;
+        history.data = {
+          old_rider_id: order.rider.id,
+          old_rider_name: order.rider.fullName,
+          new_rider_id: riderId,
+          new_rider_name: rider.fullName,
+        };
         order.status = ShipmentHistoryStatus.RIDER_REASSIGNED;
+      } else {
+        history.status = ShipmentHistoryStatus.RIDER_ASSIGNED;
+        order.status = ShipmentHistoryStatus.RIDER_ASSIGNED;
       }
 
       // Assign the new rider and update shipping order status
       order.rider = rider;
-      order.status = ShipmentHistoryStatus.RIDER_ASSIGNED;
-      history.status = ShipmentHistoryStatus.RIDER_ASSIGNED;
 
       // Notify the new rider
       await this.messageService.sendSms(MessagesTemplates.RIDER_ASSIGNED, {
@@ -180,6 +200,7 @@ export class ShippingService {
   async updateHistory(
     createShipmentHistoryDto: CreateShipmentHistoryDto,
     shippingId: string,
+    photo?: Express.Multer.File,
   ) {
     const order = await this.findOne(shippingId);
     const history = new ShipmentHistory();
@@ -188,17 +209,15 @@ export class ShippingService {
     if (
       createShipmentHistoryDto.status ===
         ShipmentHistoryStatus.PICKUP_CONFIRMED &&
-      !createShipmentHistoryDto.photo
+      !photo
     ) {
       throw new BadRequestException(
         'Photo is required for pickup confirmation',
       );
     }
 
-    if (createShipmentHistoryDto.photo) {
-      const upload = await this.filesService.uploadImage(
-        createShipmentHistoryDto.photo,
-      );
+    if (photo) {
+      const upload = await this.filesService.uploadImage(photo);
       data['photo'] = upload.url;
       data['status'] = createShipmentHistoryDto.status;
     }
@@ -213,20 +232,26 @@ export class ShippingService {
     history.description = createShipmentHistoryDto.description;
     history.data = data;
     history.order = order;
+    order.status = createShipmentHistoryDto.status;
+    await this.shippingOrderRepository.save(order);
 
     return this.shipmentHistoryRepository.save(history);
   }
 
   async changeToOutForDelivery(id: string) {
+    const cronId = `change_to_out_for_delivery_${generateOtpCode(6)}`;
     const job = new CronJob(CronExpression.EVERY_5_MINUTES, async () => {
       const order = await this.findOne(id);
+      const history = new ShipmentHistory();
+      history.status = ShipmentHistoryStatus.OUT_FOR_DELIVERY;
+      history.order = order;
       order.status = ShipmentHistoryStatus.OUT_FOR_DELIVERY;
+      await this.shipmentHistoryRepository.save(history);
       await this.shippingOrderRepository.save(order);
-      job.stop();
-      this.schedulerRegistry.deleteCronJob(`change_to_out_for_delivery_${id}`);
+      this.schedulerRegistry.deleteCronJob(cronId);
     });
 
-    this.schedulerRegistry.addCronJob(`change_to_out_for_delivery_${id}`, job);
+    this.schedulerRegistry.addCronJob(cronId, job);
     job.start();
   }
 

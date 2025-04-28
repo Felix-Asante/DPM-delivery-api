@@ -6,13 +6,16 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ShippingService } from './shipping.service';
 import { CreateShipmentDto } from './dto/create-shipment.dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiConsumes,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiTags,
@@ -21,6 +24,10 @@ import { PaginationOptions } from 'src/entities/pagination.entity';
 import { JwtAuthGuard } from 'src/auth/guards/jwtAuth.guard';
 import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { UserRoles } from 'src/utils/enums';
+import { CreateShipmentHistoryDto } from './dto/create-shipment-history.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { imageFileFilter } from 'src/utils/helpers';
+import { FindAllShipmentDto } from './dto/find-all-shippment.dto';
 
 @Controller('shipping')
 @ApiTags('Shipping')
@@ -42,7 +49,7 @@ export class ShippingController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @hasRoles(UserRoles.ADMIN)
-  async findAll(@Query() query: PaginationOptions) {
+  async findAll(@Query() query: FindAllShipmentDto) {
     return this.shippingService.findAll(query);
   }
 
@@ -77,5 +84,26 @@ export class ShippingController {
     @Param('riderId') riderId: string,
   ) {
     return this.shippingService.assignRider(id, riderId);
+  }
+
+  @Patch(':id/update-history')
+  @ApiInternalServerErrorResponse()
+  @ApiOkResponse()
+  @ApiBadRequestResponse()
+  @ApiBearerAuth()
+  @UseInterceptors(
+    FileInterceptor('photo', {
+      fileFilter: imageFileFilter,
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @UseGuards(JwtAuthGuard)
+  @hasRoles(UserRoles.ADMIN)
+  async updateHistory(
+    @Param('id') id: string,
+    @Body() body: CreateShipmentHistoryDto,
+    @UploadedFile() photo?: Express.Multer.File,
+  ) {
+    return this.shippingService.updateHistory(body, id, photo);
   }
 }
