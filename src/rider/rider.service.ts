@@ -66,6 +66,7 @@ export class RiderService {
       phone,
       password,
       fullName,
+      isVerified: true,
     });
 
     newUser.role = role;
@@ -156,7 +157,13 @@ export class RiderService {
     return await paginate(
       this.userRepository,
       { page, limit },
-      { relations: ['rider'], where: { role: { name: UserRoles.COURIER } } },
+      {
+        relations: ['rider'],
+        where: { role: { name: UserRoles.COURIER } },
+        order: {
+          createdAt: 'DESC',
+        },
+      },
     );
   }
 
