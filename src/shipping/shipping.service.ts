@@ -1,27 +1,25 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CronJob } from 'cron';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { ENV } from 'src/app.environment';
-import { PaginationOptions } from 'src/entities/pagination.entity';
+import { FilesService } from 'src/files/files.service';
 import { MessagesService } from 'src/messages/messages.service';
 import { UsersService } from 'src/users/users.service';
 import { generateBookingReference } from 'src/utils/bookings';
 import { MessagesTemplates, ShipmentHistoryStatus } from 'src/utils/enums';
-import { DataSource, Repository } from 'typeorm';
-import { CreateShipmentDto } from './dto/create-shipment.dto';
-import { ShippingOrder } from './entities/shipping-order.entity';
-import { ShipmentHistory } from './entities/shipment-history.entity';
-import { CreateShipmentHistoryDto } from './dto/create-shipment-history.dto';
-import { FilesService } from 'src/files/files.service';
-import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
-import { CronJob } from 'cron';
 import { generateOtpCode } from 'src/utils/helpers';
+import { DataSource, Repository } from 'typeorm';
+import { CreateShipmentHistoryDto } from './dto/create-shipment-history.dto';
+import { CreateShipmentDto } from './dto/create-shipment.dto';
 import { FindAllShipmentDto } from './dto/find-all-shippment.dto';
+import { ShipmentHistory } from './entities/shipment-history.entity';
+import { ShippingOrder } from './entities/shipping-order.entity';
 
 @Injectable()
 export class ShippingService {
@@ -71,7 +69,7 @@ export class ShippingService {
     } catch (error) {
       queryRunner.rollbackTransaction();
       console.log(error);
-      throw new InternalServerErrorException();
+      throw error;
     } finally {
       await queryRunner.release();
     }
@@ -83,6 +81,9 @@ export class ShippingService {
 
     const orders = await paginate(this.shippingOrderRepository, rest, {
       where,
+      order: {
+        createdAt: 'DESC',
+      },
     });
     return orders;
   }
@@ -191,7 +192,7 @@ export class ShippingService {
     } catch (error) {
       console.log(error);
       await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException();
+      throw error;
     } finally {
       await queryRunner.release();
     }
