@@ -14,7 +14,7 @@ import { UsersService } from 'src/users/users.service';
 import { generateBookingReference } from 'src/utils/bookings';
 import { MessagesTemplates, ShipmentHistoryStatus } from 'src/utils/enums';
 import { generateOtpCode } from 'src/utils/helpers';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, ILike, Repository } from 'typeorm';
 import { CreateShipmentHistoryDto } from './dto/create-shipment-history.dto';
 import { CreateShipmentDto } from './dto/create-shipment.dto';
 import { FindAllShipmentDto } from './dto/find-all-shippment.dto';
@@ -57,7 +57,7 @@ export class ShippingService {
       await this.messageService.sendSms(MessagesTemplates.SHIPMENT_RECEIVED, {
         reference,
         trackLink: trackingLink,
-        recipients: [createShipmentDto.senderPhone],
+        recipients: [createShipmentDto.recipientPhone],
       });
 
       await this.messageService.sendSms(MessagesTemplates.NEW_ORDER_RECEIVED, {
@@ -76,8 +76,22 @@ export class ShippingService {
   }
 
   async findAll(options: FindAllShipmentDto) {
-    const { status, ...rest } = options;
-    const where = status ? { status } : {};
+    const { status, query, ...rest } = options;
+    let where: any = [];
+
+    if (query) {
+      where = [
+        { reference: query, ...(status ? { status } : {}) },
+        {
+          rider: { fullName: ILike(`%${query}%`) },
+          ...(status ? { status } : {}),
+        },
+      ];
+    }
+
+    if (status && !query) {
+      where = [{ status }];
+    }
 
     const orders = await paginate(this.shippingOrderRepository, rest, {
       where,
@@ -158,6 +172,10 @@ export class ShippingService {
         };
         order.status = ShipmentHistoryStatus.RIDER_REASSIGNED;
       } else {
+        history.data = {
+          rider_id: riderId,
+          rider_name: rider.fullName,
+        };
         history.status = ShipmentHistoryStatus.RIDER_ASSIGNED;
         order.status = ShipmentHistoryStatus.RIDER_ASSIGNED;
       }

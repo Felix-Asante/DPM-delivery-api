@@ -19,8 +19,8 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiTags,
+  ApiQuery,
 } from '@nestjs/swagger';
-import { PaginationOptions } from 'src/entities/pagination.entity';
 import { JwtAuthGuard } from 'src/auth/guards/jwtAuth.guard';
 import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { UserRoles } from 'src/utils/enums';
@@ -47,6 +47,11 @@ export class ShippingController {
   @ApiOkResponse()
   @ApiBadRequestResponse()
   @ApiBearerAuth()
+  @ApiQuery({
+    name: 'query',
+    description: 'Search query',
+    required: false,
+  })
   @UseGuards(JwtAuthGuard)
   @hasRoles(UserRoles.ADMIN)
   async findAll(@Query() query: FindAllShipmentDto) {

@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from 'src/users/entities/role.entity';
 import { User } from 'src/users/entities/user.entity';
-import { UserRoles } from 'src/utils/enums';
+import { MessagesTemplates, UserRoles } from 'src/utils/enums';
 import { ERRORS } from 'src/utils/errors';
 import { generateOtpCode, tryCatch } from 'src/utils/helpers';
 import { Repository } from 'typeorm';
@@ -17,6 +17,8 @@ import { FilesService } from 'src/files/files.service';
 import { PaginationOptions } from 'src/entities/pagination.entity';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { UpdateRiderDto } from './dto/update-rider.dto';
+import { messages } from 'src/messages/data';
+import { MessagesService } from 'src/messages/messages.service';
 
 @Injectable()
 export class RiderService {
@@ -28,12 +30,14 @@ export class RiderService {
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
     private readonly filesService: FilesService,
+    private readonly messageService: MessagesService,
   ) {}
 
   async create(
     createRiderDto: CreateRiderDto,
     bikeImageFile: Express.Multer.File,
     identificationDocumentImageFile: Express.Multer.File,
+    profilePictureFile: Express.Multer.File,
   ) {
     const { email, phone, password, fullName, ...riderData } = createRiderDto;
 
@@ -60,6 +64,14 @@ export class RiderService {
     if (!role) {
       throw new InternalServerErrorException();
     }
+    let bikeImage, identificationDocumentImage, profilePicture;
+
+    if (profilePictureFile) {
+      const profilePictureResult = await this.filesService.uploadImage(
+        profilePictureFile,
+      );
+      profilePicture = profilePictureResult.url;
+    }
 
     const newUser = this.userRepository.create({
       email,
@@ -67,10 +79,10 @@ export class RiderService {
       password,
       fullName,
       isVerified: true,
+      profilePicture,
     });
 
     newUser.role = role;
-    let bikeImage, identificationDocumentImage;
 
     if (bikeImageFile) {
       const bikeImageResult = await this.filesService.uploadImage(
@@ -97,13 +109,18 @@ export class RiderService {
       riderData.identificationDocumentNumber;
     newRider.identificationDocumentType = riderData.identificationDocumentType;
     newRider.documentExpiryDate = riderData.documentExpiryDate;
-    newRider.riderId = `DPM-RIDER-${generateOtpCode(8)}`;
+    newRider.riderId = `DPM-RD-${generateOtpCode(8)}`;
     newRider.bikeImage = bikeImage;
     newRider.identificationDocumentImage = identificationDocumentImage;
 
     const savedRider = await this.riderRepository.save(newRider);
     newUser.rider = savedRider;
-    return await this.userRepository.save(newUser);
+    const rider = await this.userRepository.save(newUser);
+    await this.messageService.sendSms(MessagesTemplates.RIDER_ACCOUNT_CREATED, {
+      recipients: [rider.phone],
+      fullName: rider.fullName,
+    });
+    return rider;
   }
 
   async update(

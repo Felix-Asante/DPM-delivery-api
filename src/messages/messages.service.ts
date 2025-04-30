@@ -26,6 +26,13 @@ type MessagesParamsMap = {
     reference: string;
   };
   [MessagesTemplates.NEW_ORDER_RECEIVED]: unknown;
+  [MessagesTemplates.RIDER_ACCOUNT_CREATED]: {
+    fullName: string;
+  };
+  [MessagesTemplates.SHIPMENT_RECEIVED_RECEIVER]: {
+    reference: string;
+    trackLink: string;
+  };
 };
 
 type MessagesParams<T extends MessagesTemplates> = MessagesParamsMap[T];
@@ -106,6 +113,16 @@ export class MessagesService {
     }
     if (template === MessagesTemplates.NEW_ORDER_RECEIVED) {
       return messages.newOrderReceived();
+    }
+    if (template === MessagesTemplates.RIDER_ACCOUNT_CREATED) {
+      const { fullName } =
+        params as MessagesParamsMap[MessagesTemplates.RIDER_ACCOUNT_CREATED];
+      return messages.riderAccountCreated(fullName);
+    }
+    if (template === MessagesTemplates.SHIPMENT_RECEIVED_RECEIVER) {
+      const { reference, trackLink } =
+        params as MessagesParamsMap[MessagesTemplates.SHIPMENT_RECEIVED_RECEIVER];
+      return messages.shipmentReceivedReceiver(reference, trackLink);
     }
     return '';
   }

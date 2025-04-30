@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsNumber, IsOptional, Min } from 'class-validator';
+import { IsNumber, IsOptional, Min, IsString } from 'class-validator';
 
 export class PaginationOptions {
   @IsNumber()
@@ -18,6 +18,7 @@ export class PaginationOptions {
   limit = 10;
 
   @IsOptional()
+  @IsString()
   @ApiPropertyOptional()
-  query;
+  query?: string;
 }
