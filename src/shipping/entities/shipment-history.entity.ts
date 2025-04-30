@@ -29,4 +29,8 @@ export type ShipmentHistoryData =
       new_rider_id: string;
       new_rider_name: string;
     }
+  | {
+      rider_id: string;
+      rider_name: string;
+    }
   | Record<string, unknown>;

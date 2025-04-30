@@ -47,6 +47,9 @@ export class CreateRiderDto extends CreateUserDto {
   @ApiProperty({ type: 'string', format: 'binary', required: true })
   identificationDocumentImage: Express.Multer.File;
 
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  profilePicture: Express.Multer.File;
+
   @IsDate()
   @Type(() => Date)
   @ApiProperty()

@@ -7,12 +7,14 @@ import { RiderController } from './rider.controller';
 import { RiderService } from './rider.service';
 import { Role } from 'src/users/entities/role.entity';
 import { UsersModule } from 'src/users/users.module';
+import { MessagesModule } from 'src/messages/messages.module';
 
 @Module({
   imports: [
     FilesModule,
     UsersModule,
     TypeOrmModule.forFeature([Rider, User, Role]),
+    MessagesModule,
   ],
   controllers: [RiderController],
   providers: [RiderService],

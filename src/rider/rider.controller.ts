@@ -41,6 +41,7 @@ export class RiderController {
     FileFieldsInterceptor([
       { name: 'identificationDocumentImage', maxCount: 1 },
       { name: 'bikeImage', maxCount: 1 },
+      { name: 'profilePicture', maxCount: 1 },
     ]),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -51,12 +52,14 @@ export class RiderController {
     files: {
       bikeImage: Express.Multer.File[];
       identificationDocumentImage: Express.Multer.File[];
+      profilePicture: Express.Multer.File[];
     },
   ) {
     return this.riderService.create(
       createRiderDto,
       files?.bikeImage?.[0],
       files?.identificationDocumentImage?.[0],
+      files?.profilePicture?.[0],
     );
   }
 
@@ -69,6 +72,7 @@ export class RiderController {
     FileFieldsInterceptor([
       { name: 'identificationDocumentImage', maxCount: 1 },
       { name: 'bikeImage', maxCount: 1 },
+      { name: 'profilePicture', maxCount: 1 },
     ]),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -80,6 +84,7 @@ export class RiderController {
     files: {
       bikeImage: Express.Multer.File[];
       identificationDocumentImage: Express.Multer.File[];
+      profilePicture: Express.Multer.File[];
     },
   ) {
     return this.riderService.update(id, updateRiderDto, files);

@@ -35,6 +35,8 @@ export class User extends AbstractEntity {
 
   @Column({ nullable: true })
   code: string;
+  @Column({ nullable: true })
+  profilePicture: string;
 
   @Column({ nullable: true })
   codeUseCase: string;
