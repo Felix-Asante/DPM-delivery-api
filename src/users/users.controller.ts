@@ -9,12 +9,15 @@ import {
   Query,
   Put,
   ParseUUIDPipe,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiConsumes,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -31,6 +34,8 @@ import { BookingState, UserRoles } from 'src/utils/enums';
 import { User } from './entities/user.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { IFindUserQuery } from 'src/utils/interface';
+import { imageFileFilter } from 'src/utils/helpers';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('users')
 @Controller('users')
@@ -107,14 +112,22 @@ export class UsersController {
   @ApiNotFoundResponse()
   @ApiUnauthorizedResponse()
   @ApiBadRequestResponse()
+  @ApiForbiddenResponse()
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('profilePicture', {
+      fileFilter: imageFileFilter,
+    }),
+  )
   @hasRoles(UserRoles.PLACE_ADMIN, UserRoles.USER, UserRoles.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
     @currentUser() user: User,
+    @UploadedFile() profilePicture: Express.Multer.File,
   ) {
-    return this.usersService.update(id, updateUserDto, user);
+    return this.usersService.update(id, updateUserDto, profilePicture, user);
   }
 
   @Put('change-password')

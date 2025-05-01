@@ -12,6 +12,7 @@ import { LikesModule } from 'src/likes/likes.module';
 import { Booking } from 'src/bookings/entities/booking.entity';
 import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
 import { SmsService } from 'src/sms/sms.service';
+import { FilesModule } from 'src/files/files.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SmsService } from 'src/sms/sms.service';
       BookingStatus,
     ]),
     LikesModule,
+    FilesModule,
   ],
   controllers: [ProductsCategoryController],
   providers: [

@@ -28,6 +28,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from './entities/role.entity';
 import { User } from './entities/user.entity';
+import { FilesService } from 'src/files/files.service';
 
 @Injectable()
 export class UsersService {
@@ -42,6 +43,7 @@ export class UsersService {
     private readonly bookingRepository: Repository<Booking>,
     @InjectRepository(BookingStatus)
     private readonly bookingStatusRepository: Repository<BookingStatus>,
+    private readonly filesService: FilesService,
   ) {}
   async create(createUserDto: CreateUserDto, isPlaceAdmin = false) {
     const user = await this.userRepository.findOne({
@@ -209,7 +211,12 @@ export class UsersService {
     }
   }
 
-  update(id: string, updateUserDto: UpdateUserDto, requestUser: User) {
+  update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+    profilePicture: Express.Multer.File,
+    requestUser: User,
+  ) {
     return tryCatch(async () => {
       const user = await this.findById(id);
 
@@ -219,6 +226,10 @@ export class UsersService {
 
       const { fullName, email, address } = updateUserDto;
       const updatedUser = user;
+      if (profilePicture) {
+        const results = await this.filesService.uploadImage(profilePicture);
+        updatedUser.profilePicture = results.url;
+      }
 
       updatedUser.fullName = fullName || user.fullName;
       updatedUser.email = email || user.email;
