@@ -58,6 +58,25 @@ export class ShippingController {
     return this.shippingService.findAll(query);
   }
 
+  @Get('riders/:riderId')
+  @ApiInternalServerErrorResponse()
+  @ApiOkResponse()
+  @ApiBadRequestResponse()
+  @ApiBearerAuth()
+  @ApiQuery({
+    name: 'query',
+    description: 'Search query',
+    required: false,
+  })
+  @UseGuards(JwtAuthGuard)
+  @hasRoles(UserRoles.ADMIN)
+  async getRiderOrders(
+    @Param('riderId') riderId: string,
+    @Query() query: FindAllShipmentDto,
+  ) {
+    return this.shippingService.getRiderOrders(riderId, query);
+  }
+
   @Get(':id')
   @ApiInternalServerErrorResponse()
   @ApiOkResponse()

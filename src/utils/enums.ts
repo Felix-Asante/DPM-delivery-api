@@ -52,6 +52,8 @@ export const enum MessagesTemplates {
   RIDER_REASSIGNED = 'rider_reassigned',
   NEW_ORDER_RECEIVED = 'new_order_received',
   RIDER_ACCOUNT_CREATED = 'rider_account_created',
+  OUT_FOR_DELIVERY = 'out_for_delivery',
+  DELIVERED = 'delivered',
 }
 
 export enum ShipmentHistoryStatus {

@@ -13,4 +13,13 @@ export const messages = {
     `Hi, A new order has been received and is awaiting assignment for Pickup & Delivery. Please review and assign it as soon as possible!`,
   riderAccountCreated: (fullName: string) =>
     `Hi ${fullName}, your registration is complete! You're ready to start receiving orders now. Visit www.dpmdelivery.com/riders to check your orders. Thanks for joining DPM Deliveries!`,
+  outForDelivery: (reference: string, trackingLink: string, code: string) => `
+  Hi, your order (#${reference}) is Out for Delivery. Confirmation code: ${code}
+\nYour assigned delivery guy will contact you!
+\nTrack order here: ${trackingLink}
+\n#dpmdeliveries
+  `,
+  delivered: (reference: string) => `
+  Hi, your order (#${reference}) has been delivered. Thank you for choosing DPM Deliveries!
+  `,
 };

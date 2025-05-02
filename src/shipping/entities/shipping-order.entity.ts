@@ -50,6 +50,10 @@ export class ShippingOrder extends AbstractEntity {
   @Index('reference_idx')
   reference: string;
 
+  @Column({ nullable: true })
+  @Index('confirmation_code_idx')
+  confirmationCode: string;
+
   @ManyToOne(() => User, (rider) => rider.shippingOrders)
   rider: User;
 

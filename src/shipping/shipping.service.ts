@@ -52,7 +52,7 @@ export class ShippingService {
 
       await queryRunner.manager.save(shipment);
 
-      const trackingLink = `${ENV.FRONTEND_URL}/track-delivery?reference=${reference}`;
+      const trackingLink = `${ENV.FRONTEND_URL}/track-delivery/${reference}`;
 
       await this.messageService.sendSms(MessagesTemplates.SHIPMENT_RECEIVED, {
         reference,
@@ -117,6 +117,27 @@ export class ShippingService {
       throw new NotFoundException('Order not found');
     }
     return order;
+  }
+
+  async getRiderOrders(riderId: string, options: FindAllShipmentDto) {
+    const { status, query, ...rest } = options;
+    const where = { rider: { id: riderId } };
+
+    if (query) {
+      Object.assign(where, { reference: query });
+    }
+
+    if (status && !query) {
+      Object.assign(where, { status });
+    }
+
+    const orders = await paginate(this.shippingOrderRepository, rest, {
+      where,
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+    return orders;
   }
 
   async findByReference(reference: string) {
@@ -221,40 +242,104 @@ export class ShippingService {
     shippingId: string,
     photo?: Express.Multer.File,
   ) {
-    const order = await this.findOne(shippingId);
-    const history = new ShipmentHistory();
-    const data = {};
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (
-      createShipmentHistoryDto.status ===
-        ShipmentHistoryStatus.PICKUP_CONFIRMED &&
-      !photo
-    ) {
-      throw new BadRequestException(
-        'Photo is required for pickup confirmation',
-      );
+    try {
+      const order = await this.findOne(shippingId);
+      const history = new ShipmentHistory();
+      let data = {};
+      let smsToSend: { template: MessagesTemplates; params: any } | null = null;
+
+      if (order.status === createShipmentHistoryDto.status) {
+        throw new BadRequestException(
+          'Order status is the same as the previous status',
+        );
+      }
+
+      if (order.status === ShipmentHistoryStatus.DELIVERED) {
+        throw new BadRequestException('Order is already delivered');
+      }
+
+      switch (createShipmentHistoryDto.status) {
+        case ShipmentHistoryStatus.PICKUP_CONFIRMED:
+          if (!photo) {
+            throw new BadRequestException(
+              'Photo is required for pickup confirmation',
+            );
+          }
+
+          const upload = await this.filesService.uploadImage(photo);
+          data = {
+            photo: upload.url,
+            status: createShipmentHistoryDto.status,
+          };
+
+          await this.changeToOutForDelivery(shippingId);
+          break;
+        case ShipmentHistoryStatus.DELIVERED:
+          if (!createShipmentHistoryDto.confirmationCode) {
+            throw new BadRequestException(
+              'Confirmation code is required for delivery confirmation',
+            );
+          }
+
+          if (
+            order.confirmationCode !== createShipmentHistoryDto.confirmationCode
+          ) {
+            throw new BadRequestException('Confirmation code is incorrect!');
+          }
+
+          order.confirmationCode = null;
+          smsToSend = {
+            template: MessagesTemplates.DELIVERED,
+            params: {
+              reference: order.reference,
+              recipients: [order.recipientPhone],
+            },
+          };
+          break;
+        case ShipmentHistoryStatus.OUT_FOR_DELIVERY:
+          const confirmationCode = generateOtpCode(4);
+          order.confirmationCode = confirmationCode;
+
+          smsToSend = {
+            template: MessagesTemplates.OUT_FOR_DELIVERY,
+            params: {
+              reference: order.reference,
+              recipients: [order.recipientPhone],
+              code: confirmationCode,
+              trackingLink: `${ENV.FRONTEND_URL}/track-delivery/${order.reference}`,
+            },
+          };
+          break;
+        default:
+          break;
+      }
+
+      history.status = createShipmentHistoryDto.status;
+      history.description = createShipmentHistoryDto.description;
+      history.data = data;
+      history.order = order;
+      order.status = createShipmentHistoryDto.status;
+      await queryRunner.manager.save(order);
+
+      const savedHistory = await queryRunner.manager.save(history);
+
+      await queryRunner.commitTransaction();
+
+      if (smsToSend) {
+        await this.messageService.sendSms(smsToSend.template, smsToSend.params);
+      }
+
+      return savedHistory;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-
-    if (photo) {
-      const upload = await this.filesService.uploadImage(photo);
-      data['photo'] = upload.url;
-      data['status'] = createShipmentHistoryDto.status;
-    }
-
-    if (
-      createShipmentHistoryDto.status === ShipmentHistoryStatus.PICKUP_CONFIRMED
-    ) {
-      await this.changeToOutForDelivery(order.id);
-    }
-
-    history.status = createShipmentHistoryDto.status;
-    history.description = createShipmentHistoryDto.description;
-    history.data = data;
-    history.order = order;
-    order.status = createShipmentHistoryDto.status;
-    await this.shippingOrderRepository.save(order);
-
-    return this.shipmentHistoryRepository.save(history);
   }
 
   async changeToOutForDelivery(id: string) {
@@ -265,6 +350,15 @@ export class ShippingService {
       history.status = ShipmentHistoryStatus.OUT_FOR_DELIVERY;
       history.order = order;
       order.status = ShipmentHistoryStatus.OUT_FOR_DELIVERY;
+      const confirmationCode = generateOtpCode(4);
+      order.confirmationCode = confirmationCode;
+
+      this.messageService.sendSms(MessagesTemplates.OUT_FOR_DELIVERY, {
+        reference: order.reference,
+        recipients: [order.recipientPhone],
+        code: confirmationCode,
+        trackingLink: `${ENV.FRONTEND_URL}/track-delivery/${order.reference}`,
+      });
       await this.shipmentHistoryRepository.save(history);
       await this.shippingOrderRepository.save(order);
       this.schedulerRegistry.deleteCronJob(cronId);

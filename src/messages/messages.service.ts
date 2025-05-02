@@ -33,6 +33,14 @@ type MessagesParamsMap = {
     reference: string;
     trackLink: string;
   };
+  [MessagesTemplates.OUT_FOR_DELIVERY]: {
+    trackingLink: string;
+    code: string;
+    reference: string;
+  };
+  [MessagesTemplates.DELIVERED]: {
+    reference: string;
+  };
 };
 
 type MessagesParams<T extends MessagesTemplates> = MessagesParamsMap[T];
@@ -123,6 +131,17 @@ export class MessagesService {
       const { reference, trackLink } =
         params as MessagesParamsMap[MessagesTemplates.SHIPMENT_RECEIVED_RECEIVER];
       return messages.shipmentReceivedReceiver(reference, trackLink);
+    }
+
+    if (template === MessagesTemplates.OUT_FOR_DELIVERY) {
+      const { trackingLink, code, reference } =
+        params as MessagesParamsMap[MessagesTemplates.OUT_FOR_DELIVERY];
+      return messages.outForDelivery(reference, trackingLink, code);
+    }
+    if (template === MessagesTemplates.DELIVERED) {
+      const { reference } =
+        params as MessagesParamsMap[MessagesTemplates.DELIVERED];
+      return messages.delivered(reference);
     }
     return '';
   }
