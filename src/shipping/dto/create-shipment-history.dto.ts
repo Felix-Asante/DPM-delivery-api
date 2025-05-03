@@ -1,12 +1,6 @@
 import { Optional } from '@nestjs/common';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  ValidateIf,
-} from 'class-validator';
+import { IsEnum, IsOptional, IsString, ValidateIf } from 'class-validator';
 import { ShipmentHistoryStatus } from 'src/utils/enums';
 
 export class CreateShipmentHistoryDto {
@@ -15,10 +9,10 @@ export class CreateShipmentHistoryDto {
   status: ShipmentHistoryStatus;
 
   @IsString()
-  @IsNotEmpty()
+  @Optional()
   @ValidateIf((o) => o.status === ShipmentHistoryStatus.FAILED_DELIVERY_ATTEMPT)
   @ApiPropertyOptional()
-  description: string;
+  description?: string;
 
   @IsString()
   @Optional()
