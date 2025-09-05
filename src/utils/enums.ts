@@ -64,6 +64,14 @@ export enum ShipmentHistoryStatus {
   PICKUP_CONFIRMED = 'pickup_confirmed',
   PENDING = 'pending',
   RIDER_ASSIGNED = 'rider_assigned',
+  PAYMENT_RECEIVED = 'payment_received',
+  RETURNED = 'returned',
+  ON_HOLD = 'on_hold',
+  REPACKAGED = 'repackaged',
+  IN_TRANSIT = 'in_transit',
+  ARRIVED = 'arrived',
+  READY_FOR_PICKUP = 'ready_for_pickup',
+  REFUNDED = 'refunded',
 }
 
 export enum TransactionTypes {
