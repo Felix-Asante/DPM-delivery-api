@@ -12,14 +12,19 @@ import { FilesService } from 'src/files/files.service';
 import { MessagesService } from 'src/messages/messages.service';
 import { UsersService } from 'src/users/users.service';
 import { generateBookingReference } from 'src/utils/bookings';
-import { MessagesTemplates, ShipmentHistoryStatus } from 'src/utils/enums';
-import { generateOtpCode } from 'src/utils/helpers';
-import { DataSource, ILike, Repository } from 'typeorm';
+import {
+  MessagesTemplates,
+  ShipmentHistoryStatus,
+  UserRoles,
+} from 'src/utils/enums';
+import { generateOtpCode, tryCatch } from 'src/utils/helpers';
+import { Between, DataSource, ILike, Repository } from 'typeorm';
 import { CreateShipmentHistoryDto } from './dto/create-shipment-history.dto';
 import { CreateShipmentDto } from './dto/create-shipment.dto';
 import { FindAllShipmentDto } from './dto/find-all-shippment.dto';
 import { ShipmentHistory } from './entities/shipment-history.entity';
 import { ShippingOrder } from './entities/shipping-order.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class ShippingService {
@@ -75,15 +80,27 @@ export class ShippingService {
     }
   }
 
-  async findAll(options: FindAllShipmentDto) {
+  async findAll(options: FindAllShipmentDto, user: User) {
     const { status, query, ...rest } = options;
     let where: any = [];
 
+    const isRider = user.role.name === UserRoles.COURIER;
+
+    if (isRider) {
+      where = [{ rider: { id: user.id } }];
+    }
+
     if (query) {
       where = [
-        { reference: query, ...(status ? { status } : {}) },
         {
-          rider: { fullName: ILike(`%${query}%`) },
+          reference: query,
+          ...(status ? { status } : {}),
+          ...{
+            rider: isRider ? { id: user.id } : {},
+          },
+        },
+        {
+          rider: isRider ? { id: user.id } : { fullName: ILike(`%${query}%`) },
           ...(status ? { status } : {}),
         },
       ];
@@ -372,6 +389,51 @@ export class ShippingService {
     return this.shipmentHistoryRepository.findOne({
       where: { order: { id: shippingId } },
       relations: ['order'],
+    });
+  }
+
+  async getRiderStats(riderId: string) {
+    return tryCatch(async () => {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const [delivered, cancelled, todayDelivered, assigned] =
+        await Promise.all([
+          this.shippingOrderRepository.count({
+            where: {
+              rider: { id: riderId },
+              status: ShipmentHistoryStatus.DELIVERED,
+            },
+          }),
+          this.shippingOrderRepository.count({
+            where: {
+              rider: { id: riderId },
+              status: ShipmentHistoryStatus.RIDER_REASSIGNED,
+            },
+          }),
+          this.shippingOrderRepository.count({
+            where: {
+              rider: { id: riderId },
+              status: ShipmentHistoryStatus.DELIVERED,
+              dropOffDate: Between(startOfDay, endOfDay),
+            },
+          }),
+          this.shippingOrderRepository.count({
+            where: {
+              rider: { id: riderId },
+              status: ShipmentHistoryStatus.RIDER_ASSIGNED,
+            },
+          }),
+        ]);
+
+      return {
+        total_orders_delivered: delivered,
+        total_orders_cancelled: cancelled,
+        total_deliveries_today: todayDelivered,
+        total_orders_assigned: assigned,
+      };
     });
   }
 }

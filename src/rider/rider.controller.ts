@@ -17,6 +17,7 @@ import {
   ApiBearerAuth,
   ApiConsumes,
   ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwtAuth.guard';
@@ -24,8 +25,9 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { UserRoles } from 'src/utils/enums';
 import { PaginationOptions } from 'src/entities/pagination.entity';
-import { ApiTags } from '@nestjs/swagger';
 import { UpdateRiderDto } from './dto/update-rider.dto';
+import { currentUser } from 'src/auth/decorators/currentUser.decorator';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('rider')
 @ApiTags('Rider')
@@ -103,5 +105,15 @@ export class RiderController {
   @Get(':id')
   async findOneById(@Param('id') id: string) {
     return this.riderService.findOneById(id);
+  }
+
+  @Get(':id/stats')
+  @ApiBearerAuth()
+  @ApiBadRequestResponse()
+  @ApiOperation({ summary: '(rider)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.COURIER)
+  async getRiderStats(@Param('id') id: string, @currentUser() user: User) {
+    return this.riderService.getRiderStats(id, user);
   }
 }

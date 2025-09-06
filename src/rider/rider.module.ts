@@ -8,6 +8,7 @@ import { RiderService } from './rider.service';
 import { Role } from 'src/users/entities/role.entity';
 import { UsersModule } from 'src/users/users.module';
 import { MessagesModule } from 'src/messages/messages.module';
+import { ShippingModule } from 'src/shipping/shipping.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { MessagesModule } from 'src/messages/messages.module';
     UsersModule,
     TypeOrmModule.forFeature([Rider, User, Role]),
     MessagesModule,
+    ShippingModule,
   ],
   controllers: [RiderController],
   providers: [RiderService],

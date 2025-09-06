@@ -155,7 +155,7 @@ export class UsersService {
     try {
       const user = await this.userRepository.findOne({
         where: { email },
-        relations: ['role'],
+        relations: ['role', 'wallet', 'rider'],
       });
       if (!user) {
         throw new NotFoundException(ERRORS.USER_NOT_FOUND_EMAIL.EN);
@@ -170,7 +170,7 @@ export class UsersService {
     try {
       const user = await this.userRepository.findOne({
         where: { phone },
-        relations: ['role'],
+        relations: ['role', 'wallet', 'rider'],
       });
       if (!user) {
         throw new NotFoundException(ERRORS.USER_NOT_FOUND_PHONE.EN);
@@ -186,7 +186,7 @@ export class UsersService {
     try {
       const user = await this.userRepository.findOne({
         where: { id },
-        relations: ['role'],
+        relations: ['role', 'wallet', 'rider'],
       });
       if (!user) {
         throw new NotFoundException(ERRORS.USER_NOT_FOUND.EN);
@@ -202,7 +202,7 @@ export class UsersService {
     try {
       const user = await this.userRepository.findOne({
         where: { code },
-        relations: ['role'],
+        relations: ['role', 'wallet', 'rider'],
       });
       return user;
     } catch (error) {
@@ -285,7 +285,7 @@ export class UsersService {
     return tryCatch(async () => {
       const user = await this.userRepository.findOne({
         where: { id },
-        relations: ['role'],
+        relations: ['role', 'wallet'],
       });
       if (!user) {
         throw new NotFoundException('User not found');
@@ -301,7 +301,7 @@ export class UsersService {
   async findRiderById(id: string) {
     const rider = await this.userRepository.findOne({
       where: { id, role: { name: UserRoles.COURIER } },
-      relations: ['role'],
+      relations: ['role', 'wallet'],
     });
     if (!rider) {
       throw new NotFoundException('Rider not found');

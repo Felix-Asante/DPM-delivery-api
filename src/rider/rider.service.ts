@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -17,8 +18,9 @@ import { FilesService } from 'src/files/files.service';
 import { PaginationOptions } from 'src/entities/pagination.entity';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { UpdateRiderDto } from './dto/update-rider.dto';
-import { messages } from 'src/messages/data';
 import { MessagesService } from 'src/messages/messages.service';
+import { Wallet } from 'src/wallets/entities/wallets.entity';
+import { ShippingService } from 'src/shipping/shipping.service';
 
 @Injectable()
 export class RiderService {
@@ -31,6 +33,7 @@ export class RiderService {
     private readonly roleRepository: Repository<Role>,
     private readonly filesService: FilesService,
     private readonly messageService: MessagesService,
+    private readonly shippingOrderService: ShippingService,
   ) {}
 
   async create(
@@ -114,8 +117,18 @@ export class RiderService {
     newRider.identificationDocumentImage = identificationDocumentImage;
 
     const savedRider = await this.riderRepository.save(newRider);
+
+    const wallet = new Wallet();
+    wallet.user = newUser;
+    wallet.totalEarned = 0.0;
+    wallet.balance = 0.0;
+
+    const savedWallet = await wallet.save();
+
     newUser.rider = savedRider;
+    newUser.wallet = savedWallet;
     const rider = await this.userRepository.save(newUser);
+
     await this.messageService.sendSms(MessagesTemplates.RIDER_ACCOUNT_CREATED, {
       recipients: [rider.phone],
       fullName: rider.fullName,
@@ -191,6 +204,18 @@ export class RiderService {
         role: { name: UserRoles.COURIER },
       },
       relations: ['rider'],
+    });
+  }
+
+  async getRiderStats(riderId: string, user: User) {
+    return tryCatch(async () => {
+      if (user.role.name !== UserRoles.ADMIN && user.rider.id !== riderId) {
+        throw new ForbiddenException(
+          'You are not authorized to access this resource',
+        );
+      }
+      const stats = await this.shippingOrderService.getRiderStats(riderId);
+      return stats;
     });
   }
 }

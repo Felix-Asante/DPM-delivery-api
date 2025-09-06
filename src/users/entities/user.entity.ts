@@ -16,6 +16,7 @@ import { Booking } from 'src/bookings/entities/booking.entity';
 import { Review } from 'src/reviews/entities/review.entity';
 import { Rider } from 'src/rider/entities/rider.entity';
 import { ShippingOrder } from 'src/shipping/entities/shipping-order.entity';
+import { Wallet } from 'src/wallets/entities/wallets.entity';
 
 @Entity('users')
 @Index(['phone', 'email', 'code'])
@@ -64,6 +65,10 @@ export class User extends AbstractEntity {
   @OneToOne(() => Rider, { onDelete: 'CASCADE' })
   @JoinColumn()
   rider: Rider;
+
+  @OneToOne(() => Wallet, (wallet) => wallet.user)
+  @JoinColumn()
+  wallet: Wallet;
 
   @BeforeInsert()
   async hashPassword() {

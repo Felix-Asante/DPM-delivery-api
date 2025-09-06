@@ -3,31 +3,26 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { LoginDto } from './dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { MessagesService } from 'src/messages/messages.service';
 import { UsersService } from 'src/users/users.service';
+import { CodeUseCases } from 'src/utils/enums';
 import { ERRORS } from 'src/utils/errors';
 import {
   generateExpiryDate,
   generateOtpCode,
   isCodeExpired,
 } from 'src/utils/helpers';
-import { VerifyCodeDto } from './dto/verifyCode.dto';
-import { CodeUseCases } from 'src/utils/enums';
-import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
-import { MessagesService } from 'src/messages/messages.service';
+import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/users/entities/user.entity';
-import { Repository } from 'typeorm';
+import { VerifyCodeDto } from './dto/verifyCode.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
+    private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly messageService: MessagesService,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
   ) {}
 
   async login(body: LoginDto) {
