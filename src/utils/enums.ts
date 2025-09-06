@@ -84,3 +84,10 @@ export enum AllowedCities {
   Koforidua = 'Koforidua',
   Donkorkrom = 'Donkorkrom',
 }
+
+export enum WalletTransactionTypes {
+  PAYMENT_RECEIVED = 'payment_received',
+  WITHDRAWAL = 'withdrawal',
+  DEBIT = 'debit',
+  ADJUSTMENT = 'adjustment',
+}

@@ -30,6 +30,7 @@ import { SmsService } from './sms/sms.service';
 import { Role } from './users/entities/role.entity';
 import { UsersModule } from './users/users.module';
 import { VariablesModule } from './variables/variables.module';
+import { WalletsModule } from './wallets/wallets.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -64,6 +65,7 @@ import { VariablesModule } from './variables/variables.module';
     RiderModule,
     ShippingModule,
     AssetsModule,
+    WalletsModule,
   ],
   controllers: [AppController],
   providers: [AppService, SmsService],

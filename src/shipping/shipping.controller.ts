@@ -28,6 +28,9 @@ import { CreateShipmentHistoryDto } from './dto/create-shipment-history.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { imageFileFilter } from 'src/utils/helpers';
 import { FindAllShipmentDto } from './dto/find-all-shippment.dto';
+import { currentUser } from 'src/auth/decorators/currentUser.decorator';
+import { User } from 'src/users/entities/user.entity';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('shipping')
 @ApiTags('Shipping')
@@ -52,10 +55,10 @@ export class ShippingController {
     description: 'Search query',
     required: false,
   })
-  @UseGuards(JwtAuthGuard)
-  @hasRoles(UserRoles.ADMIN)
-  async findAll(@Query() query: FindAllShipmentDto) {
-    return this.shippingService.findAll(query);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN, UserRoles.COURIER)
+  async findAll(@Query() query: FindAllShipmentDto, @currentUser() user: User) {
+    return this.shippingService.findAll(query, user);
   }
 
   @Get('riders/:riderId')
@@ -68,7 +71,7 @@ export class ShippingController {
     description: 'Search query',
     required: false,
   })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @hasRoles(UserRoles.ADMIN)
   async getRiderOrders(
     @Param('riderId') riderId: string,
@@ -82,7 +85,7 @@ export class ShippingController {
   @ApiOkResponse()
   @ApiBadRequestResponse()
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @hasRoles(UserRoles.ADMIN)
   async findOne(@Param('id') id: string) {
     return this.shippingService.findOne(id);
@@ -101,7 +104,7 @@ export class ShippingController {
   @ApiOkResponse()
   @ApiBadRequestResponse()
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @hasRoles(UserRoles.ADMIN)
   async assignRider(
     @Param('id') id: string,
@@ -121,8 +124,8 @@ export class ShippingController {
     }),
   )
   @ApiConsumes('multipart/form-data')
-  @UseGuards(JwtAuthGuard)
-  @hasRoles(UserRoles.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN, UserRoles.COURIER)
   async updateHistory(
     @Param('id') id: string,
     @Body() body: CreateShipmentHistoryDto,
