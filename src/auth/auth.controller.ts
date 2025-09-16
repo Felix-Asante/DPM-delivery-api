@@ -1,17 +1,30 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
+  ApiProperty,
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { UserRoles } from 'src/utils/enums';
+import { currentUser } from './decorators/currentUser.decorator';
+import { hasRoles } from './decorators/roles.decorator';
 import { LoginDto } from './dto/login.dto';
-import { ForgotPasswordDto, ResetPasswordDto } from './dto/resetPassword.dto';
+import {
+  ChangePasswordDto,
+  ChangedDefaultPasswordDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from './dto/resetPassword.dto';
+import { JwtAuthGuard } from './guards/jwtAuth.guard';
+import { RolesGuard } from './guards/roles.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -57,5 +70,30 @@ export class AuthController {
   @ApiNotFoundResponse()
   resetPassword(@Body() body: ResetPasswordDto, @Param('code') code: string) {
     return this.authService.resetPassword(body, code);
+  }
+
+  @Post('change-password')
+  @ApiProperty({ description: '(super admin)' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiNotFoundResponse()
+  changePassword(@Body() body: ChangePasswordDto) {
+    return this.authService.changeUserPasswordAdmin(body);
+  }
+
+  @Post('change-default-password')
+  @ApiProperty({ description: '(Rider)' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.COURIER)
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiNotFoundResponse()
+  changeDefaultPassword(
+    @Body() body: ChangedDefaultPasswordDto,
+    @currentUser() user: User,
+  ) {
+    return this.authService.changeDefaultPassword(body, user);
   }
 }
