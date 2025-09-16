@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 import {
@@ -72,7 +80,7 @@ export class AuthController {
     return this.authService.resetPassword(body, code);
   }
 
-  @Post('change-password')
+  @Put('change-password')
   @ApiProperty({ description: '(super admin)' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -83,7 +91,7 @@ export class AuthController {
     return this.authService.changeUserPasswordAdmin(body);
   }
 
-  @Post('change-default-password')
+  @Put('change-default-password')
   @ApiProperty({ description: '(Rider)' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)

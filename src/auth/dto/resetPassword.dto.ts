@@ -28,8 +28,5 @@ export class ChangePasswordDto {
   newPassword: string;
   @ApiProperty()
   @IsString()
-  oldPassword: string;
-  @ApiProperty()
-  @IsString()
   userId: string;
 }
