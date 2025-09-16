@@ -32,6 +32,9 @@ export const ERRORS = {
   PASSWORD_MISMATCH: {
     EN: 'Passwords do not match',
   },
+  OLD_PASSWORD_MISMATCH: {
+    EN: 'Old password does not match',
+  },
   INVALID_PASSWORD_PATTERN: {
     EN: 'Password must contain at lowercase,uppercase,number and a special character',
   },

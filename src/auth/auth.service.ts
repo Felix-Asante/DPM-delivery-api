@@ -15,8 +15,13 @@ import {
   isCodeExpired,
 } from 'src/utils/helpers';
 import { LoginDto } from './dto/login.dto';
-import { ResetPasswordDto } from './dto/resetPassword.dto';
+import {
+  ChangedDefaultPasswordDto,
+  ChangePasswordDto,
+  ResetPasswordDto,
+} from './dto/resetPassword.dto';
 import { VerifyCodeDto } from './dto/verifyCode.dto';
+import { User } from 'src/users/entities/user.entity';
 @Injectable()
 export class AuthService {
   constructor(
@@ -90,6 +95,62 @@ export class AuthService {
       user.code = null;
       user.codeExpiryDate = null;
       user.codeUseCase = null;
+      user.save();
+
+      return {
+        success: true,
+      };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+  async changeDefaultPassword(data: ChangedDefaultPasswordDto, user: User) {
+    try {
+      const isSameAsOldPassword = await bcrypt.compare(
+        data.oldPassword,
+        user.password,
+      );
+      if (!isSameAsOldPassword) {
+        throw new BadRequestException(ERRORS.OLD_PASSWORD_MISMATCH.EN);
+      }
+
+      const isSameAsCurrentPassword = await bcrypt.compare(
+        data.newPassword,
+        user.password,
+      );
+      if (isSameAsCurrentPassword) {
+        throw new BadRequestException(ERRORS.PASSWORD_ALREADY_IN_USE.EN);
+      }
+
+      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+      user.password = hashedPassword;
+      user.isDefaultPassword = false;
+      user.save();
+
+      return {
+        success: true,
+      };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async changeUserPasswordAdmin(data: ChangePasswordDto) {
+    try {
+      const user = await this.usersService.findById(data.userId);
+      if (!user) {
+        throw new NotFoundException(ERRORS.USER_NOT_FOUND.EN);
+      }
+
+      if (await bcrypt.compare(data.newPassword, user.password)) {
+        throw new BadRequestException(ERRORS.PASSWORD_ALREADY_IN_USE.EN);
+      }
+
+      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+      user.password = hashedPassword;
+      user.isDefaultPassword = false;
       user.save();
 
       return {

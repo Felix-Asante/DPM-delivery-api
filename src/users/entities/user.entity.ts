@@ -70,6 +70,9 @@ export class User extends AbstractEntity {
   @JoinColumn()
   wallet: Wallet;
 
+  @Column({ nullable: true, default: false })
+  isDefaultPassword: boolean;
+
   @BeforeInsert()
   async hashPassword() {
     if (this.password) {

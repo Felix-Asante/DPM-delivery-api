@@ -83,6 +83,7 @@ export class RiderService {
       fullName,
       isVerified: true,
       profilePicture,
+      isDefaultPassword: true,
     });
 
     newUser.role = role;

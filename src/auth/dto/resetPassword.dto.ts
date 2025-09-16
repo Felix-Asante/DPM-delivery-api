@@ -14,3 +14,22 @@ export class ResetPasswordDto {
   @IsString()
   confirmPassword: string;
 }
+export class ChangedDefaultPasswordDto {
+  @ApiProperty()
+  @IsString()
+  newPassword: string;
+  @ApiProperty()
+  @IsString()
+  oldPassword: string;
+}
+export class ChangePasswordDto {
+  @ApiProperty()
+  @IsString()
+  newPassword: string;
+  @ApiProperty()
+  @IsString()
+  oldPassword: string;
+  @ApiProperty()
+  @IsString()
+  userId: string;
+}
