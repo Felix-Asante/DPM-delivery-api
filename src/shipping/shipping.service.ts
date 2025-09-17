@@ -84,6 +84,7 @@ export class ShippingService {
     const { status, query, ...rest } = options;
     let where: any = [];
 
+    console.log(user.role);
     const isRider = user.role.name === UserRoles.COURIER;
 
     if (isRider) {
@@ -107,7 +108,7 @@ export class ShippingService {
     }
 
     if (status && !query) {
-      where = [{ status }];
+      where = [{ status, ...{ rider: isRider ? { id: user.id } : {} } }];
     }
 
     const orders = await paginate(this.shippingOrderRepository, rest, {
