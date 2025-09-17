@@ -15,8 +15,11 @@ type MessagesParamsMap = {
     trackLink: string;
   };
   [MessagesTemplates.RIDER_ASSIGNED]: {
-    reference: string;
     fullName: string;
+    orderNumber: string;
+    deliveryArea: string;
+    contactNumber: string;
+    dashboardLink: string;
   };
   [MessagesTemplates.RIDER_ASSIGNED_USER]: {
     reference: string;
@@ -110,9 +113,20 @@ export class MessagesService {
       return messages.shipmentReceived(reference, trackLink);
     }
     if (template === MessagesTemplates.RIDER_ASSIGNED) {
-      const { reference, fullName } =
-        params as MessagesParamsMap[MessagesTemplates.RIDER_ASSIGNED];
-      return messages.riderAssigned(fullName, reference);
+      const {
+        dashboardLink,
+        fullName,
+        orderNumber,
+        deliveryArea,
+        contactNumber,
+      } = params as MessagesParamsMap[MessagesTemplates.RIDER_ASSIGNED];
+      return messages.riderAssigned(
+        fullName,
+        orderNumber,
+        deliveryArea,
+        contactNumber,
+        dashboardLink,
+      );
     }
     if (template === MessagesTemplates.RIDER_REASSIGNED) {
       const { fullName, reference } =

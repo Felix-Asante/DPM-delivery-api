@@ -223,8 +223,11 @@ export class ShippingService {
 
       // Notify the new rider
       await this.messageService.sendSms(MessagesTemplates.RIDER_ASSIGNED, {
-        reference: order.reference,
+        orderNumber: order.reference,
         fullName: rider.fullName,
+        deliveryArea: `${order.dropOffCity}, ${order.dropOffArea}`,
+        contactNumber: rider.phone,
+        dashboardLink: `${ENV.FRONTEND_URL}/dashboard`,
         recipients: [rider.phone],
       });
 
@@ -293,7 +296,7 @@ export class ShippingService {
             status: createShipmentHistoryDto.status,
           };
 
-          await this.changeToOutForDelivery(shippingId);
+          // await this.changeToOutForDelivery(shippingId);
           break;
         case ShipmentHistoryStatus.DELIVERED:
           if (!createShipmentHistoryDto.confirmationCode) {
