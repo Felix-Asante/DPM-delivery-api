@@ -1,8 +1,8 @@
 export const messages = {
   shipmentReceived: (reference: string, trackLink: string) =>
-    `Hi, your order (#${reference}) has been received. A rider will be assigned shortly,thank you!.\n\n\nTrack order here: ${trackLink}`,
+    `Hi, your package with order number: #${reference} has been received. A rider will be assigned shortly,thank you!.\n\n\nTrack order here: ${trackLink}`,
   shipmentReceivedReceiver: (reference: string, trackLink: string) =>
-    `Hi, your order (#${reference}) has been received. A rider will be assigned shortly,thank you!.\n\n\nTrack order here: ${trackLink}`,
+    `Hi, your package with order number: #${reference} has been received. A rider will be assigned shortly,thank you!.\n\n\nTrack order here: ${trackLink}`,
   riderAssigned: (
     fullName: string,
     orderNumber: string,
@@ -20,12 +20,12 @@ export const messages = {
   riderAccountCreated: (fullName: string) =>
     `Hi ${fullName}, your registration is complete! You're ready to start receiving orders now. Visit www.dpmdelivery.com/riders to check your orders. Thanks for joining DPM Deliveries!`,
   outForDelivery: (reference: string, trackingLink: string, code: string) => `
-  Hi, your order (#${reference}) is Out for Delivery. Confirmation code: ${code}
+  Hi, your package with order number: #${reference} is Out for Delivery. Confirmation code: ${code}
 \nYour assigned delivery guy will contact you!
 \nTrack order here: ${trackingLink}
 \n#dpmdeliveries
   `,
   delivered: (reference: string) => `
-  Hi, your order (#${reference}) has been delivered. Thank you for choosing DPM Deliveries!
+  Hi, your package with order number: #${reference} has been delivered. Thank you for choosing DPM Deliveries!
   `,
 };
