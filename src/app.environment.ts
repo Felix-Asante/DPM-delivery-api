@@ -13,5 +13,6 @@ export const ENV = {
     .required()
     .asEnum<Environment>(Object.values(Environment)),
   FRONTEND_URL: get('FRONTEND_URL').required().asString(),
+  DASHBOARD_URL: get('DASHBOARD_URL').required().asString(),
   ADMIN_PHONE_NUMBER: get('ADMIN_PHONE_NUMBER').required().asString(),
 };
