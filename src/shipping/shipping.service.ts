@@ -227,7 +227,7 @@ export class ShippingService {
         orderNumber: order.reference,
         fullName: rider.fullName,
         deliveryArea: `${order.dropOffCity}, ${order.dropOffArea}`,
-        contactNumber: rider.phone,
+        contactNumber: order.recipientPhone,
         dashboardLink: `${ENV.FRONTEND_URL}/dashboard`,
         recipients: [rider.phone],
       });
