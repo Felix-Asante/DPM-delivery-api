@@ -25,6 +25,8 @@ import { FindAllShipmentDto } from './dto/find-all-shippment.dto';
 import { ShipmentHistory } from './entities/shipment-history.entity';
 import { ShippingOrder } from './entities/shipping-order.entity';
 import { User } from 'src/users/entities/user.entity';
+import { ShipmentCostService } from './shipment-cost.service';
+import { WalletService } from 'src/wallets/wallets.service';
 
 @Injectable()
 export class ShippingService {
@@ -38,6 +40,8 @@ export class ShippingService {
     private readonly filesService: FilesService,
     private dataSource: DataSource,
     private schedulerRegistry: SchedulerRegistry,
+    private readonly shipmentCostService: ShipmentCostService,
+    private readonly walletService: WalletService,
   ) {}
 
   async create(createShipmentDto: CreateShipmentDto) {
@@ -84,7 +88,6 @@ export class ShippingService {
     const { status, query, ...rest } = options;
     let where: any = [];
 
-    console.log(user.role);
     const isRider = user.role.name === UserRoles.COURIER;
 
     if (isRider) {
@@ -263,6 +266,7 @@ export class ShippingService {
     shippingId: string,
     photo?: Express.Multer.File,
   ) {
+    // Add a guard to check if the delivery cost is set
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -282,6 +286,11 @@ export class ShippingService {
       if (order.status === ShipmentHistoryStatus.DELIVERED) {
         throw new BadRequestException('Order is already delivered');
       }
+
+      const shipmentCost =
+        await this.shipmentCostService.getShipmentCostByShipmentOrderId(
+          order.id,
+        );
 
       switch (createShipmentHistoryDto.status) {
         case ShipmentHistoryStatus.PICKUP_CONFIRMED:
@@ -312,6 +321,29 @@ export class ShippingService {
             throw new BadRequestException('Confirmation code is incorrect!');
           }
 
+          if (!shipmentCost) {
+            throw new BadRequestException('Shipment cost not found');
+          }
+
+          if (!shipmentCost.paid) {
+            throw new BadRequestException(
+              'Shipment cost is not paid, please verify the payment',
+            );
+          }
+
+          let riderPayment = 0;
+
+          if (shipmentCost.riderCommission > 0) {
+            riderPayment =
+              (shipmentCost.riderCommission / 100) * shipmentCost.totalCost;
+          }
+
+          await this.walletService.creditWallet(
+            order.rider.id,
+            riderPayment,
+            order.reference,
+          );
+
           order.confirmationCode = null;
           smsToSend = {
             template: MessagesTemplates.DELIVERED,
@@ -332,6 +364,7 @@ export class ShippingService {
               recipients: [order.recipientPhone],
               code: confirmationCode,
               trackingLink: `${ENV.FRONTEND_URL}/track-delivery/${order.reference}`,
+              totalCost: shipmentCost.totalCost,
             },
           };
           break;
@@ -363,31 +396,31 @@ export class ShippingService {
     }
   }
 
-  async changeToOutForDelivery(id: string) {
-    const cronId = `change_to_out_for_delivery_${generateOtpCode(6)}`;
-    const job = new CronJob(CronExpression.EVERY_5_MINUTES, async () => {
-      const order = await this.findOne(id);
-      const history = new ShipmentHistory();
-      history.status = ShipmentHistoryStatus.OUT_FOR_DELIVERY;
-      history.order = order;
-      order.status = ShipmentHistoryStatus.OUT_FOR_DELIVERY;
-      const confirmationCode = generateOtpCode(4);
-      order.confirmationCode = confirmationCode;
+  // async changeToOutForDelivery(id: string) {
+  //   const cronId = `change_to_out_for_delivery_${generateOtpCode(6)}`;
+  //   const job = new CronJob(CronExpression.EVERY_5_MINUTES, async () => {
+  //     const order = await this.findOne(id);
+  //     const history = new ShipmentHistory();
+  //     history.status = ShipmentHistoryStatus.OUT_FOR_DELIVERY;
+  //     history.order = order;
+  //     order.status = ShipmentHistoryStatus.OUT_FOR_DELIVERY;
+  //     const confirmationCode = generateOtpCode(4);
+  //     order.confirmationCode = confirmationCode;
 
-      this.messageService.sendSms(MessagesTemplates.OUT_FOR_DELIVERY, {
-        reference: order.reference,
-        recipients: [order.recipientPhone],
-        code: confirmationCode,
-        trackingLink: `${ENV.FRONTEND_URL}/track-delivery/${order.reference}`,
-      });
-      await this.shipmentHistoryRepository.save(history);
-      await this.shippingOrderRepository.save(order);
-      this.schedulerRegistry.deleteCronJob(cronId);
-    });
+  //     this.messageService.sendSms(MessagesTemplates.OUT_FOR_DELIVERY, {
+  //       reference: order.reference,
+  //       recipients: [order.recipientPhone],
+  //       code: confirmationCode,
+  //       trackingLink: `${ENV.FRONTEND_URL}/track-delivery/${order.reference}`,
+  //     });
+  //     await this.shipmentHistoryRepository.save(history);
+  //     await this.shippingOrderRepository.save(order);
+  //     this.schedulerRegistry.deleteCronJob(cronId);
+  //   });
 
-    this.schedulerRegistry.addCronJob(cronId, job);
-    job.start();
-  }
+  //   this.schedulerRegistry.addCronJob(cronId, job);
+  //   job.start();
+  // }
 
   async findHistoryById(shippingId: string) {
     return this.shipmentHistoryRepository.findOne({

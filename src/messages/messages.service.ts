@@ -40,6 +40,7 @@ type MessagesParamsMap = {
     trackingLink: string;
     code: string;
     reference: string;
+    totalCost: number;
   };
   [MessagesTemplates.DELIVERED]: {
     reference: string;
@@ -148,9 +149,9 @@ export class MessagesService {
     }
 
     if (template === MessagesTemplates.OUT_FOR_DELIVERY) {
-      const { trackingLink, code, reference } =
+      const { trackingLink, code, reference, totalCost } =
         params as MessagesParamsMap[MessagesTemplates.OUT_FOR_DELIVERY];
-      return messages.outForDelivery(reference, trackingLink, code);
+      return messages.outForDelivery(reference, trackingLink, code, totalCost);
     }
     if (template === MessagesTemplates.DELIVERED) {
       const { reference } =

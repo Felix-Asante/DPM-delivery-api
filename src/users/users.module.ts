@@ -10,12 +10,14 @@ import { Booking } from 'src/bookings/entities/booking.entity';
 import { BookingStatus } from 'src/bookings/entities/booking-status.entity';
 import { SmsService } from 'src/sms/sms.service';
 import { FilesModule } from 'src/files/files.module';
+import { WalletsModule } from 'src/wallets/wallets.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Role, Booking, BookingStatus]),
     LikesModule,
     FilesModule,
+    WalletsModule,
   ],
   controllers: [UsersController],
   providers: [UsersService, MessagesService, SmsService],
