@@ -9,7 +9,7 @@ export class WalletTransaction extends AbstractEntity {
   @Index('wallet_idx')
   wallet: Wallet;
 
-  @Column()
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   amount: number;
 
   @Column()

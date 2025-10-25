@@ -15,9 +15,17 @@ export class WalletService {
   ) {}
 
   async creditWallet(userId: string, amount: number, reference: string) {
-    const wallet = await this.walletRepo.findOne({
+    let wallet = await this.walletRepo.findOne({
       where: { user: { id: userId } },
     });
+
+    if (!wallet) {
+      wallet = this.walletRepo.create({
+        user: { id: userId },
+        balance: 0,
+        totalEarned: 0,
+      });
+    }
 
     wallet.balance += amount;
     wallet.totalEarned += amount;
@@ -39,6 +47,8 @@ export class WalletService {
       where: { user: { id: userId } },
     });
 
+    if (!wallet) throw new Error('Wallet not found');
+
     if (wallet.balance < amount) throw new Error('Insufficient balance');
 
     wallet.balance -= amount;
@@ -53,5 +63,11 @@ export class WalletService {
         reference,
       }),
     );
+  }
+
+  async getWalletByUserId(userId: string) {
+    return this.walletRepo.findOne({
+      where: { user: { id: userId } },
+    });
   }
 }

@@ -31,11 +31,16 @@ import { FindAllShipmentDto } from './dto/find-all-shippment.dto';
 import { currentUser } from 'src/auth/decorators/currentUser.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { SetShipmentCostDto } from './dto/set-shipment-cost.dto';
+import { ShipmentCostService } from './shipment-cost.service';
 
 @Controller('shipping')
 @ApiTags('Shipping')
 export class ShippingController {
-  constructor(private readonly shippingService: ShippingService) {}
+  constructor(
+    private readonly shippingService: ShippingService,
+    private readonly shipmentCostService: ShipmentCostService,
+  ) {}
 
   @Post()
   @ApiInternalServerErrorResponse()
@@ -132,5 +137,16 @@ export class ShippingController {
     @UploadedFile() photo?: Express.Multer.File,
   ) {
     return this.shippingService.updateHistory(body, id, photo);
+  }
+
+  @Patch(':id/set-cost')
+  @ApiInternalServerErrorResponse()
+  @ApiOkResponse()
+  @ApiBadRequestResponse()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
+  async setCost(@Param('id') id: string, @Body() body: SetShipmentCostDto) {
+    return await this.shipmentCostService.createOrUpdate(id, body);
   }
 }

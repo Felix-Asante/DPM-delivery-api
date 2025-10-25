@@ -5,8 +5,17 @@ import {
   ShipmentHistoryStatus,
   ShipmentOptions,
 } from 'src/utils/enums';
-import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 import { ShipmentHistory } from './shipment-history.entity';
+import { ShipmentCost } from './shipment-cost.entity';
 
 @Entity('shipping_orders')
 export class ShippingOrder extends AbstractEntity {
@@ -61,4 +70,8 @@ export class ShippingOrder extends AbstractEntity {
     cascade: true,
   })
   history: ShipmentHistory[];
+
+  @OneToOne(() => ShipmentCost, { eager: true })
+  @JoinColumn()
+  shipmentCost: ShipmentCost;
 }

@@ -36,11 +36,15 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { IFindUserQuery } from 'src/utils/interface';
 import { imageFileFilter } from 'src/utils/helpers';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { WalletService } from 'src/wallets/wallets.service';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly walletService: WalletService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
@@ -149,5 +153,16 @@ export class UsersController {
   @hasRoles(UserRoles.ADMIN)
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.USER, UserRoles.COURIER)
+  @Get('wallet')
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse()
+  @ApiForbiddenResponse()
+  @ApiOperation({ summary: '(user, courier)' })
+  getWallet(@currentUser() user: User) {
+    return this.walletService.getWalletByUserId(user.id);
   }
 }
