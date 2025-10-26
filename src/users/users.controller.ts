@@ -37,6 +37,7 @@ import { IFindUserQuery } from 'src/utils/interface';
 import { imageFileFilter } from 'src/utils/helpers';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { WalletService } from 'src/wallets/wallets.service';
+import { GetTransactionsDto } from 'src/wallets/dto/get-transactions.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -164,5 +165,19 @@ export class UsersController {
   @ApiOperation({ summary: '(user, courier)' })
   getWallet(@currentUser() user: User) {
     return this.walletService.getWalletByUserId(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.USER, UserRoles.COURIER)
+  @Get('wallet/transactions')
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse()
+  @ApiForbiddenResponse()
+  @ApiOperation({ summary: '(user, courier)' })
+  getWalletTransactions(
+    @currentUser() user: User,
+    @Query() queries: GetTransactionsDto,
+  ) {
+    return this.walletService.getWalletTransactions(user.id, queries);
   }
 }
