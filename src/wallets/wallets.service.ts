@@ -4,6 +4,8 @@ import { Wallet } from './entities/wallets.entity';
 import { Repository } from 'typeorm';
 import { WalletTransaction } from './entities/wallet-transactions.entity';
 import { WalletTransactionTypes } from 'src/utils/enums';
+import { paginate } from 'nestjs-typeorm-paginate';
+import { GetTransactionsDto } from './dto/get-transactions.dto';
 
 @Injectable()
 export class WalletService {
@@ -69,5 +71,20 @@ export class WalletService {
     return this.walletRepo.findOne({
       where: { user: { id: userId } },
     });
+  }
+
+  async getWalletTransactions(userId: string, queries: GetTransactionsDto) {
+    const { page = 1, limit = 10, type } = queries;
+
+    const transactions = await paginate(
+      this.txRepo,
+      { page, limit },
+      {
+        where: { wallet: { user: { id: userId } }, ...(type ? { type } : {}) },
+        order: { createdAt: 'DESC' },
+      },
+    );
+
+    return transactions;
   }
 }
