@@ -74,4 +74,7 @@ export class ShippingOrder extends AbstractEntity {
   @OneToOne(() => ShipmentCost, { eager: true })
   @JoinColumn()
   shipmentCost: ShipmentCost;
+
+  @ManyToOne(() => User, (rider) => rider.markedAsPaidOrders)
+  markedAsPaidBy: User;
 }

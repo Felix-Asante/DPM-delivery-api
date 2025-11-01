@@ -29,8 +29,13 @@ export class WalletService {
       });
     }
 
-    wallet.balance += amount;
-    wallet.totalEarned += amount;
+    const prevBalance = Number(wallet.balance || 0);
+    const newBalance = prevBalance + amount;
+    const prevTotalEarned = Number(wallet.totalEarned || 0);
+    const newTotalEarned = prevTotalEarned + amount;
+
+    wallet.balance = newBalance;
+    wallet.totalEarned = newTotalEarned;
 
     await this.walletRepo.save(wallet);
 
@@ -53,7 +58,13 @@ export class WalletService {
 
     if (wallet.balance < amount) throw new Error('Insufficient balance');
 
-    wallet.balance -= amount;
+    const prevBalance = Number(wallet.balance || 0);
+    const newBalance = prevBalance - amount;
+    const prevTotalEarned = Number(wallet.totalEarned || 0);
+    const newTotalEarned = prevTotalEarned - amount;
+
+    wallet.balance = newBalance;
+    wallet.totalEarned = newTotalEarned;
 
     await this.walletRepo.save(wallet);
 

@@ -133,10 +133,11 @@ export class ShippingController {
   @hasRoles(UserRoles.ADMIN, UserRoles.COURIER)
   async updateHistory(
     @Param('id') id: string,
+    @currentUser() user: User,
     @Body() body: CreateShipmentHistoryDto,
     @UploadedFile() photo?: Express.Multer.File,
   ) {
-    return this.shippingService.updateHistory(body, id, photo);
+    return this.shippingService.updateHistory(user, body, id, photo);
   }
 
   @Patch(':id/set-cost')
