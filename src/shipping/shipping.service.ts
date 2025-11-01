@@ -18,7 +18,7 @@ import {
   UserRoles,
 } from 'src/utils/enums';
 import { generateOtpCode, tryCatch } from 'src/utils/helpers';
-import { Between, DataSource, ILike, Repository } from 'typeorm';
+import { Between, DataSource, ILike, In, Not, Repository } from 'typeorm';
 import { CreateShipmentHistoryDto } from './dto/create-shipment-history.dto';
 import { CreateShipmentDto } from './dto/create-shipment.dto';
 import { FindAllShipmentDto } from './dto/find-all-shippment.dto';
@@ -482,7 +482,12 @@ export class ShippingService {
           this.shippingOrderRepository.count({
             where: {
               rider: { id: riderId },
-              status: ShipmentHistoryStatus.RIDER_ASSIGNED,
+              status: Not(
+                In([
+                  ShipmentHistoryStatus.DELIVERED,
+                  ShipmentHistoryStatus.OUT_FOR_DELIVERY,
+                ]),
+              ),
             },
           }),
         ]);
