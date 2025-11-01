@@ -73,6 +73,12 @@ export class User extends AbstractEntity {
   @Column({ nullable: true, default: false })
   isDefaultPassword: boolean;
 
+  @OneToMany(
+    () => ShippingOrder,
+    (shippingOrder) => shippingOrder.markedAsPaidBy,
+  )
+  markedAsPaidOrders: ShippingOrder[];
+
   @BeforeInsert()
   async hashPassword() {
     if (this.password) {

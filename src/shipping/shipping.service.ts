@@ -262,6 +262,7 @@ export class ShippingService {
   }
 
   async updateHistory(
+    user: User,
     createShipmentHistoryDto: CreateShipmentHistoryDto,
     shippingId: string,
     photo?: Express.Multer.File,
@@ -291,6 +292,16 @@ export class ShippingService {
         await this.shipmentCostService.getShipmentCostByShipmentOrderId(
           order.id,
         );
+
+      if (
+        !shipmentCost &&
+        createShipmentHistoryDto.status ===
+          ShipmentHistoryStatus.OUT_FOR_DELIVERY
+      ) {
+        throw new BadRequestException('There is no cost set for this order');
+      }
+
+      const isPaid = createShipmentHistoryDto.isPaid === 'true';
 
       switch (createShipmentHistoryDto.status) {
         case ShipmentHistoryStatus.PICKUP_CONFIRMED:
@@ -322,10 +333,11 @@ export class ShippingService {
           }
 
           if (!shipmentCost) {
-            throw new BadRequestException('Shipment cost not found');
+            throw new BadRequestException(
+              'There is no cost set for this order',
+            );
           }
-
-          if (!shipmentCost.paid) {
+          if (!shipmentCost.paid && !isPaid) {
             throw new BadRequestException(
               'Shipment cost is not paid, please verify the payment',
             );
@@ -377,6 +389,15 @@ export class ShippingService {
       history.data = data;
       history.order = order;
       order.status = createShipmentHistoryDto.status;
+
+      if (
+        isPaid &&
+        createShipmentHistoryDto.status === ShipmentHistoryStatus.DELIVERED
+      ) {
+        shipmentCost.paid = true;
+        order.markedAsPaidBy = user;
+        await queryRunner.manager.save(shipmentCost);
+      }
       await queryRunner.manager.save(order);
 
       const savedHistory = await queryRunner.manager.save(history);

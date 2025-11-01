@@ -55,10 +55,11 @@ export class ShipmentCostService {
       throw new BadRequestException('Paid at is required');
     }
 
-    const totalCost =
-      setShipmentCostDto.deliveryFee +
-      (setShipmentCostDto.repackagingFee || 0) +
-      setShipmentCostDto.pickupFee;
+    const deliveryFee = Number(setShipmentCostDto.deliveryFee || 0);
+    const repackagingFee = Number(setShipmentCostDto.repackagingFee || 0);
+    const pickupFee = Number(setShipmentCostDto.pickupFee || 0);
+
+    const totalCost = deliveryFee + repackagingFee + pickupFee;
 
     const data = {
       ...setShipmentCostDto,
