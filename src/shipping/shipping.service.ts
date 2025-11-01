@@ -348,6 +348,8 @@ export class ShippingService {
               (shipmentCost.riderCommission / 100) * shipmentCost.totalCost;
           }
 
+          riderPayment = parseFloat(riderPayment.toFixed(2));
+
           await this.walletService.creditWallet(
             order.rider.id,
             riderPayment,
