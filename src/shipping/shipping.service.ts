@@ -77,7 +77,6 @@ export class ShippingService {
       return shipment;
     } catch (error) {
       queryRunner.rollbackTransaction();
-      console.log(error);
       throw error;
     } finally {
       await queryRunner.release();
@@ -253,7 +252,6 @@ export class ShippingService {
       await queryRunner.commitTransaction();
       return savedOrder;
     } catch (error) {
-      console.log(error);
       await queryRunner.rollbackTransaction();
       throw error;
     } finally {
@@ -395,6 +393,7 @@ export class ShippingService {
         createShipmentHistoryDto.status === ShipmentHistoryStatus.DELIVERED
       ) {
         shipmentCost.paid = true;
+        shipmentCost.paidAt = new Date();
         order.markedAsPaidBy = user;
         await queryRunner.manager.save(shipmentCost);
       }
@@ -475,7 +474,7 @@ export class ShippingService {
             where: {
               rider: { id: riderId },
               status: ShipmentHistoryStatus.DELIVERED,
-              dropOffDate: Between(startOfDay, endOfDay),
+              updatedAt: Between(startOfDay, endOfDay),
             },
           }),
           this.shippingOrderRepository.count({

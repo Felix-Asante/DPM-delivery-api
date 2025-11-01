@@ -210,7 +210,7 @@ export class RiderService {
 
   async getRiderStats(riderId: string, user: User) {
     return tryCatch(async () => {
-      if (user.role.name !== UserRoles.ADMIN && user.rider.id !== riderId) {
+      if (user.role.name !== UserRoles.ADMIN && user.id !== riderId) {
         throw new ForbiddenException(
           'You are not authorized to access this resource',
         );
