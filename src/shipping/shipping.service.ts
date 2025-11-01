@@ -469,7 +469,7 @@ export class ShippingService {
           this.shippingOrderRepository.count({
             where: {
               rider: { id: riderId },
-              status: ShipmentHistoryStatus.RIDER_REASSIGNED,
+              status: ShipmentHistoryStatus.ON_HOLD,
             },
           }),
           this.shippingOrderRepository.count({
