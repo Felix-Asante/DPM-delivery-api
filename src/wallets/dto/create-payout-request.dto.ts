@@ -49,6 +49,15 @@ export class CreatePayoutRequestDto {
   @IsNotEmpty()
   mobileMoneyNumber?: string;
 
+  @ApiPropertyOptional({
+    description: 'Mobile money account holder name (required for mobile money)',
+    example: 'John Doe',
+  })
+  @ValidateIf((o) => o.payoutMethod === PayoutMethod.MOBILE_MONEY)
+  @IsString()
+  @IsNotEmpty()
+  mobileMoneyAccountName?: string;
+
   // Bank Transfer fields
   @ApiPropertyOptional({
     description: 'Bank account number (required for bank transfer)',

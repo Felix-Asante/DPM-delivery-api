@@ -50,6 +50,9 @@ export class PayoutRequest extends AbstractEntity {
   @Column({ nullable: true })
   mobileMoneyNumber: string;
 
+  @Column({ nullable: true })
+  mobileMoneyAccountName: string;
+
   // Transaction tracking
   @Column({ unique: true })
   @Index('payout_reference_idx')
