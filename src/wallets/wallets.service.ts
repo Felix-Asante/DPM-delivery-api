@@ -183,112 +183,133 @@ export class WalletService {
     dto: CreatePayoutRequestDto,
     requestIp?: string,
   ) {
-    // Get the rider's wallet
-    const wallet = await this.walletRepo.findOne({
-      where: { user: { id: riderId } },
-      relations: ['user'],
-    });
+    // Wrap database operations in a transaction
+    const payoutRequest = await this.walletRepo.manager.transaction(
+      async (transactionalEntityManager) => {
+        // Get the rider's wallet
+        const wallet = await transactionalEntityManager.findOne(Wallet, {
+          where: { user: { id: riderId } },
+          relations: ['user'],
+        });
 
-    if (!wallet) {
-      throw new NotFoundException('Wallet not found for this rider');
-    }
+        if (!wallet) {
+          throw new NotFoundException('Wallet not found for this rider');
+        }
 
-    // Check if the rider has sufficient balance
-    const currentBalance = Number(wallet.balance || 0);
-    if (currentBalance < dto.amount) {
-      throw new BadRequestException(
-        `Insufficient balance. Available: ${currentBalance}, Requested: ${dto.amount}`,
-      );
-    }
+        // Check if the rider has sufficient balance
+        const currentBalance = Number(wallet.balance || 0);
+        if (currentBalance < dto.amount) {
+          throw new BadRequestException(
+            `Insufficient balance. Available: ${currentBalance}, Requested: ${dto.amount}`,
+          );
+        }
 
-    // Check for minimum withdrawal amount (optional - you can customize this)
-    const MIN_WITHDRAWAL_AMOUNT = 10;
-    if (dto.amount < MIN_WITHDRAWAL_AMOUNT) {
-      throw new BadRequestException(
-        `Minimum withdrawal amount is ${MIN_WITHDRAWAL_AMOUNT}`,
-      );
-    }
+        // Check for minimum withdrawal amount (optional - you can customize this)
+        const MIN_WITHDRAWAL_AMOUNT = 10;
+        if (dto.amount < MIN_WITHDRAWAL_AMOUNT) {
+          throw new BadRequestException(
+            `Minimum withdrawal amount is ${MIN_WITHDRAWAL_AMOUNT}`,
+          );
+        }
 
-    // Check for pending or processing requests
-    const pendingRequest = await this.payoutRequestRepo.findOne({
-      where: {
-        rider: { id: riderId },
-        status: PayoutRequestStatus.PENDING,
+        // Check for pending or processing requests
+        const pendingRequest = await transactionalEntityManager.findOne(
+          PayoutRequest,
+          {
+            where: {
+              rider: { id: riderId },
+              status: PayoutRequestStatus.PENDING,
+            },
+          },
+        );
+
+        if (pendingRequest) {
+          throw new BadRequestException(
+            'You already have a pending payout request. Please wait for it to be processed.',
+          );
+        }
+
+        // Generate unique reference
+        const reference = `PAYOUT-${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2, 9)
+          .toUpperCase()}`;
+
+        // Calculate processing fee (you can customize this logic)
+        const PROCESSING_FEE_PERCENTAGE = 0.01; // 1%
+        const processingFee = dto.amount * PROCESSING_FEE_PERCENTAGE;
+        const netAmount = dto.amount - processingFee;
+
+        // Create payout request
+        const newPayoutRequest = this.payoutRequestRepo.create({
+          rider: { id: riderId },
+          wallet,
+          amount: dto.amount,
+          payoutMethod: dto.payoutMethod,
+          accountNumber: dto.accountNumber,
+          accountName: dto.accountName,
+          bankName: dto.bankName,
+          bankCode: dto.bankCode,
+          mobileMoneyProvider: dto.mobileMoneyProvider,
+          mobileMoneyNumber: dto.mobileMoneyNumber,
+          mobileMoneyAccountName: dto.mobileMoneyAccountName,
+          reference,
+          status: PayoutRequestStatus.PENDING,
+          notes: dto.notes,
+          requestIp,
+          processingFee,
+          netAmount,
+        });
+
+        const savedPayoutRequest = await transactionalEntityManager.save(
+          PayoutRequest,
+          newPayoutRequest,
+        );
+
+        // Record the payout request as a pending transaction
+        const transaction = this.txRepo.create({
+          wallet,
+          amount: dto.amount,
+          type: WalletTransactionTypes.PAYOUT_PENDING,
+          reference,
+        });
+
+        await transactionalEntityManager.save(WalletTransaction, transaction);
+
+        return savedPayoutRequest;
       },
-    });
-
-    if (pendingRequest) {
-      throw new BadRequestException(
-        'You already have a pending payout request. Please wait for it to be processed.',
-      );
-    }
-
-    // Generate unique reference
-    const reference = `PAYOUT-${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2, 9)
-      .toUpperCase()}`;
-
-    // Calculate processing fee (you can customize this logic)
-    const PROCESSING_FEE_PERCENTAGE = 0.01; // 1%
-    const processingFee = dto.amount * PROCESSING_FEE_PERCENTAGE;
-    const netAmount = dto.amount - processingFee;
-
-    // Create payout request
-    const payoutRequest = this.payoutRequestRepo.create({
-      rider: { id: riderId },
-      wallet,
-      amount: dto.amount,
-      payoutMethod: dto.payoutMethod,
-      accountNumber: dto.accountNumber,
-      accountName: dto.accountName,
-      bankName: dto.bankName,
-      bankCode: dto.bankCode,
-      mobileMoneyProvider: dto.mobileMoneyProvider,
-      mobileMoneyNumber: dto.mobileMoneyNumber,
-      reference,
-      status: PayoutRequestStatus.PENDING,
-      notes: dto.notes,
-      requestIp,
-      processingFee,
-      netAmount,
-    });
-
-    await this.payoutRequestRepo.save(payoutRequest);
-
-    // Record the payout request as a pending transaction
-    await this.txRepo.save(
-      this.txRepo.create({
-        wallet,
-        amount: dto.amount,
-        type: WalletTransactionTypes.PAYOUT_PENDING,
-        reference,
-      }),
     );
 
-    const admin = await this.userRepo.findOne({
-      where: { role: { name: UserRoles.ADMIN } },
-    });
+    // Send SMS notifications AFTER successful transaction commit
+    // SMS sending is outside transaction because it's an external API call that can't be rolled back
+    try {
+      const admin = await this.userRepo.findOne({
+        where: { role: { name: UserRoles.ADMIN } },
+      });
 
-    await Promise.all([
-      this.messageService.sendSms(
-        MessagesTemplates.PAYOUT_REQUESTED_ADMIN_MESSAGE,
-        {
-          recipients: [admin.phone],
-          riderName: payoutRequest.rider.fullName,
-          amount: payoutRequest.amount,
-          currentBalance: payoutRequest.wallet.balance,
-          requestId: payoutRequest.reference,
-        },
-      ),
-      this.messageService.sendSms(
-        MessagesTemplates.PAYOUT_RECEIVED_RIDER_MESSAGE,
-        {
-          recipients: [payoutRequest.rider.phone],
-          riderName: payoutRequest.rider.fullName,
-        },
-      ),
-    ]);
+      await Promise.all([
+        this.messageService.sendSms(
+          MessagesTemplates.PAYOUT_REQUESTED_ADMIN_MESSAGE,
+          {
+            recipients: [admin.phone],
+            riderName: payoutRequest.rider.fullName,
+            amount: payoutRequest.amount,
+            currentBalance: payoutRequest.wallet.balance,
+            requestId: payoutRequest.reference,
+          },
+        ),
+        this.messageService.sendSms(
+          MessagesTemplates.PAYOUT_RECEIVED_RIDER_MESSAGE,
+          {
+            recipients: [payoutRequest.rider.phone],
+            riderName: payoutRequest.rider.fullName,
+          },
+        ),
+      ]);
+    } catch (error) {
+      // Log SMS error but don't fail the request
+      console.error('Failed to send payout request SMS notifications:', error);
+    }
 
     return payoutRequest;
   }
