@@ -34,4 +34,15 @@ export const messages = {
   delivered: (reference: string) => `
   Hi, your package with order number: #${reference} has been delivered. Thank you for choosing DPM Deliveries!
   `,
+  payoutRequestedAdminMessage: (
+    riderName: string,
+    amount: number,
+    currentBalance: number,
+    requestId: string,
+  ) => `
+  Payout Alert: Rider ${riderName} has requested a payout of ${amount}. \nCurrent wallet balance is ${currentBalance}. \nRequest ID: ${requestId}.\n Please check and process.\n\n#dpmdeliveries
+  `,
+  payoutReceivedRiderMessage: (riderName: string) => `
+  Hi ${riderName}, we have received your Withdrawal Request. It will be reviewd and processed as soon as possible. Thank You.\n\n#dpmdeliveries
+  `,
 };

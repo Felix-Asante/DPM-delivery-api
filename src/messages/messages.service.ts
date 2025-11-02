@@ -45,6 +45,15 @@ type MessagesParamsMap = {
   [MessagesTemplates.DELIVERED]: {
     reference: string;
   };
+  [MessagesTemplates.PAYOUT_REQUESTED_ADMIN_MESSAGE]: {
+    riderName: string;
+    amount: number;
+    currentBalance: number;
+    requestId: string;
+  };
+  [MessagesTemplates.PAYOUT_RECEIVED_RIDER_MESSAGE]: {
+    riderName: string;
+  };
 };
 
 type MessagesParams<T extends MessagesTemplates> = MessagesParamsMap[T];
