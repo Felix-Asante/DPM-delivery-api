@@ -2,6 +2,7 @@ import { AbstractEntity } from 'src/entities/abstract.entity';
 import { ManyToOne, Column, Entity, OneToMany, Index } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { WalletTransaction } from './wallet-transactions.entity';
+import { PayoutRequest } from './payout-request.entity';
 
 @Entity('wallets')
 export class Wallet extends AbstractEntity {
@@ -17,4 +18,7 @@ export class Wallet extends AbstractEntity {
 
   @OneToMany(() => WalletTransaction, (transaction) => transaction.wallet)
   transactions: WalletTransaction[];
+
+  @OneToMany(() => PayoutRequest, (payoutRequest) => payoutRequest.wallet)
+  payoutRequests: PayoutRequest[];
 }
