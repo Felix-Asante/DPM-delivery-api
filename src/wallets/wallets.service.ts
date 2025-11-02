@@ -7,13 +7,20 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Wallet } from './entities/wallets.entity';
 import { Repository } from 'typeorm';
 import { WalletTransaction } from './entities/wallet-transactions.entity';
-import { WalletTransactionTypes, PayoutRequestStatus } from 'src/utils/enums';
+import {
+  WalletTransactionTypes,
+  PayoutRequestStatus,
+  MessagesTemplates,
+  UserRoles,
+} from 'src/utils/enums';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { GetTransactionsDto } from './dto/get-transactions.dto';
 import { PayoutRequest } from './entities/payout-request.entity';
 import { CreatePayoutRequestDto } from './dto/create-payout-request.dto';
 import { UpdatePayoutRequestStatusDto } from './dto/update-payout-request.dto';
 import { GetPayoutRequestsDto } from './dto/get-payout-requests.dto';
+import { MessagesService } from 'src/messages/messages.service';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class WalletService {
@@ -24,6 +31,9 @@ export class WalletService {
     private readonly txRepo: Repository<WalletTransaction>,
     @InjectRepository(PayoutRequest)
     private readonly payoutRequestRepo: Repository<PayoutRequest>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+    private readonly messageService: MessagesService,
   ) {}
 
   async creditWallet(userId: string, amount: number, reference: string) {
@@ -256,6 +266,30 @@ export class WalletService {
       }),
     );
 
+    const admin = await this.userRepo.findOne({
+      where: { role: { name: UserRoles.ADMIN } },
+    });
+
+    await Promise.all([
+      this.messageService.sendSms(
+        MessagesTemplates.PAYOUT_REQUESTED_ADMIN_MESSAGE,
+        {
+          recipients: [admin.phone],
+          riderName: payoutRequest.rider.fullName,
+          amount: payoutRequest.amount,
+          currentBalance: payoutRequest.wallet.balance,
+          requestId: payoutRequest.reference,
+        },
+      ),
+      this.messageService.sendSms(
+        MessagesTemplates.PAYOUT_RECEIVED_RIDER_MESSAGE,
+        {
+          recipients: [payoutRequest.rider.phone],
+          riderName: payoutRequest.rider.fullName,
+        },
+      ),
+    ]);
+
     return payoutRequest;
   }
 
@@ -275,7 +309,7 @@ export class WalletService {
     }
 
     // Check if the request is in a valid state for approval
-    if (payoutRequest.status !== PayoutRequestStatus.PENDING) {
+    if ([PayoutRequestStatus.COMPLETED].includes(payoutRequest.status)) {
       throw new BadRequestException(
         `Cannot approve a payout request with status: ${payoutRequest.status}`,
       );
@@ -305,16 +339,15 @@ export class WalletService {
       }),
     );
 
-    // Update payout request status
     payoutRequest.status = dto?.status;
     if (dto?.status === PayoutRequestStatus.APPROVED) {
       payoutRequest.approvedBy = { id: adminId } as any;
       payoutRequest.approvedAt = new Date();
     }
-    if (dto?.status === PayoutRequestStatus.PROCESSING) {
-      payoutRequest.processedBy = { id: adminId } as any;
-      payoutRequest.processedAt = new Date();
-    }
+    // if (dto?.status === PayoutRequestStatus.PROCESSING) {
+    //   payoutRequest.processedBy = { id: adminId } as any;
+    //   payoutRequest.processedAt = new Date();
+    // }
 
     if (dto?.notes) {
       payoutRequest.notes = dto.notes;

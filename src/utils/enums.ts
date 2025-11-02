@@ -54,6 +54,8 @@ export const enum MessagesTemplates {
   RIDER_ACCOUNT_CREATED = 'rider_account_created',
   OUT_FOR_DELIVERY = 'out_for_delivery',
   DELIVERED = 'delivered',
+  PAYOUT_REQUESTED_ADMIN_MESSAGE = 'payout_requested_admin_message',
+  PAYOUT_RECEIVED_RIDER_MESSAGE = 'payout_received_rider_message',
 }
 
 export enum ShipmentHistoryStatus {
@@ -96,7 +98,6 @@ export enum WalletTransactionTypes {
 
 export enum PayoutRequestStatus {
   PENDING = 'pending',
-  PROCESSING = 'processing',
   APPROVED = 'approved',
   COMPLETED = 'completed',
   REJECTED = 'rejected',
