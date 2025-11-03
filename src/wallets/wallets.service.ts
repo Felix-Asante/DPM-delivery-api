@@ -319,80 +319,103 @@ export class WalletService {
     adminId: string,
     dto?: UpdatePayoutRequestStatusDto,
   ) {
-    // Get the payout request with relations
-    const payoutRequest = await this.payoutRequestRepo.findOne({
-      where: { id: payoutRequestId },
-      relations: ['rider', 'wallet'],
-    });
+    // Wrap all database operations in a transaction
+    return await this.payoutRequestRepo.manager.transaction(
+      async (transactionalEntityManager) => {
+        // Get the payout request with relations
+        const payoutRequest = await transactionalEntityManager.findOne(
+          PayoutRequest,
+          {
+            where: { id: payoutRequestId },
+            relations: ['rider', 'wallet'],
+          },
+        );
 
-    if (!payoutRequest) {
-      throw new NotFoundException('Payout request not found');
-    }
+        if (!payoutRequest) {
+          throw new NotFoundException('Payout request not found');
+        }
 
-    // Check if the request is in a valid state for approval
-    const isCompleted = [PayoutRequestStatus.COMPLETED].includes(
-      payoutRequest.status,
+        // Check if the request is in a valid state for approval
+        const isCompleted =
+          PayoutRequestStatus.COMPLETED === payoutRequest.status;
+
+        if (isCompleted) {
+          throw new BadRequestException(
+            `Cannot approve a payout request with status: ${payoutRequest.status}`,
+          );
+        }
+
+        // Verify the wallet still has sufficient balance
+        const currentBalance = Number(payoutRequest.wallet.balance || 0);
+        if (
+          currentBalance < payoutRequest.amount &&
+          [
+            PayoutRequestStatus.APPROVED,
+            PayoutRequestStatus.COMPLETED,
+          ].includes(dto?.status)
+        ) {
+          throw new BadRequestException(
+            `Insufficient wallet balance. Available: ${parseFloat(
+              currentBalance.toFixed(2),
+            )}, Required: ${payoutRequest.amount}`,
+          );
+        }
+
+        // Deduct the amount from the wallet
+        if (dto?.status === PayoutRequestStatus.COMPLETED) {
+          payoutRequest.wallet.balance = currentBalance - payoutRequest.amount;
+          await transactionalEntityManager.save(Wallet, payoutRequest.wallet);
+        }
+
+        // Find or create payout transaction
+        let payoutTransaction = await transactionalEntityManager.findOne(
+          WalletTransaction,
+          {
+            where: {
+              wallet: { id: payoutRequest.wallet.id },
+              reference: payoutRequest.reference,
+            },
+          },
+        );
+
+        if (!payoutTransaction) {
+          payoutTransaction = new WalletTransaction();
+        }
+
+        payoutTransaction.wallet = payoutRequest.wallet;
+        payoutTransaction.amount = payoutRequest.amount;
+        payoutTransaction.type = this.getWalletTransactionType(dto?.status);
+        payoutTransaction.reference = payoutRequest.reference;
+        await transactionalEntityManager.save(
+          WalletTransaction,
+          payoutTransaction,
+        );
+
+        // Update payout request status and metadata
+        payoutRequest.status = dto?.status;
+        if (dto?.status === PayoutRequestStatus.APPROVED) {
+          payoutRequest.approvedBy = { id: adminId } as any;
+          payoutRequest.approvedAt = new Date();
+        }
+
+        if (dto?.notes) {
+          payoutRequest.notes = dto.notes;
+        }
+        if (dto?.externalReference) {
+          payoutRequest.externalReference = dto.externalReference;
+        }
+        if (dto?.transactionId) {
+          payoutRequest.transactionId = dto.transactionId;
+        }
+
+        const savedPayoutRequest = await transactionalEntityManager.save(
+          PayoutRequest,
+          payoutRequest,
+        );
+
+        return savedPayoutRequest;
+      },
     );
-    if (isCompleted) {
-      throw new BadRequestException(
-        `Cannot approve a payout request with status: ${payoutRequest.status}`,
-      );
-    }
-
-    // Verify the wallet still has sufficient balance
-    const currentBalance = Number(payoutRequest.wallet.balance || 0);
-    if (
-      currentBalance < payoutRequest.amount &&
-      [PayoutRequestStatus.APPROVED, PayoutRequestStatus.COMPLETED].includes(
-        payoutRequest.status,
-      )
-    ) {
-      throw new BadRequestException(
-        `Insufficient wallet balance. Available: ${parseFloat(
-          currentBalance.toFixed(2),
-        )}, Required: ${payoutRequest.amount}`,
-      );
-    }
-
-    // Deduct the amount from the wallet
-    if (isCompleted) {
-      payoutRequest.wallet.balance = currentBalance - payoutRequest.amount;
-      await this.walletRepo.save(payoutRequest.wallet);
-    }
-    await this.txRepo.save(
-      this.txRepo.create({
-        wallet: payoutRequest.wallet,
-        amount: payoutRequest.amount,
-        type: this.getWalletTransactionType(payoutRequest.status),
-        reference: payoutRequest.reference,
-      }),
-    );
-
-    // Create a withdrawal transaction record
-
-    payoutRequest.status = dto?.status;
-    if (dto?.status === PayoutRequestStatus.APPROVED) {
-      payoutRequest.approvedBy = { id: adminId } as any;
-      payoutRequest.approvedAt = new Date();
-    }
-    // if (dto?.status === PayoutRequestStatus.PROCESSING) {
-    //   payoutRequest.processedBy = { id: adminId } as any;
-    //   payoutRequest.processedAt = new Date();
-    // }
-
-    if (dto?.notes) {
-      payoutRequest.notes = dto.notes;
-    }
-    if (dto?.externalReference) {
-      payoutRequest.externalReference = dto.externalReference;
-    }
-    if (dto?.transactionId) {
-      payoutRequest.transactionId = dto.transactionId;
-    }
-
-    await this.payoutRequestRepo.save(payoutRequest);
-
-    return payoutRequest;
   }
 
   private getWalletTransactionType(status: PayoutRequestStatus) {
