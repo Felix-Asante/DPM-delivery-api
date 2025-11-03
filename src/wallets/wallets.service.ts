@@ -338,14 +338,21 @@ export class WalletService {
 
     // Verify the wallet still has sufficient balance
     const currentBalance = Number(payoutRequest.wallet.balance || 0);
-    if (currentBalance < payoutRequest.amount) {
+    if (
+      currentBalance < payoutRequest.amount &&
+      [PayoutRequestStatus.APPROVED, PayoutRequestStatus.COMPLETED].includes(
+        payoutRequest.status,
+      )
+    ) {
       throw new BadRequestException(
-        `Insufficient wallet balance. Available: ${currentBalance}, Required: ${payoutRequest.amount}`,
+        `Insufficient wallet balance. Available: ${parseFloat(
+          currentBalance.toFixed(2),
+        )}, Required: ${payoutRequest.amount}`,
       );
     }
 
     // Deduct the amount from the wallet
-    if (dto?.status === PayoutRequestStatus.APPROVED) {
+    if (dto?.status === PayoutRequestStatus.COMPLETED) {
       payoutRequest.wallet.balance = currentBalance - payoutRequest.amount;
       await this.walletRepo.save(payoutRequest.wallet);
     }
