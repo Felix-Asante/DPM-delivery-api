@@ -330,7 +330,10 @@ export class WalletService {
     }
 
     // Check if the request is in a valid state for approval
-    if ([PayoutRequestStatus.COMPLETED].includes(payoutRequest.status)) {
+    const isCompleted = [PayoutRequestStatus.COMPLETED].includes(
+      payoutRequest.status,
+    );
+    if (isCompleted) {
       throw new BadRequestException(
         `Cannot approve a payout request with status: ${payoutRequest.status}`,
       );
@@ -352,20 +355,20 @@ export class WalletService {
     }
 
     // Deduct the amount from the wallet
-    if (dto?.status === PayoutRequestStatus.COMPLETED) {
+    if (isCompleted) {
       payoutRequest.wallet.balance = currentBalance - payoutRequest.amount;
       await this.walletRepo.save(payoutRequest.wallet);
     }
-
-    // Create a withdrawal transaction record
     await this.txRepo.save(
       this.txRepo.create({
         wallet: payoutRequest.wallet,
         amount: payoutRequest.amount,
-        type: WalletTransactionTypes.WITHDRAWAL,
+        type: this.getWalletTransactionType(payoutRequest.status),
         reference: payoutRequest.reference,
       }),
     );
+
+    // Create a withdrawal transaction record
 
     payoutRequest.status = dto?.status;
     if (dto?.status === PayoutRequestStatus.APPROVED) {
@@ -390,5 +393,20 @@ export class WalletService {
     await this.payoutRequestRepo.save(payoutRequest);
 
     return payoutRequest;
+  }
+
+  private getWalletTransactionType(status: PayoutRequestStatus) {
+    switch (status) {
+      case PayoutRequestStatus.APPROVED:
+        return WalletTransactionTypes.PAYOUT_PENDING;
+      case PayoutRequestStatus.COMPLETED:
+        return WalletTransactionTypes.WITHDRAWAL;
+      case PayoutRequestStatus.FAILED:
+        return WalletTransactionTypes.PAYOUT_FAILED;
+      case PayoutRequestStatus.REJECTED:
+        return WalletTransactionTypes.PAYOUT_REJECTED;
+      default:
+        return WalletTransactionTypes.PAYOUT_PENDING;
+    }
   }
 }
