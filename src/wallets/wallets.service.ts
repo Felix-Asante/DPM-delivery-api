@@ -398,7 +398,7 @@ export class WalletService {
   private getWalletTransactionType(status: PayoutRequestStatus) {
     switch (status) {
       case PayoutRequestStatus.APPROVED:
-        return WalletTransactionTypes.PAYOUT_PENDING;
+        return WalletTransactionTypes.PAYOUT_APPROVED;
       case PayoutRequestStatus.COMPLETED:
         return WalletTransactionTypes.WITHDRAWAL;
       case PayoutRequestStatus.FAILED:
