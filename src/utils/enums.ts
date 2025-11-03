@@ -95,6 +95,7 @@ export enum WalletTransactionTypes {
   PAYOUT_PENDING = 'payout_pending',
   PAYOUT_REJECTED = 'payout_rejected',
   PAYOUT_FAILED = 'payout_failed',
+  PAYOUT_APPROVED = 'payout_approved',
 }
 
 export enum PayoutRequestStatus {
