@@ -179,7 +179,7 @@ export class WalletService {
   }
 
   async createPayoutRequest(
-    riderId: string,
+    rider: User,
     dto: CreatePayoutRequestDto,
     requestIp?: string,
   ) {
@@ -188,7 +188,7 @@ export class WalletService {
       async (transactionalEntityManager) => {
         // Get the rider's wallet
         const wallet = await transactionalEntityManager.findOne(Wallet, {
-          where: { user: { id: riderId } },
+          where: { user: { id: rider.id } },
           relations: ['user'],
         });
 
@@ -217,7 +217,7 @@ export class WalletService {
           PayoutRequest,
           {
             where: {
-              rider: { id: riderId },
+              rider: { id: rider.id },
               status: PayoutRequestStatus.PENDING,
             },
           },
@@ -242,7 +242,7 @@ export class WalletService {
 
         // Create payout request
         const newPayoutRequest = this.payoutRequestRepo.create({
-          rider: { id: riderId },
+          rider: { id: rider.id },
           wallet,
           amount: dto.amount,
           payoutMethod: dto.payoutMethod,
@@ -292,8 +292,8 @@ export class WalletService {
           MessagesTemplates.PAYOUT_REQUESTED_ADMIN_MESSAGE,
           {
             recipients: [admin.phone],
-            riderName: payoutRequest.rider.fullName,
-            amount: payoutRequest.amount,
+            riderName: rider.fullName,
+            amount: dto.amount,
             currentBalance: payoutRequest.wallet.balance,
             requestId: payoutRequest.reference,
           },
@@ -301,8 +301,8 @@ export class WalletService {
         this.messageService.sendSms(
           MessagesTemplates.PAYOUT_RECEIVED_RIDER_MESSAGE,
           {
-            recipients: [payoutRequest.rider.phone],
-            riderName: payoutRequest.rider.fullName,
+            recipients: [rider.phone],
+            riderName: rider.fullName,
           },
         ),
       ]);

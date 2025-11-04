@@ -96,6 +96,7 @@ export class MessagesService {
     params: SendSmsParams<T>,
   ) {
     try {
+      console.log(JSON.stringify(params.recipients));
       const message = this.createMessage(template, params);
       const smsResponse = await this.smsService.send(
         params.recipients,
@@ -108,7 +109,6 @@ export class MessagesService {
         data: smsResponse,
       };
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -166,6 +166,21 @@ export class MessagesService {
       const { reference } =
         params as MessagesParamsMap[MessagesTemplates.DELIVERED];
       return messages.delivered(reference);
+    }
+    if (template === MessagesTemplates.PAYOUT_REQUESTED_ADMIN_MESSAGE) {
+      const { riderName, amount, currentBalance, requestId } =
+        params as MessagesParamsMap[MessagesTemplates.PAYOUT_REQUESTED_ADMIN_MESSAGE];
+      return messages.payoutRequestedAdminMessage(
+        riderName,
+        amount,
+        currentBalance,
+        requestId,
+      );
+    }
+    if (template === MessagesTemplates.PAYOUT_RECEIVED_RIDER_MESSAGE) {
+      const { riderName } =
+        params as MessagesParamsMap[MessagesTemplates.PAYOUT_RECEIVED_RIDER_MESSAGE];
+      return messages.payoutReceivedRiderMessage(riderName);
     }
     return '';
   }
