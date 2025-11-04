@@ -293,8 +293,10 @@ export class WalletService {
           {
             recipients: [admin.phone],
             riderName: rider.fullName,
-            amount: dto.amount,
-            currentBalance: payoutRequest.wallet.balance,
+            amount: parseFloat(dto.amount?.toFixed(2)),
+            currentBalance: parseFloat(
+              payoutRequest.wallet?.balance?.toFixed(2),
+            ),
             requestId: payoutRequest.reference,
           },
         ),
