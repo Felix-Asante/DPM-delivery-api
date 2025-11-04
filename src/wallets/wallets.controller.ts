@@ -72,7 +72,7 @@ export class WalletsController {
   ) {
     const requestIp = request.ip || request.headers['x-forwarded-for'];
     return this.walletsService.createPayoutRequest(
-      user.id,
+      user,
       createPayoutRequestDto,
       requestIp as string,
     );
