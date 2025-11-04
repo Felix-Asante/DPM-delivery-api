@@ -96,7 +96,6 @@ export class MessagesService {
     params: SendSmsParams<T>,
   ) {
     try {
-      console.log(JSON.stringify(params.recipients));
       const message = this.createMessage(template, params);
       const smsResponse = await this.smsService.send(
         params.recipients,
