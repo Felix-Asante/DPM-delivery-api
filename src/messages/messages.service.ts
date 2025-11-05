@@ -32,6 +32,8 @@ type MessagesParamsMap = {
   [MessagesTemplates.RIDER_ACCOUNT_CREATED]: {
     fullName: string;
     dashboardLink: string;
+    phone: string;
+    password: string;
   };
   [MessagesTemplates.SHIPMENT_RECEIVED_RECEIVER]: {
     reference: string;
@@ -147,9 +149,14 @@ export class MessagesService {
       return messages.newOrderReceived();
     }
     if (template === MessagesTemplates.RIDER_ACCOUNT_CREATED) {
-      const { fullName, dashboardLink } =
+      const { fullName, dashboardLink, phone, password } =
         params as MessagesParamsMap[MessagesTemplates.RIDER_ACCOUNT_CREATED];
-      return messages.riderAccountCreated(fullName, dashboardLink);
+      return messages.riderAccountCreated(
+        fullName,
+        dashboardLink,
+        phone,
+        password,
+      );
     }
     if (template === MessagesTemplates.SHIPMENT_RECEIVED_RECEIVER) {
       const { reference, trackLink } =
