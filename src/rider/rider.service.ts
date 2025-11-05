@@ -80,7 +80,7 @@ export class RiderService {
     const newUser = this.userRepository.create({
       email,
       phone,
-      password,
+      password: ENV.RIDER_DEFAULT_PASSWORD,
       fullName,
       isVerified: true,
       profilePicture,
@@ -136,7 +136,7 @@ export class RiderService {
       fullName: rider.fullName,
       dashboardLink: ENV.DASHBOARD_URL,
       phone: rider.phone,
-      password: rider.password,
+      password: ENV.RIDER_DEFAULT_PASSWORD,
     });
     return rider;
   }
