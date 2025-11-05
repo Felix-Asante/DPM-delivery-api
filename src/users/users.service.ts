@@ -54,7 +54,6 @@ export class UsersService {
       throw new ConflictException(ERRORS.PHONE_ALREADY_TAKEN.EN);
     }
 
-    // create a new user
     const role = await this.roleRepository.findOne({
       where: { name: isPlaceAdmin ? UserRoles.PLACE_ADMIN : UserRoles.USER },
     });
@@ -73,6 +72,7 @@ export class UsersService {
     newUser.password = createUserDto.password;
 
     const savedUser = await newUser.save();
+
     // send sms
     const SMS_MESSAGE = `Your Account Verification code is ${smsCode}`;
     if (!isPlaceAdmin) {
