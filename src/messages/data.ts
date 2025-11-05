@@ -17,8 +17,13 @@ export const messages = {
     `Hi ${fullName}, Note that the order (#${reference}) previously assigned to you has now been reassigned. Thank you for your understanding.`,
   newOrderReceived: () =>
     `Hi, A new order has been received and is awaiting assignment for Pickup & Delivery. Please review and assign it as soon as possible!`,
-  riderAccountCreated: (fullName: string, dashboardLink: string) =>
-    `Hi ${fullName}, your registration is complete! You're ready to start receiving orders now. Visit ${dashboardLink} to check your orders. Thanks for joining DPM Deliveries!`,
+  riderAccountCreated: (
+    fullName: string,
+    dashboardLink: string,
+    phone: string,
+    password: string,
+  ) =>
+    `Hi ${fullName}, your registration is complete! You're ready to start receiving orders now. Visit ${dashboardLink} to check your orders. Your login credentials are: Phone: ${phone}, Password: ${password}.\n\nThanks for joining DPM Deliveries!`,
   outForDelivery: (
     reference: string,
     trackingLink: string,

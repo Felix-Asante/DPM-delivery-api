@@ -135,6 +135,8 @@ export class RiderService {
       recipients: [rider.phone],
       fullName: rider.fullName,
       dashboardLink: ENV.DASHBOARD_URL,
+      phone: rider.phone,
+      password: rider.password,
     });
     return rider;
   }
