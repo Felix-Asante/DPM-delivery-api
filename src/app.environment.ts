@@ -15,4 +15,5 @@ export const ENV = {
   FRONTEND_URL: get('FRONTEND_URL').required().asString(),
   DASHBOARD_URL: get('DASHBOARD_URL').required().asString(),
   ADMIN_PHONE_NUMBER: get('ADMIN_PHONE_NUMBER').required().asString(),
+  RIDER_DEFAULT_PASSWORD: get('RIDER_DEFAULT_PASSWORD').required().asString(),
 };
