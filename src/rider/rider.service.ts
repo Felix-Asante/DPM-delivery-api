@@ -21,6 +21,7 @@ import { UpdateRiderDto } from './dto/update-rider.dto';
 import { MessagesService } from 'src/messages/messages.service';
 import { Wallet } from 'src/wallets/entities/wallets.entity';
 import { ShippingService } from 'src/shipping/shipping.service';
+import { ENV } from 'src/app.environment';
 
 @Injectable()
 export class RiderService {
@@ -133,6 +134,7 @@ export class RiderService {
     await this.messageService.sendSms(MessagesTemplates.RIDER_ACCOUNT_CREATED, {
       recipients: [rider.phone],
       fullName: rider.fullName,
+      dashboardLink: ENV.DASHBOARD_URL,
     });
     return rider;
   }
