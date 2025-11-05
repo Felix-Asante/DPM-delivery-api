@@ -43,7 +43,7 @@ export class RiderService {
     identificationDocumentImageFile: Express.Multer.File,
     profilePictureFile: Express.Multer.File,
   ) {
-    const { email, phone, password, fullName, ...riderData } = createRiderDto;
+    const { email, phone, fullName, ...riderData } = createRiderDto;
 
     let user = await this.userRepository.findOne({
       where: { phone },
