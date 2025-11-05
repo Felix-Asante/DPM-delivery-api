@@ -309,7 +309,6 @@ export class WalletService {
         ),
       ]);
     } catch (error) {
-      // Log SMS error but don't fail the request
       console.error('Failed to send payout request SMS notifications:', error);
     }
 
