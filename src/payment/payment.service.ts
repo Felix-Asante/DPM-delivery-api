@@ -33,7 +33,6 @@ export class PaymentService {
       });
       return response.data;
     } catch (error) {
-      console.log('resss', error?.response?.data);
       return error?.response?.data;
     }
   }
@@ -51,7 +50,6 @@ export class PaymentService {
       };
 
       const endpoint = externalApis.payment.checkStatus();
-      console.log({ endpoint, payload });
       const response = await axios.post(endpoint, payload, {
         headers: {
           appId,
