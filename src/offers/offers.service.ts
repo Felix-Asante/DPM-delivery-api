@@ -4,27 +4,22 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OfferTypes } from './entities/offer-type.entity';
-import { Offer } from './entities/offer.entity';
-import { Between, FindOptionsWhere, ILike, In, Repository } from 'typeorm';
+import { paginate } from 'nestjs-typeorm-paginate';
+import { PaginationOptions } from 'src/entities/pagination.entity';
+import { Place } from 'src/places/entities/place.entity';
+import { PlacesService } from 'src/places/places.service';
+import { ProductsService } from 'src/products/products.service';
+import { User } from 'src/users/entities/user.entity';
+import { OffersTypes } from 'src/utils/enums';
 import { ERRORS } from 'src/utils/errors';
+import { getNearbyPlaces, getTotalItems, tryCatch } from 'src/utils/helpers';
 import { IDistance } from 'src/utils/interface';
-import {
-  getCurrentMonthDate,
-  getNearbyPlaces,
-  getTotalItems,
-  tryCatch,
-} from 'src/utils/helpers';
+import { ILike, Repository } from 'typeorm';
 import { OfferTypeDto } from './dtos/create-offer-types.dto';
 import { CreateOfferDto } from './dtos/create-offer.dto';
-import { ProductsService } from 'src/products/products.service';
-import { PlacesService } from 'src/places/places.service';
-import { Place } from 'src/places/entities/place.entity';
-import { OffersTypes, UserRoles } from 'src/utils/enums';
-import { PaginationOptions } from 'src/entities/pagination.entity';
-import { paginate } from 'nestjs-typeorm-paginate';
 import { UpdateOfferDto } from './dtos/update-offer.dto';
-import { User } from 'src/users/entities/user.entity';
+import { OfferTypes } from './entities/offer-type.entity';
+import { Offer } from './entities/offer.entity';
 
 @Injectable()
 export class OffersService {
