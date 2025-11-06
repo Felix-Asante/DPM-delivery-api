@@ -1,13 +1,9 @@
-import { MessagesTemplates } from './../utils/enums';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Twilio } from 'twilio';
-import { ENV } from 'src/utils/constants';
-import { ISendMessage } from './interface';
 import { SmsService } from 'src/sms/sms.service';
+import { MessagesTemplates } from './../utils/enums';
 import { messages } from './data';
-
-const TwilioClient = new Twilio(ENV.TWILIO_ACCOUNT_SID, ENV.TWILIO_AUTH_TOKEN);
+import { ISendMessage } from './interface';
 
 type MessagesParamsMap = {
   [MessagesTemplates.SHIPMENT_RECEIVED]: {
