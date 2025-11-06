@@ -1,17 +1,14 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseGuards,
-  Put,
+  Get,
+  Param,
   ParseUUIDPipe,
+  Post,
+  Put,
+  UseGuards,
 } from '@nestjs/common';
-import { ProductsCategoryService } from './products-category.service';
-import { CreateProductsCategoryDto } from './dto/create-products-category.dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -20,11 +17,13 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwtAuth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { UserRoles } from 'src/utils/enums';
+import { CreateProductsCategoryDto } from './dto/create-products-category.dto';
 import { UpdateProductsCategoryDto } from './dto/update-product-category.dto';
+import { ProductsCategoryService } from './products-category.service';
 
 @Controller('products-category')
 @ApiTags('Products category')
