@@ -3,7 +3,6 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { BookingsService } from 'src/bookings/bookings.service';
 import { MessagesService } from 'src/messages/messages.service';
 import { PaymentService } from 'src/payment/payment.service';
-import { tryCatch } from 'src/utils/helpers';
 
 @Injectable()
 export class CronsService {

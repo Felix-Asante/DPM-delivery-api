@@ -120,7 +120,7 @@ export class FilesService {
       // const stream = this.doc.pipe(
       //   fs.createWriteStream(`${booking.reference}.pdf`),
       // );
-      const buffer = await new Promise((resolve, reject) => {
+      const buffer = await new Promise((resolve) => {
         const buffers: Buffer[] = [];
         this.doc.on('data', (chunk: Buffer) => buffers.push(chunk));
         this.doc.on('end', () => {
