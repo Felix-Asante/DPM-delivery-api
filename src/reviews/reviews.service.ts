@@ -57,12 +57,12 @@ export class ReviewsService {
       if (deleted.affected) {
         return {
           success: true,
-          message: 'The review with id: ' + id + ' has been deleted',
+          message: `The review with id: ${id} has been deleted`,
         };
       } else {
         return {
           success: false,
-          message: 'The review with id: ' + id + ' has NOT been deleted',
+          message: `The review with id: ${id} has NOT been deleted`,
         };
       }
     } catch (error) {
