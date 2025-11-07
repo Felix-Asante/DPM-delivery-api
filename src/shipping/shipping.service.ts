@@ -3,13 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
+import { SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CronJob } from 'cron';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { ENV } from 'src/app.environment';
 import { FilesService } from 'src/files/files.service';
 import { MessagesService } from 'src/messages/messages.service';
+import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { generateBookingReference } from 'src/utils/bookings';
 import {
@@ -18,15 +18,14 @@ import {
   UserRoles,
 } from 'src/utils/enums';
 import { generateOtpCode, tryCatch } from 'src/utils/helpers';
+import { WalletService } from 'src/wallets/wallets.service';
 import { Between, DataSource, ILike, In, Not, Repository } from 'typeorm';
 import { CreateShipmentHistoryDto } from './dto/create-shipment-history.dto';
 import { CreateShipmentDto } from './dto/create-shipment.dto';
 import { FindAllShipmentDto } from './dto/find-all-shippment.dto';
 import { ShipmentHistory } from './entities/shipment-history.entity';
 import { ShippingOrder } from './entities/shipping-order.entity';
-import { User } from 'src/users/entities/user.entity';
 import { ShipmentCostService } from './shipment-cost.service';
-import { WalletService } from 'src/wallets/wallets.service';
 
 @Injectable()
 export class ShippingService {
