@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { AssetsModule } from './assets/assets.module';
 import { AuthModule } from './auth/auth.module';
 import { BookingsModule } from './bookings/bookings.module';
@@ -66,6 +67,7 @@ import { WalletsModule } from './wallets/wallets.module';
     ShippingModule,
     AssetsModule,
     WalletsModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService, SmsService],
