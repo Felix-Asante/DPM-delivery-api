@@ -229,8 +229,9 @@ export class ShippingService {
         fullName: rider.fullName,
         deliveryArea: `${order.dropOffCity}, ${order.dropOffArea}`,
         contactNumber: order.recipientPhone,
-        dashboardLink: `${ENV.FRONTEND_URL}/dashboard`,
+        dashboardLink: `${ENV.DASHBOARD_URL}`,
         recipients: [rider.phone],
+        fee: order.shipmentCost.totalCost,
       });
 
       // If this is the first assignment (not a reassignment), notify the user

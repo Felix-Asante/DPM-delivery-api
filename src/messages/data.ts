@@ -9,8 +9,9 @@ export const messages = {
     deliveryArea: string,
     contactNumber: string,
     dashboardLink: string,
+    fee: number,
   ) =>
-    `Hi ${fullName}, You have been assigned a new order (#${orderNumber}).\n Deliver to: ${deliveryArea}.\n Contact: ${contactNumber}. \n Please check your Dashboard (${dashboardLink}) for more details. Thank you`,
+    `Hi ${fullName}, You have been assigned a new order (#${orderNumber}).\n Deliver to: ${deliveryArea}.\n Contact: ${contactNumber}.\n Fee: ${fee}gh \n Please check your Dashboard (${dashboardLink}) for more details. Thank you`,
   riderAssignedUser: (reference: string) =>
     `Hi, your order (#${reference}) has been confirmed and assigned to a rider. Rider will get in touch with updates. Thanks for choosing us!`,
   riderReassigned: (fullName: string, reference: string) =>

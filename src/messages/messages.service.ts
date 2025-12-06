@@ -16,6 +16,7 @@ type MessagesParamsMap = {
     deliveryArea: string;
     contactNumber: string;
     dashboardLink: string;
+    fee: number;
   };
   [MessagesTemplates.RIDER_ASSIGNED_USER]: {
     reference: string;
@@ -127,6 +128,7 @@ export class MessagesService {
         orderNumber,
         deliveryArea,
         contactNumber,
+        fee,
       } = params as MessagesParamsMap[MessagesTemplates.RIDER_ASSIGNED];
       return messages.riderAssigned(
         fullName,
@@ -134,6 +136,7 @@ export class MessagesService {
         deliveryArea,
         contactNumber,
         dashboardLink,
+        fee,
       );
     }
     if (template === MessagesTemplates.RIDER_REASSIGNED) {
