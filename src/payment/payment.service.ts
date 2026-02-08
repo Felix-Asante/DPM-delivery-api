@@ -1,9 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { externalApis } from 'src/lib/external-api';
 import { CheckPaymentStatusDto } from './dto/check-payment-status.dto';
 import { CreateMobilePaymentDto } from './dto/create-mobile-payment.dto';
+import { ERRORS } from 'src/utils/errors';
+import { ENV } from 'src/app.environment';
+import { ResolveAccountResponse } from './dto/interface';
+import { MobileMoneyProvider } from 'src/utils/enums';
+
+export const MOBILE_MONEY_CODES: Record<string, string> = {
+  MOMO: 'MTN', // MTN Mobile Money
+  AIRTELTIGO: 'ATL', // AirtelTigo Money
+  TELECEL: 'VOD', // Telecel Cash (formerly Vodafone Cash)
+};
 
 @Injectable()
 export class PaymentService {
@@ -58,6 +72,44 @@ export class PaymentService {
       return response.data;
     } catch (error) {
       return { error: error?.message };
+    }
+  }
+
+  async verifyMobileMoneyAccount(
+    accountNumber: string,
+    provider: MobileMoneyProvider,
+  ) {
+    const bankCode = MOBILE_MONEY_CODES[provider];
+
+    if (!bankCode) {
+      throw new BadRequestException(ERRORS.PAYMENT_METHOD.DOES_NOT_EXIST.EN);
+    }
+
+    try {
+      const endpoint = externalApis.paystack.verifyPhoneNumber(
+        accountNumber,
+        bankCode,
+      );
+      const response = await axios.get<ResolveAccountResponse>(endpoint, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${ENV.PAYSTACK_SECRET}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = response.data;
+
+      if (!result.status || !result.data) {
+        throw new BadRequestException(result.message);
+      }
+
+      return {
+        success: true,
+        accountName: result.data.account_name,
+      };
+    } catch (error: any) {
+      throw new InternalServerErrorException(error.message);
     }
   }
 }

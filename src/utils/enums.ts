@@ -111,3 +111,9 @@ export enum PayoutMethod {
   MOBILE_MONEY = 'mobile_money',
   BANK_TRANSFER = 'bank_transfer',
 }
+
+export enum MobileMoneyProvider {
+  MTN = 'MOMO',
+  AIRTELTIGO = 'AIRTELTIGO',
+  TELECEL = 'TELECEL',
+}

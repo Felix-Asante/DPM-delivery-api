@@ -14,6 +14,7 @@ import { UserRoles } from 'src/utils/enums';
 import { CheckPaymentStatusDto } from './dto/check-payment-status.dto';
 import { CreateMobilePaymentDto } from './dto/create-mobile-payment.dto';
 import { PaymentService } from './payment.service';
+import { VerifyMobileMoneyAccountDto } from './dto/verify-mobile-money-account';
 
 @ApiTags('Payment')
 @Controller('payment')
@@ -42,5 +43,18 @@ export class PaymentController {
   @hasRoles(UserRoles.USER, UserRoles.ADMIN)
   async checkPaymentStatus(@Body() body: CheckPaymentStatusDto) {
     return await this.paymentService.checkPaymentStatus(body);
+  }
+  @Post('/verify-mobile-money-account')
+  @ApiBadRequestResponse()
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiOperation({ summary: '(users/admin)' })
+  @ApiBearerAuth()
+  @ApiOkResponse()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async verifyMobileMoneyAccount(@Body() body: VerifyMobileMoneyAccountDto) {
+    return await this.paymentService.verifyMobileMoneyAccount(
+      body.accountNumber,
+      body.provider,
+    );
   }
 }
