@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
@@ -186,6 +187,12 @@ export class ShippingService {
       if (order.rider && order.rider.id === riderId) {
         throw new BadRequestException(
           'Rider is already assigned to this order',
+        );
+      }
+
+      if (!order.shipmentCost) {
+        throw new NotAcceptableException(
+          'Shipment cost is not set for this order, please set the cost first',
         );
       }
 
