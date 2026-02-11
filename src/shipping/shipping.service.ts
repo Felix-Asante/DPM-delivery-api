@@ -500,4 +500,24 @@ export class ShippingService {
       };
     });
   }
+
+  async getRiderLatestOrders(riderId: string) {
+    return tryCatch(async () => {
+      const paginatedOrders = await paginate(
+        this.shippingOrderRepository,
+        { page: 1, limit: 10 },
+        {
+          where: {
+            rider: { id: riderId },
+            status: In([
+              ShipmentHistoryStatus.RIDER_ASSIGNED,
+              ShipmentHistoryStatus.OUT_FOR_DELIVERY,
+            ]),
+          },
+          order: { createdAt: 'DESC' },
+        },
+      );
+      return paginatedOrders;
+    });
+  }
 }

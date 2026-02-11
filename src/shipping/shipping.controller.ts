@@ -150,4 +150,20 @@ export class ShippingController {
   async setCost(@Param('id') id: string, @Body() body: SetShipmentCostDto) {
     return await this.shipmentCostService.createOrUpdate(id, body);
   }
+
+  @Get('riders/latest-orders')
+  @ApiInternalServerErrorResponse()
+  @ApiOkResponse()
+  @ApiBadRequestResponse()
+  @ApiBearerAuth()
+  @ApiQuery({
+    name: 'query',
+    description: 'Search query',
+    required: false,
+  })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.COURIER)
+  async getRiderLatestOrders(@currentUser() user: User) {
+    return this.shippingService.getRiderLatestOrders(user.id);
+  }
 }
