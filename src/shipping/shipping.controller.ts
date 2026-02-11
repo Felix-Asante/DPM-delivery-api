@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Param,
   Patch,
@@ -151,7 +152,7 @@ export class ShippingController {
     return await this.shipmentCostService.createOrUpdate(id, body);
   }
 
-  @Get('riders/latest-orders')
+  @Get('riders/:riderId/latest-orders')
   @ApiInternalServerErrorResponse()
   @ApiOkResponse()
   @ApiBadRequestResponse()
@@ -163,7 +164,15 @@ export class ShippingController {
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @hasRoles(UserRoles.COURIER)
-  async getRiderLatestOrders(@currentUser() user: User) {
-    return this.shippingService.getRiderLatestOrders(user.id);
+  async getRiderLatestOrders(
+    @Param('riderId') riderId: string,
+    @currentUser() user: User,
+  ) {
+    if (user.id !== riderId) {
+      throw new ForbiddenException(
+        'You are not authorized to access this resource',
+      );
+    }
+    return this.shippingService.getRiderLatestOrders(riderId);
   }
 }
