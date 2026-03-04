@@ -518,7 +518,7 @@ export class ShippingService {
             rider: { id: riderId },
             status: In([
               ShipmentHistoryStatus.RIDER_ASSIGNED,
-              ShipmentHistoryStatus.RIDER_ASSIGNED,
+              ShipmentHistoryStatus.RIDER_REASSIGNED,
             ]),
           },
           order: { createdAt: 'DESC' },
