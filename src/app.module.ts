@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { BookingStatus } from './bookings/entities/booking-status.entity';
 import { CategoriesModule } from './categories/categories.module';
+import { ComplaintsModule } from './complaints/complaints.module';
 import { CronsModule } from './crons/crons.module';
 import { DatabaseConnectionService } from './db/data-source.service';
 import { FilesModule } from './files/files.module';
@@ -51,6 +52,7 @@ import { WalletsModule } from './wallets/wallets.module';
     MessagesModule,
     PlacesModule,
     CategoriesModule,
+    ComplaintsModule,
     FilesModule,
     ProductsCategoryModule,
     ProductsModule,

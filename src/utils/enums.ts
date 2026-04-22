@@ -117,3 +117,15 @@ export enum MobileMoneyProvider {
   AIRTELTIGO = 'AIRTELTIGO',
   TELECEL = 'TELECEL',
 }
+
+export enum ComplaintCategory {
+  DELAY = 'delay',
+  DAMAGED_ITEM = 'damaged_item',
+  RIDER_CONTACT = 'rider_contact',
+  INCORRECT_STATUS_UPDATE = 'incorrect_status_update',
+  MISSING_ITEM = 'missing_item',
+  SAFETY_TRAFFIC_VIOLATIONS = 'safety_traffic_violations',
+  REFUND_REQUEST = 'refund_request',
+  INCORRECT_ADDRESS = 'incorrect_address',
+  ITEM_SWAP = 'item_swap',
+}
