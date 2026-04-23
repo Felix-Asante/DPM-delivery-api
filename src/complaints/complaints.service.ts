@@ -4,11 +4,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { paginate } from 'nestjs-typeorm-paginate';
 import { FilesService } from 'src/files/files.service';
 import { ShippingOrder } from 'src/shipping/entities/shipping-order.entity';
 import { ComplaintCategory } from 'src/utils/enums';
-import { Repository } from 'typeorm';
+import { isValidDateString } from 'src/utils/helpers';
+import { Between, FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { CreateComplaintDto } from './dto/create-complaint.dto';
+import { FindAllComplaintsDto } from './dto/find-all-complaints.dto';
 import { Complaint } from './entities/complaint.entity';
 
 const PICTURE_REQUIRED_CATEGORIES: ComplaintCategory[] = [
@@ -58,5 +61,46 @@ export class ComplaintsService {
     });
 
     return this.complaintsRepository.save(complaint);
+  }
+
+  findAllForAdmin(dto: FindAllComplaintsDto) {
+    const { page = 1, limit = 10, query, category, from, to } = dto;
+    const rest = { page, limit };
+
+    if ((from && !to) || (to && !from)) {
+      throw new BadRequestException('Invalid date range');
+    }
+    if (from && to) {
+      if (!isValidDateString(from) || !isValidDateString(to)) {
+        throw new BadRequestException('Invalid date range');
+      }
+    }
+
+    const base: FindOptionsWhere<Complaint> = {};
+    if (category) {
+      base.category = category;
+    }
+    if (from && to) {
+      base.createdAt = Between(new Date(from), new Date(to));
+    }
+
+    if (query) {
+      const q = ILike(`%${query}%`);
+      const orWhere: FindOptionsWhere<Complaint>[] = [
+        { ...base, fullName: q },
+        { ...base, phone: q },
+        { ...base, trackingNumber: q },
+        { ...base, issue: q },
+      ];
+      return paginate(this.complaintsRepository, rest, {
+        where: orWhere,
+        order: { createdAt: 'DESC' },
+      });
+    }
+
+    return paginate(this.complaintsRepository, rest, {
+      where: Object.keys(base).length ? base : undefined,
+      order: { createdAt: 'DESC' },
+    });
   }
 }
