@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PaginationOptions } from 'src/entities/pagination.entity';
-import { ComplaintCategory } from 'src/utils/enums';
+import { ComplaintCategory, complaintStatusEnum } from 'src/utils/enums';
 
 export class FindAllComplaintsDto extends PaginationOptions {
   @IsOptional()
@@ -18,4 +18,9 @@ export class FindAllComplaintsDto extends PaginationOptions {
   @IsString()
   @ApiPropertyOptional({ description: 'ISO end date (inclusive)' })
   to?: string;
+
+  @IsOptional()
+  @IsEnum(complaintStatusEnum)
+  @ApiPropertyOptional({ enum: complaintStatusEnum })
+  status?: complaintStatusEnum;
 }

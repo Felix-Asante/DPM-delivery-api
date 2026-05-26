@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  Patch,
   Post,
   Query,
   UploadedFile,
@@ -15,7 +17,9 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -29,6 +33,8 @@ import { imageFileFilter } from 'src/utils/helpers';
 import { CreateComplaintDto } from './dto/create-complaint.dto';
 import { FindAllComplaintsDto } from './dto/find-all-complaints.dto';
 import { ComplaintsService } from './complaints.service';
+import { UpdateComplaintStatusDto } from './dto/update-complaint-status.dto';
+import { currentUser } from 'src/auth/decorators/currentUser.decorator';
 
 @ApiTags('Complaints')
 @Controller('complaints')
@@ -55,6 +61,36 @@ export class ComplaintsController {
   @ApiInternalServerErrorResponse()
   findAllForAdmin(@Query() query: FindAllComplaintsDto) {
     return this.complaintsService.findAllForAdmin(query);
+  }
+
+  @Patch(':id/update-status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '(Admin) Update complaint status' })
+  @ApiUnauthorizedResponse()
+  @ApiForbiddenResponse()
+  @ApiInternalServerErrorResponse()
+  updateStatus(
+    @Param('id') id: string,
+    @Body() body: UpdateComplaintStatusDto,
+    @currentUser() user,
+  ) {
+    return this.complaintsService.updateStatus(id, body, user);
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRoles.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '(Admin) Get complaint details' })
+  @ApiParam({ name: 'id', required: true, type: String })
+  @ApiUnauthorizedResponse()
+  @ApiForbiddenResponse()
+  @ApiNotFoundResponse({ description: 'Complaint not found' })
+  @ApiInternalServerErrorResponse()
+  getComplaint(@Param('id') id: string) {
+    return this.complaintsService.findOneForAdmin(id);
   }
 
   @Post()

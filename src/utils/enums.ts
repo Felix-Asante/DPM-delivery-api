@@ -129,3 +129,15 @@ export enum ComplaintCategory {
   INCORRECT_ADDRESS = 'incorrect_address',
   ITEM_SWAP = 'item_swap',
 }
+
+export enum complaintStatusEnum {
+  OPEN = 'OPEN',
+  IN_REVIEW = 'IN_REVIEW',
+  ASSIGNED = 'ASSIGNED',
+  AWAITING_CUSTOMER_RESPONSE = 'AWAITING_CUSTOMER_RESPONSE',
+  INVESTIGATING = 'INVESTIGATING',
+  PENDING_REFUND = 'PENDING_REFUND',
+  RESOLVED = 'RESOLVED',
+  CLOSED = 'CLOSED',
+  INVALID_SPAM = 'INVALID_SPAM',
+}

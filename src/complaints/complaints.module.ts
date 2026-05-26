@@ -6,10 +6,15 @@ import { UsersModule } from 'src/users/users.module';
 import { ComplaintsController } from './complaints.controller';
 import { ComplaintsService } from './complaints.service';
 import { Complaint } from './entities/complaint.entity';
+import { ComplaintStatusHistory } from './entities/complaint-status-history.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Complaint, ShippingOrder]),
+    TypeOrmModule.forFeature([
+      Complaint,
+      ShippingOrder,
+      ComplaintStatusHistory,
+    ]),
     FilesModule,
     UsersModule,
   ],

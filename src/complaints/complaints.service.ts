@@ -7,12 +7,20 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { FilesService } from 'src/files/files.service';
 import { ShippingOrder } from 'src/shipping/entities/shipping-order.entity';
-import { ComplaintCategory } from 'src/utils/enums';
+import { ComplaintCategory, complaintStatusEnum } from 'src/utils/enums';
 import { isValidDateString } from 'src/utils/helpers';
-import { Between, FindOptionsWhere, ILike, Repository } from 'typeorm';
+import {
+  Between,
+  DataSource,
+  FindOptionsWhere,
+  ILike,
+  Repository,
+} from 'typeorm';
 import { CreateComplaintDto } from './dto/create-complaint.dto';
 import { FindAllComplaintsDto } from './dto/find-all-complaints.dto';
 import { Complaint } from './entities/complaint.entity';
+import { UpdateComplaintStatusDto } from './dto/update-complaint-status.dto';
+import { ComplaintStatusHistory } from './entities/complaint-status-history.entity';
 
 const PICTURE_REQUIRED_CATEGORIES: ComplaintCategory[] = [
   ComplaintCategory.DAMAGED_ITEM,
@@ -24,6 +32,7 @@ export class ComplaintsService {
   constructor(
     @InjectRepository(Complaint)
     private readonly complaintsRepository: Repository<Complaint>,
+    private readonly datasource: DataSource,
     @InjectRepository(ShippingOrder)
     private readonly shippingOrderRepository: Repository<ShippingOrder>,
     private readonly filesService: FilesService,
@@ -63,8 +72,21 @@ export class ComplaintsService {
     return this.complaintsRepository.save(complaint);
   }
 
+  async findOneForAdmin(id: string) {
+    const complaint = await this.complaintsRepository.findOne({
+      where: { id },
+      relations: ['order', 'statusHistory', 'statusHistory.updatedBy'],
+    });
+
+    if (!complaint) {
+      throw new NotFoundException('Complaint not found');
+    }
+
+    return complaint;
+  }
+
   findAllForAdmin(dto: FindAllComplaintsDto) {
-    const { page = 1, limit = 10, query, category, from, to } = dto;
+    const { page = 1, limit = 10, query, category, status, from, to } = dto;
     const rest = { page, limit };
 
     if ((from && !to) || (to && !from)) {
@@ -82,6 +104,9 @@ export class ComplaintsService {
     }
     if (from && to) {
       base.createdAt = Between(new Date(from), new Date(to));
+    }
+    if (status) {
+      base.status = status;
     }
 
     if (query) {
@@ -102,5 +127,52 @@ export class ComplaintsService {
       where: Object.keys(base).length ? base : undefined,
       order: { createdAt: 'DESC' },
     });
+  }
+
+  async updateStatus(id: string, body: UpdateComplaintStatusDto, user) {
+    const complaint = await this.complaintsRepository.findOne({
+      where: { id },
+    });
+
+    if (!complaint) {
+      throw new NotFoundException('Complaint not found');
+    }
+
+    if (complaint.status === body.status) {
+      throw new BadRequestException('Complaint already has this status');
+    }
+
+    if (
+      complaint.status === complaintStatusEnum.RESOLVED ||
+      complaint.status === complaintStatusEnum.CLOSED
+    ) {
+      const isResolved = complaint.status === complaintStatusEnum.RESOLVED;
+      throw new BadRequestException(
+        `Cannot update status of a ${
+          isResolved ? 'resolved' : 'closed'
+        } complaint`,
+      );
+    }
+
+    const oldStatus = complaint.status;
+    complaint.status = body.status;
+
+    const historyEntry = {
+      complaintId: complaint,
+      oldStatus,
+      newStatus: body.status,
+      comment: body.comment,
+      updatedBy: user,
+    };
+
+    const updatedComplaint = await this.datasource.transaction(
+      async (manager) => {
+        await manager.save(ComplaintStatusHistory, historyEntry);
+        const updatedComplaint = await manager.save(Complaint, complaint);
+        return updatedComplaint;
+      },
+    );
+
+    return updatedComplaint;
   }
 }

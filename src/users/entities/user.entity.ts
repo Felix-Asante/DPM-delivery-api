@@ -18,6 +18,7 @@ import { Rider } from 'src/rider/entities/rider.entity';
 import { ShippingOrder } from 'src/shipping/entities/shipping-order.entity';
 import { Wallet } from 'src/wallets/entities/wallets.entity';
 import { PayoutRequest } from 'src/wallets/entities/payout-request.entity';
+import { ComplaintStatusHistory } from 'src/complaints/entities/complaint-status-history.entity';
 
 @Entity('users')
 @Index(['phone', 'email', 'code'])
@@ -88,6 +89,9 @@ export class User extends AbstractEntity {
 
   @OneToMany(() => PayoutRequest, (payoutRequest) => payoutRequest.processedBy)
   processedPayoutRequests: PayoutRequest[];
+
+  @OneToMany(() => ComplaintStatusHistory, (history) => history.updatedBy)
+  statusHistory: ComplaintStatusHistory[];
 
   @BeforeInsert()
   async hashPassword() {
